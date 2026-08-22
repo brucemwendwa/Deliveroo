@@ -1,0 +1,45 @@
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: #F3F1ED;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+* { box-sizing: border-box; }
+a { color: #141414; text-decoration: none; }
+a:hover { color: #C4700F; }
+button { font-family: inherit; }
+::selection { background: #F5911E; color: #141414; }
+
+@keyframes dashmove { to { stroke-dashoffset: -56; } }
+@keyframes pulsering {
+  0% { transform: scale(.65); opacity: .5; }
+  75% { transform: scale(2.4); opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #E9E6E1; }
+::-webkit-scrollbar-thumb {
+  background: #C2BCB4;
+  border-radius: 20px;
+  border: 3px solid #E9E6E1;
+  background-clip: content-box;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* §24 — a visible focus ring on every interactive element, including dark surfaces. */
+:focus-visible {
+  outline: 2px solid #F5911E;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
