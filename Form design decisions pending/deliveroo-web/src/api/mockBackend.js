@@ -341,11 +341,27 @@ export async function setFleetStatus(mode, status) {
   return next;
 }
 
+/**
+ * §17 — a delivery belongs to the account that booked it. Enforced here rather than
+ * in the screen, because a rule that lives only in the UI is not a rule: anyone could
+ * call the endpoint directly. Staff pass, since dispatch acts on the customer's behalf,
+ * and the seeded demo orders have no owner to protect.
+ */
+function assertOwner(order) {
+  if (!order.userId) return;
+  const session = read(SESSION_KEY, null);
+  if (session?.isAdmin) return;
+  if (session?.id !== order.userId) {
+    throw new Error('Only the customer who booked this delivery can change or cancel it.');
+  }
+}
+
 /** §16 — only while the parcel is still moving. Re-routes and re-prices. */
 export async function changeDestination(id, { destination, route }) {
   await wait();
   return mutate(id, (order) => {
     if (isTerminal(order.status)) throw new Error('This delivery can no longer be changed.');
+    assertOwner(order);
     const next = {
       ...order,
       destination,
@@ -365,6 +381,7 @@ export async function cancelOrder(id) {
   await wait();
   return mutate(id, (order) => {
     if (isTerminal(order.status)) throw new Error('This delivery can no longer be cancelled.');
+    assertOwner(order);
     return stamp(order, STATUS.CANCELLED);
   });
 }
