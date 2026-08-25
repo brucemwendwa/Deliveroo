@@ -92,10 +92,11 @@ describe('admin scale', () => {
   });
 
   it('marks unweighed orders in the list so nothing ships on a guess', async () => {
-    seeded();
+    // Counted from the fixtures rather than hardcoded: the seed carries one order per
+    // transport mode now, and most of them have never been near a scale.
+    const unweighed = seeded().filter((order) => !order.parcel.verifiedWeightKg).length;
     await renderAdmin();
 
-    // The PENDING fixture is the only one still on its declared weight.
-    await waitFor(() => expect(screen.getAllByText('EST.')).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText('EST.')).toHaveLength(unweighed));
   });
 });
