@@ -55,7 +55,9 @@ describe('requesting a pickup', () => {
     // Dispatch answers on its own — no button, no reload. The wait is the search
     // delay plus the backend's own latency, in fake-timer milliseconds.
     expect(await screen.findByText('Pickup agent assigned.', {}, { timeout: 8000 })).toBeInTheDocument();
-    expect(screen.getByText(/km/)).toBeInTheDocument();
+    // Who is coming, how far out, and the way to watch them arrive.
+    expect(screen.getByText(/away/)).toBeInTheDocument();
+    expect(screen.getByText(/arriving in/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /track pickup/i })).toBeInTheDocument();
   });
 });
