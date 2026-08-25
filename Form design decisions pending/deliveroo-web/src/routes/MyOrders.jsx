@@ -6,7 +6,7 @@ import { selectUser } from '../store/authSlice';
 import { openAuthModal } from '../store/uiSlice';
 import useOrderSync from '../hooks/useOrderSync';
 import { STATUS_LABEL } from '../lib/orderStatus';
-import { formatKes, formatKm } from '../lib/pricing';
+import { formatKes, formatKm, isWeightVerified } from '../lib/pricing';
 import { color, font, radius, statusTone } from '../theme';
 import PageShell from './PageShell';
 import Button from '../components/ui/Button';
@@ -70,7 +70,13 @@ export default function MyOrders() {
                 {order.pickup.name} → {order.destination.name}
               </span>
               <span style={{ flex: 'none', fontSize: '14px', color: color.body }}>{formatKm(order.route.distanceKm)}</span>
-              <span style={{ flex: 'none', fontSize: '14px', fontWeight: 700 }}>{formatKes(order.pricing.total)}</span>
+              <span style={{ flex: 'none', fontSize: '14px', fontWeight: 700 }}>
+                {formatKes(order.pricing.total)}
+                {/* Not yet weighed — this is still the estimate, not the bill. */}
+                {!isWeightVerified(order.parcel) && (
+                  <span style={{ marginLeft: '5px', fontWeight: 500, fontSize: '12px', color: color.muted }}>est.</span>
+                )}
+              </span>
               <span
                 style={{
                   flex: 'none',
