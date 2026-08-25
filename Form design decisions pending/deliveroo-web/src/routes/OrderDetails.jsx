@@ -6,7 +6,7 @@ import { cancelOrder, changeDestination } from '../store/ordersSlice';
 import { showToast } from '../store/uiSlice';
 import { routeBetween } from '../api/geo';
 import { STATUS_LABEL, blockedReason, canCancel, canChangeDestination } from '../lib/orderStatus';
-import { formatDuration, formatKes, formatKm, quote } from '../lib/pricing';
+import { formatDuration, formatKes, formatKm, isWeightVerified, priceOrder } from '../lib/pricing';
 import { color, eyebrow, font, radius, statusTone } from '../theme';
 import PageShell from './PageShell';
 import RouteMap from '../components/booking/RouteMap';
@@ -79,17 +79,31 @@ export default function OrderDetails() {
     }
   };
 
-  const updatedQuote = newRoute ? quote({ weightKg: order.parcel.weightKg, distanceKm: newRoute.distanceKm }) : null;
+  // priceOrder, not quote: once the parcel has been weighed the preview has to bill the
+  // measured weight, exactly as the backend will — otherwise the two figures disagree.
+  const updatedQuote = newRoute ? priceOrder({ parcel: order.parcel, route: newRoute }) : null;
+
+  const weighed = isWeightVerified(order.parcel);
 
   const details = [
     ['Order ID', order.id],
     ['Status', STATUS_LABEL[order.status]],
     ['Pickup', order.pickup.label],
     ['Destination', order.destination.label],
-    ['Package', `${order.parcel.weightKg} kg${order.parcel.description ? ` · ${order.parcel.description}` : ''}`],
+    // Until it has been on our scale the weight is the customer's own figure, and the
+    // fee it produced is an estimate. Both labels say which they are.
+    [
+      weighed ? 'Package · weighed at pickup' : 'Package · as declared',
+      `${weighed ? order.parcel.verifiedWeightKg : order.parcel.weightKg} kg${order.parcel.description ? ` · ${order.parcel.description}` : ''}`
+    ],
     ['Distance', formatKm(order.route.distanceKm)],
     ['Estimated duration', formatDuration(order.route.durationSeconds)],
-    ['Delivery fee', formatKes(order.pricing.total)],
+    [
+      weighed ? 'Delivery fee' : 'Estimated fee',
+      weighed && order.quotedPricing && order.quotedPricing.total !== order.pricing.total
+        ? `${formatKes(order.pricing.total)} · estimated ${formatKes(order.quotedPricing.total)}`
+        : formatKes(order.pricing.total)
+    ],
     ['Sender', `${order.sender.name} · ${order.sender.phone}`],
     ['Recipient', `${order.recipient.name} · ${order.recipient.phone}`],
     ['Courier', order.courier ? `${order.courier.name} · ${order.courier.vehicle}` : 'Not yet assigned'],
@@ -144,6 +158,13 @@ export default function OrderDetails() {
               </div>
             ))}
           </div>
+
+          {!weighed && (
+            <p style={{ margin: '12px 0 0', fontSize: '13px', lineHeight: 1.5, color: color.muted }}>
+              This fee is an estimate based on the weight you gave us. We weigh the package at
+              pickup and confirm the final price then — you can cancel any time before delivery.
+            </p>
+          )}
 
           {/* §16 / §17 — both actions state why they're unavailable rather than just greying out. */}
           <div style={{ marginTop: '24px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
