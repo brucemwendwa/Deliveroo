@@ -1,16 +1,21 @@
 import {
   MOCK_OTP,
+  assignAgent,
   cancelOrder,
   changeDestination,
   createOrder,
+  getFleet,
   getOrder,
+  setFleetStatus,
   subscribe,
   updateCourierPosition,
   updateOrderStatus,
+  updatePresentLocation,
   verifyOtp,
   verifyWeight
 } from '../api/mockBackend';
 import { STATUS } from '../lib/orderStatus';
+import { FLEET_STATUS, TRANSPORT } from '../lib/transport';
 
 const PICKUP = { id: 'a', label: 'Westlands · Nairobi', name: 'Westlands', lat: -1.2673, lng: 36.8065 };
 const DESTINATION = { id: 'b', label: 'Kilimani · Nairobi', name: 'Kilimani', lat: -1.2921, lng: 36.7833 };
@@ -125,6 +130,71 @@ describe('mock backend', () => {
     // Back as the owner, both work.
     await verifyOtp({ identifier: 'owner@one.co', code: MOCK_OTP });
     expect((await cancelOrder(order.id)).status).toBe(STATUS.CANCELLED);
+  });
+
+  // §25 — the on-demand half: the customer asks, the platform matches.
+  describe('dispatch', () => {
+    it('matches a pending order with a pickup agent', async () => {
+      const order = await createOrder(draft);
+      const assigned = await assignAgent(order.id);
+
+      expect(assigned.status).toBe(STATUS.ASSIGNED);
+      expect(assigned.courier).toMatchObject({
+        name: expect.any(String),
+        vehicle: expect.any(String),
+        plate: expect.any(String),
+        distanceKm: expect.any(Number),
+        etaMinutes: expect.any(Number)
+      });
+    });
+
+    it('is idempotent, so a retry or a second tab cannot double-assign', async () => {
+      const order = await createOrder(draft);
+      const first = await assignAgent(order.id);
+      const second = await assignAgent(order.id);
+
+      expect(second.courier).toEqual(first.courier);
+      expect(second.history.filter((entry) => entry.status === STATUS.ASSIGNED)).toHaveLength(1);
+    });
+
+    it('will not drag an order that has already moved on back to assigned', async () => {
+      const order = await createOrder(draft);
+      await updateOrderStatus(order.id, STATUS.ASSIGNED);
+      await updateOrderStatus(order.id, STATUS.PICKED_UP);
+
+      expect((await assignAgent(order.id)).status).toBe(STATUS.PICKED_UP);
+    });
+  });
+
+  // §26 — the console's two staff-only levers.
+  describe('dispatch console', () => {
+    const signInAsAdmin = () => verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+
+    it('records where the parcel currently is, staff only', async () => {
+      const order = await createOrder(draft);
+      await expect(updatePresentLocation(order.id, { label: 'Voi' })).rejects.toThrow(/only staff/i);
+
+      await signInAsAdmin();
+      const updated = await updatePresentLocation(order.id, { label: 'Voi' });
+      expect(updated.presentLocation).toMatchObject({ label: 'Voi', at: expect.any(String) });
+    });
+
+    it('opens with every mode available, and only staff may change that', async () => {
+      expect(await getFleet()).toMatchObject({ [TRANSPORT.DRONE]: FLEET_STATUS.AVAILABLE });
+      await expect(setFleetStatus(TRANSPORT.DRONE, FLEET_STATUS.OFFLINE)).rejects.toThrow(/only staff/i);
+
+      await signInAsAdmin();
+      await setFleetStatus(TRANSPORT.DRONE, FLEET_STATUS.OFFLINE);
+      expect((await getFleet())[TRANSPORT.DRONE]).toBe(FLEET_STATUS.OFFLINE);
+      // The rest of the network is untouched.
+      expect((await getFleet())[TRANSPORT.ROAD]).toBe(FLEET_STATUS.AVAILABLE);
+    });
+
+    it('refuses an availability it does not recognise', async () => {
+      await signInAsAdmin();
+      await expect(setFleetStatus('TELEPORT', FLEET_STATUS.AVAILABLE)).rejects.toThrow(/unknown transport mode/i);
+      await expect(setFleetStatus(TRANSPORT.AIR, 'MAYBE')).rejects.toThrow(/unknown availability/i);
+    });
   });
 
   it('rejects backwards status transitions', async () => {
