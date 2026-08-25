@@ -6,6 +6,7 @@ import { makeStore } from '../store';
 import { AppRoutes } from '../App';
 import { seedIfEmpty } from '../api/mockBackend';
 import { STATUS } from '../lib/orderStatus';
+import { cancelOrder } from '../store/ordersSlice';
 
 /** Reads the seeded fixtures straight out of the mock backend's store. */
 const seeded = () => {
@@ -92,6 +93,23 @@ describe('routes', () => {
   it('asks for sign-in before listing personal deliveries', async () => {
     renderAt('/orders');
     expect(await screen.findByText('Sign in to see your deliveries.')).toBeInTheDocument();
+  });
+
+  it('reports a failed action once, as a toast, rather than failing silently', async () => {
+    const [inTransit] = seeded();
+    // An order booked by someone else: §17 says only its owner may cancel it, and the
+    // rule is enforced in the backend, so the screen has to surface the refusal.
+    const orders = JSON.parse(localStorage.getItem('deliveroo.orders'));
+    orders[0].userId = 'usr_somebody';
+    localStorage.setItem('deliveroo.orders', JSON.stringify(orders));
+
+    const { store } = renderAt(`/orders/${inTransit.id}`);
+    await screen.findByText('Delivery details');
+    await store.dispatch(cancelOrder(inTransit.id));
+
+    expect(await screen.findByText(/only the customer who booked/i)).toBeInTheDocument();
+    // …and cleared, so it cannot toast again on the next render.
+    expect(store.getState().orders.error).toBeNull();
   });
 
   it('falls through to a 404 for unknown paths', async () => {
