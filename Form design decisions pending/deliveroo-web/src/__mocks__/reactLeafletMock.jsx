@@ -6,5 +6,6 @@ export const MapContainer = passthrough;
 export const TileLayer = () => null;
 export const Marker = () => null;
 export const Polyline = () => null;
+export const Tooltip = () => null;
 export const useMap = () => ({ setView() {}, fitBounds() {} });
 export const useMapEvents = () => null;
