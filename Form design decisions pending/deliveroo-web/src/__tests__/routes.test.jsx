@@ -101,7 +101,7 @@ describe('routes', () => {
     renderAt('/book');
     expect(await screen.findByText('Sign in to send a package.')).toBeInTheDocument();
     // The form itself must not be reachable by typing the URL.
-    expect(screen.queryByText('Where are we picking up from?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Where should we pick it up?')).not.toBeInTheDocument();
   });
 
   it('opens the booking form on /book once signed in', async () => {
@@ -112,7 +112,7 @@ describe('routes', () => {
       JSON.stringify({ id: 'u1', name: 'Ada', phone: '+254700000000' })
     );
     renderAt('/book');
-    expect(await screen.findByText('Where are we picking up from?')).toBeInTheDocument();
+    expect(await screen.findByText('Where should we pick it up?')).toBeInTheDocument();
   });
 
   it('sends a signed-out visitor to sign-in rather than to booking', async () => {
@@ -120,6 +120,6 @@ describe('routes', () => {
     await userEvent.click(screen.getByRole('link', { name: 'Send a package' }));
 
     expect(store.getState().ui.authModal).toEqual({ open: true, returnTo: '/book' });
-    expect(screen.queryByText('Where are we picking up from?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Where should we pick it up?')).not.toBeInTheDocument();
   });
 });
