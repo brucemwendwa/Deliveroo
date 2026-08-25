@@ -2,13 +2,20 @@
 // email provider later is a one-function change; nothing here surfaces in the MVP UI.
 
 import { STATUS } from './orderStatus';
+import { formatKes } from './pricing';
 
 export const NOTIFICATION_TEMPLATES = {
   [STATUS.ASSIGNED]: 'Your courier has been assigned.',
   [STATUS.PICKED_UP]: 'Your package has been picked up.',
   [STATUS.IN_TRANSIT]: 'Your package is currently in transit.',
   [STATUS.DELIVERED]: 'Your package has been delivered.',
-  DESTINATION_CHANGED: 'Your delivery location has been updated.'
+  DESTINATION_CHANGED: 'Your delivery location has been updated.',
+  // §19 — the one template that has to quote figures: a fare that moved after
+  // pickup is the message, so it takes the order rather than a fixed string.
+  WEIGHT_VERIFIED: (order) =>
+    `We weighed your package at pickup: ${order.parcel.verifiedWeightKg} kg. ` +
+    `Your delivery fee is now ${formatKes(order.pricing.total)}` +
+    `${order.quotedPricing && order.quotedPricing.total !== order.pricing.total ? ` (estimated ${formatKes(order.quotedPricing.total)})` : ''}.`
 };
 
 const OUTBOX_KEY = 'deliveroo.outbox';
@@ -26,8 +33,11 @@ const readOutbox = () => {
  * function for a POST to the mail service and every call site keeps working.
  */
 export function notify(order, templateKey) {
-  const message = NOTIFICATION_TEMPLATES[templateKey];
-  if (!message || !order) return null;
+  const template = NOTIFICATION_TEMPLATES[templateKey];
+  if (!template || !order) return null;
+  // Templates may be functions when the message has to quote the order's own figures.
+  const message = typeof template === 'function' ? template(order) : template;
+  if (!message) return null;
 
   const entry = {
     id: `ntf_${Date.now().toString(36)}`,
