@@ -43,3 +43,48 @@ button { font-family: inherit; }
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* §25 — motion for the live states: a searching radar, a pulsing "in transit" dot,
+   cards that acknowledge a tap, and skeletons while a quote is being worked out. */
+@keyframes popIn {
+  from { transform: scale(.55); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes shimmer {
+  from { background-position: 130% 0; }
+  to { background-position: -130% 0; }
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .35; transform: scale(.82); }
+}
+@keyframes radar {
+  0% { transform: scale(.3); opacity: .55; }
+  80% { opacity: 0; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+@keyframes drawRoute { to { stroke-dashoffset: 0; } }
+
+/* Nothing here is load-bearing: if the visitor asks for less movement, they get it. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* The route draws itself in rather than appearing — Leaflet takes a className on the
+   path. Only solid lines get it: a CSS dasharray would overwrite the dashed pattern
+   that marks an estimated route or a schematic air/sea arc. */
+.route-line {
+  stroke-dasharray: 3000;
+  stroke-dashoffset: 3000;
+  animation: drawRoute 1.1s cubic-bezier(.16,1,.3,1) forwards;
+}
+.route-fade { animation: fadeIn .7s ease both; }
