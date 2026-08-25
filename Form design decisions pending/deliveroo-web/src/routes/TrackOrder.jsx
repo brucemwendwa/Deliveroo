@@ -10,6 +10,7 @@ import TransportBadge from '../components/transport/TransportBadge';
 import TransportGlyph from '../components/transport/TransportGlyph';
 import Button from '../components/ui/Button';
 import PageShell from './PageShell';
+import { TrackingSkeleton } from '../components/ui/Skeleton';
 import {
   STATUS,
   STATUS_LABEL,
@@ -65,7 +66,7 @@ export default function TrackOrder() {
   // Progress is a function of time, so the screen keeps its own clock.
   const now = useNow(20_000);
 
-  if (loading) return <PageShell eyebrow="Tracking" title="Loading…" />;
+  if (loading) return <TrackingSkeleton />;
   if (!order) {
     return (
       <PageShell eyebrow="Tracking" title="We can't find that order.">
