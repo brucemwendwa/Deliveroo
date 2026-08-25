@@ -402,12 +402,23 @@ export function seedIfEmpty() {
       from: 'CBD · Nairobi',
       to: 'Karen · Nairobi',
       status: STATUS.PENDING,
-      mode: TRANSPORT.DRONE,
+      mode: TRANSPORT.ROAD,
       weight: 1,
       km: 18.2,
-      mins: 30,
+      mins: 47,
       pickup: { lat: -1.2864, lng: 36.8172 },
       drop: { lat: -1.3191, lng: 36.7062 }
+    },
+    {
+      from: 'Kilimani · Nairobi',
+      to: 'Runda · Nairobi',
+      status: STATUS.ASSIGNED,
+      mode: TRANSPORT.DRONE,
+      weight: 2,
+      km: 9.4,
+      mins: 20,
+      pickup: { lat: -1.2921, lng: 36.7833 },
+      drop: { lat: -1.2189, lng: 36.8172 }
     },
     {
       from: 'Industrial Area · Nairobi',
