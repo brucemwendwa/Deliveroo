@@ -7,7 +7,17 @@ import Icon from '../Icon';
  * trigger on close, and Tab is trapped inside. Used by auth (§12) and the cancel
  * confirmation (§17).
  */
-export default function Modal({ open, onClose, title, labelledBy, children, maxWidth = '460px' }) {
+export default function Modal({
+  open,
+  onClose,
+  title,
+  labelledBy,
+  children,
+  maxWidth = '460px',
+  /** 'sheet' docks the panel to the bottom edge — the phone-native shape (§23). */
+  placement = 'center'
+}) {
+  const sheet = placement === 'sheet';
   const panelRef = useRef(null);
   const restoreRef = useRef(null);
 
@@ -68,9 +78,9 @@ export default function Modal({ open, onClose, title, labelledBy, children, maxW
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: sheet ? 'flex-end' : 'center',
         justifyContent: 'center',
-        padding: layout.gutter,
+        padding: sheet ? 0 : layout.gutter,
         animation: 'fadeIn .2s ease both'
       }}
     >
@@ -83,14 +93,16 @@ export default function Modal({ open, onClose, title, labelledBy, children, maxW
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth,
-          maxHeight: '92vh',
+          maxWidth: sheet ? 'none' : maxWidth,
+          maxHeight: sheet ? '90vh' : '92vh',
           overflowY: 'auto',
           background: color.paper,
-          borderRadius: radius.card,
-          padding: 'clamp(24px,3.5vw,38px)',
+          borderRadius: sheet ? '26px 26px 0 0' : radius.card,
+          padding: sheet
+            ? `26px ${layout.gutter} calc(26px + env(safe-area-inset-bottom,0px))`
+            : 'clamp(24px,3.5vw,38px)',
           boxShadow: '0 50px 90px -40px rgba(10,10,10,.75)',
-          animation: `riseIn .3s ${ease.out} both`
+          animation: sheet ? `sheetUp .32s ${ease.out} both` : `riseIn .3s ${ease.out} both`
         }}
       >
         <button
