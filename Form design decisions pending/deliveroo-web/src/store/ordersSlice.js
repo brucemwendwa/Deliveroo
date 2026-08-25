@@ -4,6 +4,8 @@
 
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import * as apiClient from '../api';
+import { STATUS, isTerminal, stepIndex } from '../lib/orderStatus';
+import { transportOf } from '../lib/transport';
 
 export const fetchOrder = createAsyncThunk('orders/fetchOne', async (id, { rejectWithValue }) => {
   try {
@@ -30,6 +32,43 @@ export const changeStatus = createAsyncThunk(
 
 export const moveCourier = createAsyncThunk('orders/moveCourier', async ({ id, lat, lng }) =>
   apiClient.updateCourierPosition(id, { lat, lng })
+);
+
+/**
+ * §25 — ask dispatch for a pickup agent. This is the on-demand half of the product:
+ * the customer requests, the platform matches. Idempotent on the backend, so a retry
+ * or a second mounted screen cannot double-assign.
+ */
+export const dispatchAgent = createAsyncThunk('orders/dispatchAgent', async (id, { rejectWithValue }) => {
+  try {
+    return await apiClient.assignAgent(id);
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
+});
+
+/** §26 — admin pins where the parcel actually is. */
+export const setPresentLocation = createAsyncThunk(
+  'orders/setPresentLocation',
+  async ({ id, label, lat, lng }, { rejectWithValue }) => {
+    try {
+      return await apiClient.updatePresentLocation(id, { label, lat, lng });
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+/** §18 — admin records the measured weight; the backend re-prices off it. */
+export const verifyWeight = createAsyncThunk(
+  'orders/verifyWeight',
+  async ({ id, weightKg }, { rejectWithValue }) => {
+    try {
+      return await apiClient.verifyWeight(id, { weightKg });
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
 );
 
 export const changeDestination = createAsyncThunk(
@@ -107,7 +146,15 @@ const ordersSlice = createSlice({
       });
     }
 
-    for (const thunk of [changeStatus, moveCourier, changeDestination, cancelOrder]) {
+    for (const thunk of [
+      changeStatus,
+      moveCourier,
+      dispatchAgent,
+      setPresentLocation,
+      verifyWeight,
+      changeDestination,
+      cancelOrder
+    ]) {
       builder
         .addCase(thunk.fulfilled, (state, action) => {
           upsert(state, action.payload);
@@ -130,5 +177,42 @@ export const selectAllOrders = createSelector(
   (ids, entities) => ids.map((id) => entities[id]).filter(Boolean)
 );
 export const selectOrdersError = (state) => state.orders.error;
+
+// --- dashboard selectors (§15) ----------------------------------------------
+
+/**
+ * The delivery the customer is actually watching: the one furthest along that hasn't
+ * finished. Memoized — like selectAllOrders, it derives rather than reads.
+ */
+export const selectActiveOrder = createSelector([selectAllOrders], (orders) => {
+  const live = orders.filter((order) => !isTerminal(order.status));
+  if (!live.length) return null;
+  return live.reduce((best, order) => (stepIndex(order.status) > stepIndex(best.status) ? order : best), live[0]);
+});
+
+/** Counts behind the dashboard and the console's tiles. */
+export const selectOrderStats = createSelector([selectAllOrders], (orders) => {
+  const counts = Object.fromEntries(Object.values(STATUS).map((status) => [status, 0]));
+  for (const order of orders) counts[order.status] = (counts[order.status] || 0) + 1;
+  return {
+    ...counts,
+    total: orders.length,
+    active: orders.filter((order) => !isTerminal(order.status)).length,
+    spend: orders
+      .filter((order) => order.status !== STATUS.CANCELLED)
+      .reduce((sum, order) => sum + (order.pricing?.total || 0), 0)
+  };
+});
+
+/** Counts by transport mode, for the console's capacity panel. */
+export const selectModeLoad = createSelector([selectAllOrders], (orders) => {
+  const load = {};
+  for (const order of orders) {
+    if (isTerminal(order.status)) continue;
+    const mode = transportOf(order);
+    load[mode] = (load[mode] || 0) + 1;
+  }
+  return load;
+});
 
 export default ordersSlice.reducer;
