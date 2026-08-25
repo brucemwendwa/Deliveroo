@@ -27,9 +27,12 @@ const renderAdmin = async () => {
   return store;
 };
 
-/** The console defaults to the first order; click through to a specific one. */
+/**
+ * The console defaults to the first order; click through to a specific one. The
+ * board is a table now, and each row's parcel id is the button that selects it.
+ */
 const select = async (order) => {
-  await userEvent.click(await screen.findByText(`${order.pickup.name} → ${order.destination.name}`));
+  await userEvent.click(await screen.findByRole('button', { name: order.id }));
 };
 
 beforeEach(() => {
