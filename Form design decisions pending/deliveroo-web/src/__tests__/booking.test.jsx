@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { makeStore } from '../store';
 import BookDelivery from '../components/booking/BookDelivery';
-import { setDestination, setPickup, setWeight } from '../store/bookingSlice';
+import { goToStep, setDestination, setPickup, setWeight } from '../store/bookingSlice';
 
 const WESTLANDS = { id: 'a', label: 'Westlands · Nairobi', name: 'Westlands', lat: -1.2673, lng: 36.8065 };
 const KILIMANI = { id: 'b', label: 'Kilimani · Nairobi', name: 'Kilimani', lat: -1.2921, lng: 36.7833 };
@@ -46,6 +46,57 @@ describe('booking flow', () => {
     expect(screen.getByText('Westlands · Nairobi')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
     expect(store.getState().booking.step).toBe(0);
+  });
+
+  /** Both endpoints and a resolved route — everything the transport step needs. */
+  const withRoute = (store) => {
+    store.dispatch(setPickup(WESTLANDS));
+    store.dispatch(setDestination(KILIMANI));
+    store.dispatch(setWeight(3));
+    store.dispatch({
+      type: 'booking/resolveRoute/fulfilled',
+      payload: { distanceKm: 12.4, durationSeconds: 2100, coordinates: [], estimated: false }
+    });
+  };
+
+  it('offers every mode on the transport step, and says why two of them cannot run this route', async () => {
+    const { store } = renderBooking();
+    withRoute(store);
+    store.dispatch(goToStep(3));
+
+    // A 12 km hop across town: a van or a drone can do it, a plane and a ship cannot.
+    expect(await screen.findByRole('button', { name: /^Road, KES/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /^Drone, KES/ })).toBeEnabled();
+
+    const air = screen.getByRole('button', { name: /^Air unavailable/ });
+    expect(air).toBeDisabled();
+    expect(air).toHaveAccessibleName(/air freight starts at 120 km/i);
+    expect(screen.getByRole('button', { name: /^Ship unavailable/ })).toBeDisabled();
+    // §25 requires the reason to be on screen, not only in the label.
+    expect(screen.getByText(/sea freight starts at 200 km/i)).toBeInTheDocument();
+  });
+
+  it('re-prices the delivery when a different mode is chosen', async () => {
+    const { store, container } = renderBooking();
+    // The running total the price card announces.
+    const total = () => container.querySelector('[aria-live="polite"]').textContent;
+
+    withRoute(store);
+    store.dispatch(goToStep(3));
+
+    // The step lands on the cheapest option that can run the route.
+    const drone = await screen.findByRole('button', { name: /^Drone, KES/ });
+    expect(store.getState().booking.transport.mode).toBe('ROAD');
+    expect(screen.getByRole('button', { name: /^Road, KES/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(total()).toBe('KES 650');
+
+    await userEvent.click(drone);
+
+    expect(store.getState().booking.transport.mode).toBe('DRONE');
+    expect(drone).toHaveAttribute('aria-pressed', 'true');
+    // A drone across town costs more than the van it replaced, and the quote follows.
+    expect(total()).not.toBe('KES 650');
+    expect(total()).toBe(drone.getAttribute('aria-label').split(', ')[1]);
   });
 
   it('prices the delivery from weight and route distance', async () => {
