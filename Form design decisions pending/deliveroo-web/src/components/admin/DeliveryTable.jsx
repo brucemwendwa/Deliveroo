@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import useNow from '../../hooks/useNow';
 import { currentLocationLabel, isTerminal, remainingSeconds } from '../../lib/orderStatus';
-import { etaClock, formatKes, formatKm, isWeightVerified } from '../../lib/pricing';
+import { etaClock, formatKes, isWeightVerified } from '../../lib/pricing';
 import { modeMeta, transportOf } from '../../lib/transport';
 import { color, ease, font, radius } from '../../theme';
 import TransportGlyph from '../transport/TransportGlyph';
