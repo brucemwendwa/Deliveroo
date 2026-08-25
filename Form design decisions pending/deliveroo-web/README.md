@@ -236,8 +236,9 @@ Ten suites: `pricing` · `transport` · `orderStatus` · `mockBackend` (the rule
 actually enforced) and `App` · `routes` · `booking` · `adminWeight` · `experience` · `uiSlice`
 (what the screens do with them). `experience.test.jsx` covers the two things that are hard to
 eyeball — the dispatch wait resolving into an assigned agent, and the narrow-viewport layout.
-It sets `window.innerWidth` rather than dispatching `setNarrow`, because AppLayout reads the
-real viewport on mount and would overwrite it.
+It also covers the customer dashboard, whose active-delivery panel is otherwise only reachable
+with a signed-in session and a live order. It sets `window.innerWidth` rather than dispatching
+`setNarrow`, because AppLayout reads the real viewport on mount and would overwrite it.
 
 `jest.setup.cjs` stubs `IntersectionObserver`, `scrollTo` and `scrollIntoView`, which jsdom
 lacks. Three `moduleNameMapper` entries matter:
