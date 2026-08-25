@@ -1,0 +1,135 @@
+import { useDispatch, useSelector } from 'react-redux';
+import { selectFleet, setFleetStatus } from '../../store/fleetSlice';
+import { selectModeLoad } from '../../store/ordersSlice';
+import { showToast } from '../../store/uiSlice';
+import { FLEET_STATUS, FLEET_STATUS_LABEL, TRANSPORT_MODES } from '../../lib/transport';
+import { color, eyebrow, font, radius } from '../../theme';
+import TransportGlyph from '../transport/TransportGlyph';
+
+const TONE = {
+  [FLEET_STATUS.AVAILABLE]: color.orange,
+  [FLEET_STATUS.BUSY]: color.orangeDeep,
+  [FLEET_STATUS.OFFLINE]: color.muted
+};
+
+/**
+ * §26 — transport availability.
+ *
+ * Prototype controls over *partner capacity dispatch can book into today* — not a
+ * fleet Deliveroo owns. Taking a mode offline here removes it from the customer's
+ * options immediately, which is the point: this is the one screen that can stop the
+ * booking flow offering something that cannot actually be flown.
+ */
+export default function FleetPanel() {
+  const dispatch = useDispatch();
+  const fleet = useSelector(selectFleet);
+  const load = useSelector(selectModeLoad);
+
+  const change = async (mode, status) => {
+    const result = await dispatch(setFleetStatus({ mode, status }));
+    if (setFleetStatus.fulfilled.match(result)) {
+      dispatch(showToast({ message: `${mode} capacity → ${FLEET_STATUS_LABEL[status]}`, tone: 'info' }));
+    }
+  };
+
+  return (
+    <div
+      style={{
+        borderRadius: radius.card,
+        border: '1px solid rgba(17,17,17,.12)',
+        background: color.white,
+        padding: 'clamp(18px,2.2vw,26px)'
+      }}
+    >
+      <div style={{ ...eyebrow, marginBottom: '6px' }}>Transport availability</div>
+      <p style={{ margin: '0 0 18px', fontSize: '13px', lineHeight: 1.55, color: color.muted, maxWidth: '58ch' }}>
+        Capacity Deliveroo can book into right now, across its carrier partners. Taking a mode
+        offline withdraws it from customer quotes immediately.
+      </p>
+
+      <div style={{ display: 'grid', gap: '10px' }}>
+        {TRANSPORT_MODES.map((meta) => {
+          const status = fleet[meta.id] || FLEET_STATUS.AVAILABLE;
+          const active = load[meta.id] || 0;
+
+          return (
+            <div
+              key={meta.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '12px',
+                padding: '12px 14px',
+                borderRadius: '16px',
+                border: '1px solid rgba(17,17,17,.1)',
+                background: status === FLEET_STATUS.OFFLINE ? 'rgba(17,17,17,.035)' : color.white
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '12px',
+                  background: 'rgba(245,145,30,.14)',
+                  flex: 'none'
+                }}
+              >
+                <TransportGlyph mode={meta.id} size={20} color={color.orangeDeep} />
+              </span>
+
+              <span style={{ flex: '1 1 130px', minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: '15px', fontWeight: 700, letterSpacing: '-.02em', color: color.ink }}>
+                  {meta.label}
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', marginTop: '3px', fontFamily: font.mono, fontSize: '10.5px', letterSpacing: '.1em', textTransform: 'uppercase', color: TONE[status] }}>
+                  <span aria-hidden="true" style={{ width: '6px', height: '6px', borderRadius: '99px', background: TONE[status] }} />
+                  {FLEET_STATUS_LABEL[status]}
+                  <span style={{ color: color.muted }}>· {active} active</span>
+                </span>
+              </span>
+
+              <span
+                role="radiogroup"
+                aria-label={`${meta.label} availability`}
+                style={{ display: 'flex', gap: '4px', padding: '4px', borderRadius: radius.pill, background: 'rgba(17,17,17,.05)' }}
+              >
+                {Object.values(FLEET_STATUS).map((option) => {
+                  const on = option === status;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      onClick={() => change(meta.id, option)}
+                      style={{
+                        height: '36px',
+                        padding: '0 13px',
+                        borderRadius: radius.pill,
+                        border: 'none',
+                        background: on ? color.ink : 'transparent',
+                        fontFamily: font.body,
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        color: on ? color.paper : color.muted,
+                        cursor: 'pointer',
+                        transition: 'background .18s, color .18s'
+                      }}
+                    >
+                      {FLEET_STATUS_LABEL[option]}
+                    </button>
+                  );
+                })}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
