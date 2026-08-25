@@ -1,29 +1,69 @@
 import { Link, useParams } from 'react-router-dom';
 import useOrder from '../hooks/useOrder';
+import useNow from '../hooks/useNow';
 import RouteMap from '../components/booking/RouteMap';
 import EtaPanel from '../components/tracking/EtaPanel';
 import CourierCard from '../components/tracking/CourierCard';
+import FindingAgent from '../components/tracking/FindingAgent';
 import StatusTimeline from '../components/tracking/StatusTimeline';
+import TransportBadge from '../components/transport/TransportBadge';
+import TransportGlyph from '../components/transport/TransportGlyph';
 import Button from '../components/ui/Button';
 import PageShell from './PageShell';
-import { STATUS, STATUS_LABEL, isTerminal } from '../lib/orderStatus';
-import { formatDuration, formatKm } from '../lib/pricing';
-import { color, eyebrow, font, layout, radius } from '../theme';
+import {
+  STATUS,
+  STATUS_LABEL,
+  currentLocationLabel,
+  isArriving,
+  isTerminal,
+  progressFor,
+  remainingKm,
+  remainingSeconds
+} from '../lib/orderStatus';
+import { etaClock, formatDuration, formatKes, formatKm } from '../lib/pricing';
+import { modeMeta, priorityOf, transportOf } from '../lib/transport';
+import { color, eyebrow, font, layout, radius, statusTone } from '../theme';
 
-/** How far along the journey each status sits, for the progress bar and ETA. */
-const PROGRESS = {
-  [STATUS.PENDING]: 4,
-  [STATUS.ASSIGNED]: 20,
-  [STATUS.PICKED_UP]: 45,
-  [STATUS.IN_TRANSIT]: 76,
-  [STATUS.DELIVERED]: 100,
-  [STATUS.CANCELLED]: 0
-};
+/** One live figure: label above, value below. Four of them sit under the map. */
+function LiveStat({ label, value, icon, mode }) {
+  return (
+    <div
+      style={{
+        flex: '1 1 140px',
+        padding: '15px 17px',
+        borderRadius: '18px',
+        background: 'rgba(243,241,237,.06)',
+        border: '1px solid rgba(243,241,237,.1)'
+      }}
+    >
+      <div style={{ ...eyebrow, fontSize: '9.5px', color: 'rgba(243,241,237,.5)', marginBottom: '8px' }}>{label}</div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontFamily: font.display,
+          fontWeight: 700,
+          fontSize: 'clamp(17px,1.9vw,23px)',
+          lineHeight: 1.1,
+          letterSpacing: '-.02em',
+          color: color.paper
+        }}
+      >
+        {mode && <TransportGlyph mode={mode} size={19} color={color.orange} />}
+        {icon}
+        {value}
+      </div>
+    </div>
+  );
+}
 
-// §14 — map-led, dark, so the route and the courier are the only bright things.
+// §14/§25 — map-led, dark, so the route and the vehicle are the only bright things.
 export default function TrackOrder() {
   const { id } = useParams();
   const { order, loading } = useOrder(id);
+  // Progress is a function of time, so the screen keeps its own clock.
+  const now = useNow(20_000);
 
   if (loading) return <PageShell eyebrow="Tracking" title="Loading…" />;
   if (!order) {
@@ -39,18 +79,28 @@ export default function TrackOrder() {
     );
   }
 
-  const progress = PROGRESS[order.status] ?? 0;
-  const remainingSeconds = order.route.durationSeconds * (1 - progress / 100);
-  const etaMinutes = order.status === STATUS.DELIVERED ? 0 : Math.max(1, Math.round(remainingSeconds / 60));
+  const mode = transportOf(order);
+  const meta = modeMeta(mode);
+  const progress = progressFor(order, now);
+  const secondsLeft = remainingSeconds(order, now);
+  const etaMinutes = order.status === STATUS.DELIVERED ? 0 : Math.max(1, Math.round(secondsLeft / 60));
+  const kmLeft = remainingKm(order, now);
+  const arriving = isArriving(order, now);
+  const live = !isTerminal(order.status);
+  const tone = statusTone[order.status];
 
   const headline =
     order.status === STATUS.DELIVERED
       ? 'Delivered.'
       : order.status === STATUS.CANCELLED
         ? 'Delivery cancelled.'
-        : order.status === STATUS.PENDING
-          ? 'Finding you a courier.'
-          : 'Your package is on the way.';
+        : arriving
+          ? 'Arriving now.'
+          : order.status === STATUS.PENDING
+            ? 'Finding you a pickup agent.'
+            : order.status === STATUS.ASSIGNED
+              ? 'Your agent is on the way.'
+              : `On the way by ${meta.label.toLowerCase()}.`;
 
   return (
     <div style={{ background: color.ink, paddingTop: '80px' }}>
@@ -66,7 +116,39 @@ export default function TrackOrder() {
         }}
       >
         <div style={{ flex: '1 1 340px', minWidth: 'min(100%,300px)' }}>
-          <div style={{ ...eyebrow, color: color.orange, marginBottom: '14px' }}>Order #{order.id}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+            <span style={{ ...eyebrow, color: color.orange }}>Parcel #{order.id}</span>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                height: '26px',
+                padding: '0 11px',
+                borderRadius: radius.pill,
+                background: 'rgba(243,241,237,.1)',
+                fontFamily: font.mono,
+                fontSize: '10.5px',
+                letterSpacing: '.12em',
+                textTransform: 'uppercase',
+                color: color.paper
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '99px',
+                  background: tone,
+                  animation: live ? 'livePulse 1.8s ease-in-out infinite' : 'none'
+                }}
+              />
+              {STATUS_LABEL[order.status]}
+            </span>
+            <TransportBadge mode={mode} priority={priorityOf(order)} tone="dark" size="sm" />
+          </div>
+
           <h1
             style={{
               margin: '0 0 26px',
@@ -82,9 +164,19 @@ export default function TrackOrder() {
             {headline}
           </h1>
 
-          {!isTerminal(order.status) && <EtaPanel etaMinutes={etaMinutes} progress={progress} />}
+          {live && (
+            <EtaPanel
+              etaMinutes={etaMinutes}
+              progress={progress}
+              arrivalAt={etaClock(secondsLeft, now)}
+              fromLabel={order.pickup.name || 'Pickup'}
+              toLabel={order.destination.name || 'Destination'}
+            />
+          )}
 
-          {order.courier ? (
+          {order.status === STATUS.PENDING && !order.courier ? (
+            <FindingAgent pickupLabel={order.pickup.name || order.pickup.label} />
+          ) : order.courier ? (
             <CourierCard courier={order.courier} status={order.status} />
           ) : (
             <div
@@ -98,8 +190,8 @@ export default function TrackOrder() {
               }}
             >
               {order.status === STATUS.CANCELLED
-                ? 'No courier was assigned to this delivery.'
-                : 'A courier will be assigned shortly.'}
+                ? 'No agent was assigned to this delivery.'
+                : 'An agent will be assigned shortly.'}
             </div>
           )}
 
@@ -107,7 +199,7 @@ export default function TrackOrder() {
             <div style={{ ...eyebrow, color: 'rgba(243,241,237,.5)', marginBottom: '20px' }}>
               Status · {STATUS_LABEL[order.status]}
             </div>
-            <StatusTimeline status={order.status} tone="dark" />
+            <StatusTimeline order={order} tone="dark" />
           </div>
 
           <div style={{ marginTop: '26px' }}>
@@ -123,31 +215,53 @@ export default function TrackOrder() {
             destination={order.destination}
             route={order.route}
             courier={order.courier}
+            presentLocation={order.presentLocation}
+            mode={mode}
+            moving={live}
             height="clamp(340px,52vh,560px)"
           />
-          <div style={{ display: 'flex', gap: '12px' }}>
-            {[
-              { label: 'Distance', value: formatKm(order.route.distanceKm) },
-              { label: 'Journey time', value: formatDuration(order.route.durationSeconds) }
-            ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  flex: 1,
-                  padding: '16px 18px',
-                  borderRadius: '18px',
-                  background: 'rgba(243,241,237,.06)',
-                  border: '1px solid rgba(243,241,237,.1)'
-                }}
-              >
-                <div style={{ ...eyebrow, fontSize: '10px', color: 'rgba(243,241,237,.5)', marginBottom: '8px' }}>
-                  {item.label}
-                </div>
-                <div style={{ fontFamily: font.display, fontWeight: 700, fontSize: 'clamp(22px,2.4vw,30px)', lineHeight: 1, color: color.paper }}>
-                  {item.value}
-                </div>
-              </div>
-            ))}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+            <LiveStat label="Current location" value={currentLocationLabel(order)} />
+            <LiveStat label="Destination" value={order.destination.name || order.destination.label} />
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+            <LiveStat
+              label={order.status === STATUS.DELIVERED ? 'Arrived' : 'ETA'}
+              value={order.status === STATUS.DELIVERED ? 'Delivered' : etaClock(secondsLeft, now)}
+            />
+            <LiveStat
+              label={live ? 'Distance remaining' : 'Distance'}
+              value={live ? formatKm(kmLeft) : formatKm(order.route.distanceKm)}
+            />
+            <LiveStat label="Transport" value={meta.label} mode={mode} />
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '10px 20px',
+              padding: '14px 17px',
+              borderRadius: '18px',
+              background: 'rgba(243,241,237,.04)',
+              border: '1px solid rgba(243,241,237,.08)',
+              fontSize: '13.5px',
+              color: 'rgba(243,241,237,.7)'
+            }}
+          >
+            <span>
+              Journey <strong style={{ color: color.paper }}>{formatKm(order.route.distanceKm)}</strong>
+            </span>
+            <span>
+              Door to door{' '}
+              <strong style={{ color: color.paper }}>
+                {formatDuration(order.pricing?.durationSeconds || order.route.durationSeconds)}
+              </strong>
+            </span>
+            <span>
+              Fee <strong style={{ color: color.paper }}>{formatKes(order.pricing.total)}</strong>
+            </span>
           </div>
         </div>
       </div>
