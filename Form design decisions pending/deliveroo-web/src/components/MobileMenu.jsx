@@ -88,6 +88,29 @@ export default function MobileMenu() {
             desktop nav. */}
         {signedIn ? (
           <>
+            <Link
+              to={BOOKING_PATH}
+              onClick={(event) => {
+                close();
+                startBooking(event);
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                height: '58px',
+                borderRadius: radius.pill,
+                background: color.orange,
+                color: color.ink,
+                fontSize: '16.5px',
+                fontWeight: 700,
+                fontFamily: font.body
+              }}
+            >
+              <Icon name="add" size={20} />
+              Request delivery
+            </Link>
             <Link to="/orders" onClick={close} style={outlineControl}>
               {user.name} · My deliveries
             </Link>
