@@ -23,6 +23,17 @@ const http = {
   listAllOrders: () => api('/admin/orders'),
   updateOrderStatus: (id, status) => api(`/orders/${id}/status`, { method: 'PATCH', body: { status } }),
   updateCourierPosition: (id, position) => api(`/orders/${id}/courier`, { method: 'PATCH', body: position }),
+  // §25 — dispatch finds and attaches a pickup agent. The server owns the matching;
+  // the client only asks. Must be idempotent: the confirmation screen may retry.
+  assignAgent: (id) => api(`/orders/${id}/assign`, { method: 'POST' }),
+  // §26 — staff-only: where the parcel currently is, in words.
+  updatePresentLocation: (id, payload) => api(`/orders/${id}/location`, { method: 'PATCH', body: payload }),
+  // §26 — which transport capacity dispatch can book into today.
+  getFleet: () => api('/transport/availability'),
+  setFleetStatus: (mode, status) =>
+    api('/admin/transport/availability', { method: 'PATCH', body: { mode, status } }),
+  // Staff-only on the server. The console gates the button, the route gates the data.
+  verifyWeight: (id, payload) => api(`/admin/orders/${id}/weight`, { method: 'PATCH', body: payload }),
   changeDestination: (id, payload) => api(`/orders/${id}/destination`, { method: 'PATCH', body: payload }),
   cancelOrder: (id) => api(`/orders/${id}/cancel`, { method: 'POST' }),
 
@@ -48,6 +59,11 @@ export const listOrders = (...args) => impl.listOrders(...args);
 export const listAllOrders = (...args) => impl.listAllOrders(...args);
 export const updateOrderStatus = (...args) => impl.updateOrderStatus(...args);
 export const updateCourierPosition = (...args) => impl.updateCourierPosition(...args);
+export const assignAgent = (...args) => impl.assignAgent(...args);
+export const updatePresentLocation = (...args) => impl.updatePresentLocation(...args);
+export const getFleet = (...args) => impl.getFleet(...args);
+export const setFleetStatus = (...args) => impl.setFleetStatus(...args);
+export const verifyWeight = (...args) => impl.verifyWeight(...args);
 export const changeDestination = (...args) => impl.changeDestination(...args);
 export const cancelOrder = (...args) => impl.cancelOrder(...args);
 
