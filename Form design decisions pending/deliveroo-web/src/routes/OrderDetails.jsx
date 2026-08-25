@@ -19,6 +19,7 @@ import { etaClock, formatDuration, formatKes, formatKm, isWeightVerified, priceO
 import { modeMeta, priorityOf, priorityOption, transportOf } from '../lib/transport';
 import { color, eyebrow, font, radius } from '../theme';
 import PageShell from './PageShell';
+import { TrackingSkeleton } from '../components/ui/Skeleton';
 import RouteMap from '../components/booking/RouteMap';
 import PlaceSearch from '../components/booking/PlaceSearch';
 import StatusTimeline from '../components/tracking/StatusTimeline';
@@ -70,7 +71,7 @@ export default function OrderDetails() {
   const [newRoute, setNewRoute] = useState(null);
   const [busy, setBusy] = useState(false);
 
-  if (loading) return <PageShell eyebrow="Delivery" title="Loading…" />;
+  if (loading) return <TrackingSkeleton tone="light" />;
   if (!order) return <PageShell eyebrow="Delivery" title="Order not found." />;
 
   const mode = transportOf(order);
