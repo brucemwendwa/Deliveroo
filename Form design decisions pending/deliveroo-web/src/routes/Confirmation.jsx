@@ -10,6 +10,7 @@ import RouteMap from '../components/booking/RouteMap';
 import TransportBadge from '../components/transport/TransportBadge';
 import Button from '../components/ui/Button';
 import PageShell from './PageShell';
+import { TrackingSkeleton } from '../components/ui/Skeleton';
 import { STATUS, STATUS_LABEL } from '../lib/orderStatus';
 import { formatDuration, formatKes, formatKm, isWeightVerified } from '../lib/pricing';
 import { priorityOf, transportOf } from '../lib/transport';
@@ -43,7 +44,7 @@ export default function Confirmation() {
     return () => clearTimeout(timer);
   }, [dispatch, id, awaitingAgent]);
 
-  if (loading) return <PageShell eyebrow="Delivery" title="Loading…" />;
+  if (loading) return <TrackingSkeleton />;
   if (!order) return <PageShell eyebrow="Delivery" title="Order not found." />;
 
   const mode = transportOf(order);
