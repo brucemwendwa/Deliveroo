@@ -4,7 +4,7 @@ import PageShell from './PageShell';
 import StatusTimeline from '../components/tracking/StatusTimeline';
 import Button from '../components/ui/Button';
 import { STATUS_LABEL } from '../lib/orderStatus';
-import { formatDuration, formatKes, formatKm } from '../lib/pricing';
+import { formatDuration, formatKes, formatKm, isWeightVerified } from '../lib/pricing';
 import { color, eyebrow, font, radius } from '../theme';
 
 const stat = (label, value) => ({ label, value });
@@ -17,13 +17,18 @@ export default function Confirmation() {
   if (loading) return <PageShell eyebrow="Delivery" title="Loading…" />;
   if (!order) return <PageShell eyebrow="Delivery" title="Order not found." />;
 
+  const weighed = isWeightVerified(order.parcel);
+
   const stats = [
     stat('Pickup', order.pickup.label),
     stat('Destination', order.destination.label),
-    stat('Package', `${order.parcel.weightKg} kg${order.parcel.description ? ` · ${order.parcel.description}` : ''}`),
+    stat(
+      weighed ? 'Package · weighed at pickup' : 'Package · as declared',
+      `${weighed ? order.parcel.verifiedWeightKg : order.parcel.weightKg} kg${order.parcel.description ? ` · ${order.parcel.description}` : ''}`
+    ),
     stat('Distance', formatKm(order.route.distanceKm)),
     stat('Estimated time', formatDuration(order.route.durationSeconds)),
-    stat('Delivery fee', formatKes(order.pricing.total))
+    stat(weighed ? 'Delivery fee' : 'Estimated fee', formatKes(order.pricing.total))
   ];
 
   return (
@@ -74,6 +79,12 @@ export default function Confirmation() {
               </div>
             ))}
           </div>
+          {!weighed && (
+            <p style={{ margin: '16px 0 0', fontSize: '13px', lineHeight: 1.5, color: color.muted }}>
+              We&apos;ll weigh the package at pickup and confirm the final fee from the measured
+              weight.
+            </p>
+          )}
           <p style={{ margin: '18px 0 0', fontSize: '13px', color: color.muted, fontFamily: font.mono, letterSpacing: '.04em' }}>
             Keep order #{order.id} to track this delivery later.
           </p>
