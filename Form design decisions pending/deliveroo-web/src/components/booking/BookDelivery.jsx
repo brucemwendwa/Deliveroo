@@ -29,7 +29,7 @@ import { openAuthModal, showToast } from '../../store/uiSlice';
 import { reverseGeocode } from '../../api/geo';
 import { formatDuration, formatKes, formatKm } from '../../lib/pricing';
 import { PACKAGE_TYPES, modeMeta, volumetricWeightKg } from '../../lib/transport';
-import { color, eyebrow, font, layout, radius } from '../../theme';
+import { color, eyebrow, font, layout } from '../../theme';
 import Button from '../ui/Button';
 import Chip from '../ui/Chip';
 import Field from '../ui/Field';
