@@ -2,10 +2,21 @@ import { color, font } from '../../theme';
 
 /**
  * Arrival readout (§14). Lifted from the old LiveTracking marketing section, which
- * had exactly this UI already built and on-palette — now driven by a real order
- * instead of hardcoded copy.
+ * had exactly this UI already built and on-palette — now driven by a real order:
+ * the minutes, the clock time and the bar all come from how far through the journey
+ * the parcel actually is.
  */
-export default function EtaPanel({ etaMinutes, progress = 0, fromLabel = 'Picked up', toLabel = 'Arriving' }) {
+export default function EtaPanel({
+  etaMinutes,
+  progress = 0,
+  arrivalAt,
+  fromLabel = 'Picked up',
+  toLabel = 'Arriving'
+}) {
+  const hours = Math.floor(etaMinutes / 60);
+  const minutes = etaMinutes % 60;
+  const long = etaMinutes >= 60;
+
   return (
     <div
       style={{
@@ -35,15 +46,28 @@ export default function EtaPanel({ etaMinutes, progress = 0, fromLabel = 'Picked
           style={{
             fontFamily: font.display,
             fontWeight: 700,
-            fontSize: 'clamp(44px,5vw,74px)',
+            fontSize: 'clamp(40px,4.6vw,70px)',
             lineHeight: 0.86,
             color: color.orange,
-            letterSpacing: '-.01em'
+            letterSpacing: '-.01em',
+            whiteSpace: 'nowrap'
           }}
         >
-          {etaMinutes}
-          <span style={{ fontSize: '.42em', color: color.paper }}> MIN</span>
+          {long ? hours : etaMinutes}
+          <span style={{ fontSize: '.42em', color: color.paper }}>{long ? ' H' : ' MIN'}</span>
+          {long && minutes > 0 && (
+            <>
+              {' '}
+              {minutes}
+              <span style={{ fontSize: '.42em', color: color.paper }}> MIN</span>
+            </>
+          )}
         </div>
+        {arrivalAt && (
+          <div style={{ marginTop: '10px', fontSize: '13.5px', color: 'rgba(243,241,237,.7)' }}>
+            Expected by <strong style={{ color: color.paper }}>{arrivalAt}</strong>
+          </div>
+        )}
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '6px' }}>
         <div
