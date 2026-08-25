@@ -27,7 +27,7 @@ export default function PriceCard({ quote, route, weightKg }) {
       }}
     >
       <div style={row}>
-        <span style={{ color: color.muted }}>Package weight</span>
+        <span style={{ color: color.muted }}>Declared weight</span>
         <strong style={{ color: color.ink }}>{weightKg} kg</strong>
       </div>
       <div style={row}>
@@ -81,9 +81,9 @@ export default function PriceCard({ quote, route, weightKg }) {
           {hasRoute ? formatKes(quote.total) : '—'}
         </div>
         <p style={{ margin: '14px 0 0', fontSize: '12.5px', lineHeight: 1.5, color: color.muted }}>
-          {route?.estimated
-            ? 'Route service unavailable — distance and time are approximate. Final price may vary depending on delivery conditions.'
-            : 'Final price may vary depending on delivery conditions.'}
+          {route?.estimated && 'Route service unavailable — distance and time are approximate. '}
+          This is an estimate. We weigh your package at pickup and confirm the final price from
+          the measured weight.
         </p>
       </div>
     </div>
