@@ -1,24 +1,17 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setNarrow, setScrolled } from '../store/uiSlice';
-
-const BREAKPOINT = 980;
+import { setScrolled } from '../store/uiSlice';
 
 /**
- * Owns the two pieces of scroll/viewport state the layout reacts to, plus the
- * parallax transforms. Elements opt into parallax with data-parallax="0.02"
- * (the number is the shift factor); the element is moved within its parent,
- * clamped so its edges never enter the frame.
+ * Owns the scroll state the nav reacts to, plus the parallax transforms. Elements opt
+ * into parallax with data-parallax="0.02" (the number is the shift factor); the element
+ * is moved within its parent, clamped so its edges never enter the frame.
+ *
+ * The viewport breakpoint used to live here too; it moved to useNarrowViewport, which
+ * AppLayout runs, because every route needs it and only this one runs the parallax.
  */
 export default function useScrollEffects({ parallax = true } = {}) {
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    const onResize = () => dispatch(setNarrow(window.innerWidth < BREAKPOINT));
-    onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [dispatch]);
 
   useEffect(() => {
     const layers = Array.from(document.querySelectorAll('[data-parallax]'));
