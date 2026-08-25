@@ -37,8 +37,10 @@ describe('routes', () => {
   it('renders live tracking for a real order', async () => {
     const [inTransit] = seeded();
     renderAt(`/track/${inTransit.id}`);
-    expect(await screen.findByText(`Order #${inTransit.id}`)).toBeInTheDocument();
-    expect(screen.getByText('Your package is on the way.')).toBeInTheDocument();
+    expect(await screen.findByText(`Parcel #${inTransit.id}`)).toBeInTheDocument();
+    // The headline names the mode it is travelling on (§25).
+    expect(screen.getByText('On the way by road.')).toBeInTheDocument();
+    expect(screen.getAllByText('Road').length).toBeGreaterThan(0);
   });
 
   it('tells the customer plainly when an order id is unknown', async () => {
