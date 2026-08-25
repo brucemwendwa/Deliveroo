@@ -44,8 +44,12 @@ export default function WeighParcel({ order }) {
 
   const typed = parseFloat(entry);
   const valid = Number.isFinite(typed) && typed > 0 && typed <= MAX_WEIGHT_KG;
-  // Priced against the order's own route, so the preview is the real new fare.
-  const preview = valid ? priceOrder({ parcel: { ...order.parcel, verifiedWeightKg: typed }, route: order.route }) : null;
+  // Priced against the order's own route *and* its own mode, so the preview is the
+  // real new fare: re-pricing an air shipment on the road tariff would show a figure
+  // the backend will never charge.
+  const preview = valid
+    ? priceOrder({ parcel: { ...order.parcel, verifiedWeightKg: typed }, route: order.route, transport: order.transport })
+    : null;
   const previewDelta = preview ? preview.total - order.pricing.total : 0;
 
   const submit = async () => {
