@@ -1,15 +1,21 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { loadSession } from '../store/authSlice';
+import { clearFleetError, fetchFleet, selectFleetError } from '../store/fleetSlice';
+import { clearOrderError, selectOrdersError } from '../store/ordersSlice';
+import { showToast } from '../store/uiSlice';
+import useNarrowViewport from '../hooks/useNarrowViewport';
 import { seedIfEmpty } from '../api';
 import { color, font } from '../theme';
 import Nav from '../components/Nav';
 import MobileMenu from '../components/MobileMenu';
+import BottomNav, { BOTTOM_NAV_HEIGHT } from '../components/BottomNav';
 import SiteFooter from '../components/SiteFooter';
 import GooFilter from '../components/GooFilter';
 import AuthModal from '../components/auth/AuthModal';
 import Toast from '../components/ui/Toast';
+import { BOOKING_PATH } from '../hooks/useStartBooking';
 
 /** Anchor links carry a hash across routes; this does the scrolling on arrival. */
 function ScrollToHash() {
@@ -32,20 +38,52 @@ function ScrollToHash() {
 
 export default function AppLayout() {
   const dispatch = useDispatch();
+  const narrow = useSelector((state) => state.ui.narrow);
+  const { pathname } = useLocation();
+  // Every failed mutation reports the same way, in one place, rather than each screen
+  // inventing its own error strip — or worse, failing silently.
+  const orderError = useSelector(selectOrdersError);
+  const fleetError = useSelector(selectFleetError);
+  const failure = orderError || fleetError;
+  useNarrowViewport();
+
+  useEffect(() => {
+    if (!failure) return;
+    dispatch(showToast({ message: failure, tone: 'error' }));
+    // Cleared once shown, or the same failure would toast again on the next render.
+    dispatch(clearOrderError());
+    dispatch(clearFleetError());
+  }, [dispatch, failure]);
 
   useEffect(() => {
     dispatch(loadSession());
     seedIfEmpty();
+    // Transport availability gates what booking may offer, so it is loaded once at
+    // the top rather than by each screen that happens to need it.
+    dispatch(fetchFleet());
   }, [dispatch]);
 
+  // The booking flow carries its own fixed quote bar; two stacked bars on a phone is
+  // one too many, so the flow keeps the bottom edge to itself.
+  const showBottomNav = narrow && pathname !== BOOKING_PATH;
+
   return (
-    <div style={{ background: color.paper, fontFamily: font.body, color: color.inkSoft, overflowX: 'hidden' }}>
+    <div
+      style={{
+        background: color.paper,
+        fontFamily: font.body,
+        color: color.inkSoft,
+        overflowX: 'hidden',
+        paddingBottom: showBottomNav ? `calc(${BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom,0px))` : undefined
+      }}
+    >
       <GooFilter />
       <ScrollToHash />
       <Nav />
       <MobileMenu />
       <Outlet />
       <SiteFooter brand="Deliveroo" />
+      {showBottomNav && <BottomNav />}
       <AuthModal />
       <Toast />
     </div>
