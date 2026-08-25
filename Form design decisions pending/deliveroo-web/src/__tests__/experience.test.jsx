@@ -1,10 +1,11 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { makeStore } from '../store';
 import { AppRoutes } from '../App';
 import { verifyOtp } from '../store/authSlice';
-import { MOCK_OTP, seedIfEmpty } from '../api/mockBackend';
+import { MOCK_OTP, createOrder, seedIfEmpty, updateOrderStatus } from '../api/mockBackend';
 import { STATUS } from '../lib/orderStatus';
 
 const seeded = () => {
@@ -97,5 +98,57 @@ describe('mobile layout', () => {
     // Every delivery is still there, as a card each rather than a row each.
     expect(await screen.findByRole('button', { name: new RegExp(orders[0].id) })).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+});
+
+// §15 — the customer dashboard: the live delivery first, the history under it.
+describe('customer dashboard', () => {
+  const book = async (store, overrides = {}) => {
+    const user = (await store.dispatch(verifyOtp({ identifier: 'ada@one.co', code: MOCK_OTP }))).payload;
+    return createOrder({
+      userId: user.id,
+      pickup: { id: 'a', label: 'Westlands · Nairobi', name: 'Westlands', lat: -1.2673, lng: 36.8065 },
+      destination: { id: 'b', label: 'Mombasa', name: 'Mombasa', lat: -4.0435, lng: 39.6682 },
+      route: { distanceKm: 485, durationSeconds: 7.2 * 3600, coordinates: [], estimated: false },
+      transport: { mode: 'AIR', priority: 'STANDARD' },
+      parcel: { weightKg: 3, description: 'Documents' },
+      sender: { name: 'Ada', phone: '+254700000001' },
+      recipient: { name: 'Grace', phone: '+254700000002' },
+      ...overrides
+    });
+  };
+
+  it('leads with the delivery in progress, and how it is travelling', async () => {
+    const store = makeStore();
+    const order = await book(store);
+    await updateOrderStatus(order.id, STATUS.ASSIGNED);
+
+    renderAt('/orders', store);
+
+    const active = await screen.findByRole('region', { name: 'Active delivery' });
+    expect(within(active).getByText('Westlands → Mombasa')).toBeInTheDocument();
+    // Named twice on purpose: on the badge, and again in the row of live facts.
+    expect(within(active).getAllByText('Air').length).toBeGreaterThan(0);
+    expect(within(active).getByText(/km away · arriving in/i)).toBeInTheDocument();
+    expect(within(active).getByRole('link', { name: /track live/i })).toBeInTheDocument();
+
+    // …and the primary action is to send another one — in the page header as well as
+    // the nav, which is why there is more than one of them.
+    expect(screen.getAllByRole('link', { name: /request delivery/i }).length).toBeGreaterThan(0);
+  });
+
+  it('filters the history by transport mode', async () => {
+    const store = makeStore();
+    await book(store);
+    renderAt('/orders', store);
+
+    await screen.findByRole('region', { name: 'Active delivery' });
+    expect(screen.getByText('Total deliveries')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Ship' }));
+    expect(await screen.findByText(/no deliveries match that/i)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Air' }));
+    expect(screen.queryByText(/no deliveries match that/i)).not.toBeInTheDocument();
   });
 });
