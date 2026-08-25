@@ -3,7 +3,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { makeStore } from '../store';
 import { AppRoutes } from '../App';
-import { setNarrow } from '../store/uiSlice';
 import { verifyOtp } from '../store/authSlice';
 import { MOCK_OTP, seedIfEmpty } from '../api/mockBackend';
 import { STATUS } from '../lib/orderStatus';
@@ -24,8 +23,18 @@ const renderAt = (path, store = makeStore()) => ({
   )
 });
 
+/**
+ * AppLayout reads the real viewport width on mount, so the narrow layout has to be
+ * set on the window rather than pushed straight into the store.
+ */
+const setViewport = (width) => {
+  Object.defineProperty(window, 'innerWidth', { value: width, configurable: true, writable: true });
+  window.dispatchEvent(new Event('resize'));
+};
+
 beforeEach(() => {
   localStorage.clear();
+  setViewport(1024);
 });
 
 // §25 — the Uber moment: request, search, matched.
@@ -43,8 +52,9 @@ describe('requesting a pickup', () => {
 
     expect(await screen.findByText(/finding a pickup agent near you/i)).toBeInTheDocument();
 
-    // Dispatch answers on its own — no button, no reload.
-    expect(await screen.findByText('Pickup agent assigned.')).toBeInTheDocument();
+    // Dispatch answers on its own — no button, no reload. The wait is the search
+    // delay plus the backend's own latency, in fake-timer milliseconds.
+    expect(await screen.findByText('Pickup agent assigned.', {}, { timeout: 8000 })).toBeInTheDocument();
     expect(screen.getByText(/km/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /track pickup/i })).toBeInTheDocument();
   });
@@ -53,9 +63,8 @@ describe('requesting a pickup', () => {
 // §23 — the phone layout is a different arrangement of the same screens, not a
 // stripped-down one.
 describe('mobile layout', () => {
-  const renderNarrow = (path) => {
-    const store = makeStore();
-    store.dispatch(setNarrow(true));
+  const renderNarrow = (path, store = makeStore()) => {
+    setViewport(420);
     return renderAt(path, store);
   };
 
@@ -70,9 +79,8 @@ describe('mobile layout', () => {
 
   it('keeps the bottom bar out of the booking flow, which has its own', async () => {
     const store = makeStore();
-    store.dispatch(setNarrow(true));
     await store.dispatch(verifyOtp({ identifier: 'sender@one.co', code: MOCK_OTP }));
-    renderAt('/book', store);
+    renderNarrow('/book', store);
 
     expect(await screen.findByText('Where should we pick it up?')).toBeInTheDocument();
     expect(screen.queryByRole('navigation', { name: 'Primary' })).not.toBeInTheDocument();
@@ -81,9 +89,8 @@ describe('mobile layout', () => {
   it('turns the dispatch table into cards', async () => {
     const orders = seeded();
     const store = makeStore();
-    store.dispatch(setNarrow(true));
     await store.dispatch(verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP }));
-    renderAt('/admin', store);
+    renderNarrow('/admin', store);
 
     // Every delivery is still there, as a card each rather than a row each.
     expect(await screen.findByRole('button', { name: new RegExp(orders[0].id) })).toBeInTheDocument();
