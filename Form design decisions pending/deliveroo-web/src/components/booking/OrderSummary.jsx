@@ -65,7 +65,7 @@ export default function OrderSummary({ pickup, destination, parcel, route, quote
       <div style={line}>
         <span style={{ color: color.muted }}>Package</span>
         <strong style={{ color: color.ink }}>
-          {parcel.weightKg} kg{parcel.description ? ` · ${parcel.description}` : ''}
+          {parcel.weightKg} kg declared{parcel.description ? ` · ${parcel.description}` : ''}
         </strong>
       </div>
       <div style={line}>
@@ -77,11 +77,15 @@ export default function OrderSummary({ pickup, destination, parcel, route, quote
         <strong style={{ color: color.ink }}>{route ? formatDuration(route.durationSeconds) : '—'}</strong>
       </div>
       <div style={{ ...line, alignItems: 'center', paddingTop: '18px' }}>
-        <span style={{ color: color.muted }}>Delivery fee</span>
+        <span style={{ color: color.muted }}>Estimated fee</span>
         <strong style={{ fontFamily: font.display, fontWeight: 700, fontSize: 'clamp(26px,3vw,38px)', lineHeight: 1, color: color.ink }}>
           {formatKes(quote.total)}
         </strong>
       </div>
+      <p style={{ margin: '10px 0 0', fontSize: '12.5px', lineHeight: 1.5, color: color.muted }}>
+        Confirmed once we weigh the package at pickup. You can cancel at any point before
+        it&apos;s delivered.
+      </p>
     </div>
   );
 }
