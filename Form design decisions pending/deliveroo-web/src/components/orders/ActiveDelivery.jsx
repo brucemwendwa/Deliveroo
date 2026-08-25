@@ -3,7 +3,7 @@ import useNow from '../../hooks/useNow';
 import { STATUS, currentLocationLabel, progressFor, remainingKm, remainingSeconds } from '../../lib/orderStatus';
 import { etaClock, formatKm } from '../../lib/pricing';
 import { modeMeta, priorityOf, transportOf } from '../../lib/transport';
-import { color, ease, eyebrow, font, radius } from '../../theme';
+import { color, ease, eyebrow, font } from '../../theme';
 import Button from '../ui/Button';
 import Icon from '../Icon';
 import TransportBadge from '../transport/TransportBadge';
