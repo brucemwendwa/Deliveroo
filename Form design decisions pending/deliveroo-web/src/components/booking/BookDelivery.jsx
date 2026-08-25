@@ -170,11 +170,17 @@ export default function BookDelivery() {
               question="What are we carrying?"
               active={step === 2}
               complete={complete.parcel}
-              summary={`${parcel.weightKg} kg${parcel.description ? ` · ${parcel.description}` : ''}`}
+              summary={`${parcel.weightKg} kg declared${parcel.description ? ` · ${parcel.description}` : ''}`}
               onOpen={() => open(2)}
             >
               <fieldset style={{ border: 'none', padding: 0, margin: '0 0 22px' }}>
-                <legend style={{ ...eyebrow, marginBottom: '12px', padding: 0 }}>Package weight</legend>
+                <legend style={{ ...eyebrow, marginBottom: '8px', padding: 0 }}>Roughly how heavy is it?</legend>
+                {/* §9 — this figure only buys an estimate; the fare is settled on our
+                    scale at pickup, so an optimistic guess here changes nothing. */}
+                <p style={{ margin: '0 0 14px', fontSize: '13.5px', lineHeight: 1.5, color: color.muted }}>
+                  A rough figure is fine — we weigh the package at pickup and the final price is
+                  worked out from that.
+                </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                   {WEIGHTS.map((weight) => (
                     <Chip
