@@ -1,4 +1,14 @@
-import { MINIMUM_FARE, formatDuration, formatKes, formatKm, quote } from '../lib/pricing';
+import {
+  MINIMUM_FARE,
+  billableWeightKg,
+  formatDelta,
+  formatDuration,
+  formatKes,
+  formatKm,
+  priceOrder,
+  quote,
+  weightDiscrepancy
+} from '../lib/pricing';
 
 describe('pricing', () => {
   it('reproduces the specified worked example: 3 kg over 12.4 km costs KES 650', () => {
@@ -34,5 +44,44 @@ describe('pricing', () => {
     expect(formatKm(12.4)).toBe('12.4 km');
     expect(formatDuration(2100)).toBe('35 min');
     expect(formatDuration(4320)).toBe('1 h 12 min');
+  });
+});
+
+describe('declared vs verified weight', () => {
+  it('bills the declared weight only until the parcel has been weighed', () => {
+    expect(billableWeightKg({ weightKg: 3 })).toBe(3);
+    expect(billableWeightKg({ weightKg: 3, verifiedWeightKg: null })).toBe(3);
+    expect(billableWeightKg({ weightKg: 3, verifiedWeightKg: 7.2 })).toBe(7.2);
+  });
+
+  it('marks the quote as an estimate until an admin has measured it', () => {
+    const route = { distanceKm: 12.4 };
+    expect(priceOrder({ parcel: { weightKg: 3 }, route })).toMatchObject({ total: 650, basis: 'estimated' });
+    expect(priceOrder({ parcel: { weightKg: 3, verifiedWeightKg: 7.2 }, route })).toMatchObject({
+      total: 860,
+      basis: 'verified',
+      declaredWeightKg: 3
+    });
+  });
+
+  it('flags a declaration that is under by more than the allowance', () => {
+    expect(weightDiscrepancy({ weightKg: 3 })).toBeNull();
+    // Within 20% of 3 kg.
+    expect(weightDiscrepancy({ weightKg: 3, verifiedWeightKg: 3.4 }).flagged).toBe(false);
+    expect(weightDiscrepancy({ weightKg: 3, verifiedWeightKg: 7.2 }).flagged).toBe(true);
+    // Over-declaring costs the customer, not us — never flagged.
+    expect(weightDiscrepancy({ weightKg: 10, verifiedWeightKg: 2 }).flagged).toBe(false);
+  });
+
+  it('keeps the small-parcel allowance absolute, not proportional', () => {
+    // 20% of 0.5 kg is 0.1 kg, which every scale would trip; the 0.5 kg floor wins.
+    expect(weightDiscrepancy({ weightKg: 0.5, verifiedWeightKg: 0.9 }).flagged).toBe(false);
+    expect(weightDiscrepancy({ weightKg: 0.5, verifiedWeightKg: 4 }).flagged).toBe(true);
+  });
+
+  it('signs the delta, because the direction is the point', () => {
+    expect(formatDelta(4.2)).toBe('+4.2 kg');
+    expect(formatDelta(-0.8)).toBe('−0.8 kg');
+    expect(formatDelta(0)).toBe('0.0 kg');
   });
 });
