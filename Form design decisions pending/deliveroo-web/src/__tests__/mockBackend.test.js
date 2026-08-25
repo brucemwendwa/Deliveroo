@@ -100,12 +100,29 @@ describe('mock backend', () => {
   });
 
   it('records a cancellation in the order history', async () => {
-    const order = await createOrder(draft);
+    // §17 — cancelling is the owner's to do, so the order is booked under a real session.
+    const owner = await verifyOtp({ identifier: 'owner@example.com', code: MOCK_OTP });
+    const order = await createOrder({ ...draft, userId: owner.id });
     const cancelled = await cancelOrder(order.id);
 
     expect(cancelled.status).toBe(STATUS.CANCELLED);
     expect(cancelled.history.map((entry) => entry.status)).toEqual([STATUS.PENDING, STATUS.CANCELLED]);
     expect((await getOrder(order.id)).status).toBe(STATUS.CANCELLED);
+  });
+
+  it('refuses to let anyone but the owner cancel or re-route a delivery (§17)', async () => {
+    const owner = await verifyOtp({ identifier: 'owner@example.com', code: MOCK_OTP });
+    const order = await createOrder({ ...draft, userId: owner.id });
+
+    await verifyOtp({ identifier: 'someone.else@example.com', code: MOCK_OTP });
+    await expect(cancelOrder(order.id)).rejects.toThrow(/only the customer who booked/i);
+    await expect(
+      changeDestination(order.id, { destination: DESTINATION, route: draft.route })
+    ).rejects.toThrow(/only the customer who booked/i);
+
+    // Back as the owner, both work.
+    await verifyOtp({ identifier: 'owner@example.com', code: MOCK_OTP });
+    expect((await cancelOrder(order.id)).status).toBe(STATUS.CANCELLED);
   });
 
   it('rejects backwards status transitions', async () => {
