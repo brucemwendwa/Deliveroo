@@ -7,7 +7,8 @@ import {
   subscribe,
   updateCourierPosition,
   updateOrderStatus,
-  verifyOtp
+  verifyOtp,
+  verifyWeight
 } from '../api/mockBackend';
 import { STATUS } from '../lib/orderStatus';
 
@@ -36,13 +37,23 @@ describe('mock backend', () => {
     expect(order.pricing.total).toBe(650);
   });
 
-  it('assigns a courier the moment the order moves off pending', async () => {
+  it('assigns a pickup agent the moment the order moves off pending', async () => {
     const order = await createOrder(draft);
     const assigned = await updateOrderStatus(order.id, STATUS.ASSIGNED);
 
-    expect(assigned.courier).toMatchObject({ name: expect.any(String), vehicle: expect.any(String) });
-    // The courier starts at the pickup point.
-    expect(assigned.courier.lat).toBeCloseTo(PICKUP.lat);
+    expect(assigned.courier).toMatchObject({
+      name: expect.any(String),
+      vehicle: expect.any(String),
+      plate: expect.any(String),
+      distanceKm: expect.any(Number),
+      etaMinutes: expect.any(Number)
+    });
+    // §25 — the agent is dispatched *towards* the pickup, so they start short of it.
+    // The marker sits exactly as far out as the distance the customer is quoted:
+    // one degree of latitude is ~111 km.
+    const offsetKm = Math.abs(assigned.courier.lat - PICKUP.lat) * 111;
+    expect(offsetKm).toBeLessThanOrEqual(assigned.courier.distanceKm + 0.01);
+    expect(assigned.courier.distanceKm).toBeLessThanOrEqual(4);
   });
 
   it('notifies subscribers on every write — this is what drives live tracking (§18)', async () => {
@@ -113,5 +124,85 @@ describe('mock backend', () => {
 
   it('rejects a wrong verification code', async () => {
     await expect(verifyOtp({ identifier: 'someone@example.com', code: '123456' })).rejects.toThrow(/not right/i);
+  });
+  // §9/§18 — the customer's weight is a declaration; the fare is settled on our scale.
+  describe('weight verification', () => {
+    const signInAsAdmin = () => verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    const signInAsCustomer = () => verifyOtp({ identifier: 'someone@example.com', code: MOCK_OTP });
+
+    it('prices a new order as an estimate off the declared weight', async () => {
+      const order = await createOrder(draft);
+      expect(order.parcel.verifiedWeightKg).toBeNull();
+      expect(order.pricing.basis).toBe('estimated');
+    });
+
+    it('refuses a customer trying to record a weight — this is the whole point', async () => {
+      const order = await createOrder(draft);
+      await signInAsCustomer();
+      await expect(verifyWeight(order.id, { weightKg: 1 })).rejects.toThrow(/only staff/i);
+
+      // …and with no session at all.
+      localStorage.removeItem('deliveroo.session');
+      await expect(verifyWeight(order.id, { weightKg: 1 })).rejects.toThrow(/only staff/i);
+      expect((await getOrder(order.id)).parcel.verifiedWeightKg).toBeNull();
+    });
+
+    it('re-prices on the measured weight and keeps the original estimate', async () => {
+      const order = await createOrder(draft);
+      await signInAsAdmin();
+      // Declared 3 kg (KES 650); it is really 7.2 kg.
+      const weighed = await verifyWeight(order.id, { weightKg: 7.2 });
+
+      expect(weighed.parcel.verifiedWeightKg).toBe(7.2);
+      expect(weighed.parcel.weightKg).toBe(3);
+      expect(weighed.parcel.weighedBy).toBe('admin@deliveroo.co');
+      // 7.2 kg (360) + 12.4 km (496) = 856 → 860
+      expect(weighed.pricing.total).toBe(860);
+      expect(weighed.pricing.basis).toBe('verified');
+      expect(weighed.quotedPricing.total).toBe(650);
+    });
+
+    it('bills the measured weight when the destination changes afterwards (§16)', async () => {
+      const order = await createOrder(draft);
+      await signInAsAdmin();
+      await verifyWeight(order.id, { weightKg: 7.2 });
+
+      const rerouted = await changeDestination(order.id, {
+        destination: { ...DESTINATION, label: 'Karen · Nairobi', name: 'Karen' },
+        route: { distanceKm: 24.8, durationSeconds: 3600, coordinates: [], estimated: false }
+      });
+
+      // 7.2 kg (360) + 24.8 km (992) = 1352 → 1360, not the 1150 the declaration would give.
+      expect(rerouted.pricing.total).toBe(1360);
+      expect(rerouted.pricing.basis).toBe('verified');
+    });
+
+    it('closes the scale once the parcel is in transit', async () => {
+      const order = await createOrder(draft);
+      await signInAsAdmin();
+      await updateOrderStatus(order.id, STATUS.IN_TRANSIT);
+
+      await expect(verifyWeight(order.id, { weightKg: 7.2 })).rejects.toThrow(/in transit/i);
+    });
+
+    it('rejects weights that are not a reading off a scale', async () => {
+      const order = await createOrder(draft);
+      await signInAsAdmin();
+
+      await expect(verifyWeight(order.id, { weightKg: 0 })).rejects.toThrow(/kilograms/i);
+      await expect(verifyWeight(order.id, { weightKg: -4 })).rejects.toThrow(/kilograms/i);
+      await expect(verifyWeight(order.id, { weightKg: 'heavy' })).rejects.toThrow(/kilograms/i);
+      await expect(verifyWeight(order.id, { weightKg: 5000 })).rejects.toThrow(/cannot carry/i);
+    });
+
+    it('compares a re-weigh against the original estimate, not the last correction', async () => {
+      const order = await createOrder(draft);
+      await signInAsAdmin();
+      await verifyWeight(order.id, { weightKg: 7.2 });
+      const corrected = await verifyWeight(order.id, { weightKg: 6 });
+
+      expect(corrected.pricing.total).toBe(800);
+      expect(corrected.quotedPricing.total).toBe(650);
+    });
   });
 });
