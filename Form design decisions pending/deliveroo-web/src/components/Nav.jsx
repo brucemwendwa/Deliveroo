@@ -193,7 +193,33 @@ export default function Nav() {
               the top-right corner looking for.
             */}
             {signedIn ? (
-              <ProfileMenu user={user} />
+              <>
+                {/* Signed in, the CTA changes job: not "get started" but the action
+                    the account exists for. */}
+                <HoverLink
+                  as={Link}
+                  to={BOOKING_PATH}
+                  onClick={startBooking}
+                  hoverStyle={hover.yellow}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                    height: '44px',
+                    padding: '0 20px',
+                    borderRadius: radius.pill,
+                    background: color.orange,
+                    color: color.ink,
+                    fontSize: '14.5px',
+                    fontWeight: 700,
+                    transition: `transform .2s ${ease.out}, box-shadow .2s`
+                  }}
+                >
+                  <Icon name="add" size={17} />
+                  Request delivery
+                </HoverLink>
+                <ProfileMenu user={user} />
+              </>
             ) : (
               <>
                 <button
