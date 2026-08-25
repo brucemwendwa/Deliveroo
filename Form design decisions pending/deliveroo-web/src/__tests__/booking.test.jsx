@@ -23,8 +23,8 @@ const renderBooking = (store = makeStore()) => ({
 describe('booking flow', () => {
   it('opens on the pickup step', () => {
     renderBooking();
-    expect(screen.getByText('Where are we picking up from?')).toBeInTheDocument();
-    expect(screen.queryByText('Where should we take it?')).not.toBeInTheDocument();
+    expect(screen.getByText('Where should we pick it up?')).toBeInTheDocument();
+    expect(screen.queryByText('Where should we deliver it?')).not.toBeInTheDocument();
   });
 
   it('will not advance past pickup until a location is chosen', async () => {
