@@ -25,6 +25,13 @@ function OptionCard({ option, selected, onSelect }) {
       onClick={() => available && onSelect(meta.id)}
       disabled={!available}
       aria-pressed={selected}
+      // Without this the accessible name is the whole card read as one run-on string.
+      // Spelled out instead: what it is, what it costs, how long, and why not.
+      aria-label={
+        available
+          ? `${meta.label}, ${formatKes(quote.total)}, ${formatDuration(quote.durationSeconds)}`
+          : `${meta.label} unavailable. ${reason}`
+      }
       {...bind}
       style={{
         position: 'relative',
