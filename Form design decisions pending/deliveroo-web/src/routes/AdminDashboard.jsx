@@ -5,10 +5,11 @@ import { selectIsAdmin } from '../store/authSlice';
 import { openAuthModal, showToast } from '../store/uiSlice';
 import useOrderSync from '../hooks/useOrderSync';
 import { STATUS_LABEL, allowedTransitions } from '../lib/orderStatus';
-import { formatDuration, formatKes, formatKm } from '../lib/pricing';
+import { formatDelta, formatDuration, formatKes, formatKm, isWeightVerified, weightDiscrepancy } from '../lib/pricing';
 import { color, control, eyebrow, font, radius, statusTone } from '../theme';
 import RouteMap from '../components/booking/RouteMap';
 import StatusTimeline from '../components/tracking/StatusTimeline';
+import WeighParcel from '../components/admin/WeighParcel';
 import Button from '../components/ui/Button';
 import PageShell from './PageShell';
 
@@ -64,6 +65,8 @@ export default function AdminDashboard() {
             )}
             {orders.map((order) => {
               const active = selected?.id === order.id;
+              const weighed = isWeightVerified(order.parcel);
+              const flagged = weightDiscrepancy(order.parcel)?.flagged;
               return (
                 <button
                   key={order.id}
@@ -91,10 +94,19 @@ export default function AdminDashboard() {
                     </span>
                     <span style={{ display: 'block', marginTop: '3px', fontFamily: font.mono, fontSize: '11px', letterSpacing: '.08em', color: color.muted }}>
                       {order.id} · {STATUS_LABEL[order.status]}
+                      {flagged && <span style={{ color: color.orangeDeep }}> · UNDER-DECLARED</span>}
                     </span>
                   </span>
-                  <span style={{ flex: 'none', fontSize: '13.5px', fontWeight: 700, color: color.ink }}>
-                    {formatKes(order.pricing.total)}
+                  <span style={{ flex: 'none', textAlign: 'right' }}>
+                    <span style={{ display: 'block', fontSize: '13.5px', fontWeight: 700, color: color.ink }}>
+                      {formatKes(order.pricing.total)}
+                    </span>
+                    {/* An unweighed order is still on the customer's own figure — say so. */}
+                    {!weighed && (
+                      <span style={{ display: 'block', marginTop: '2px', fontFamily: font.mono, fontSize: '10px', letterSpacing: '.08em', color: color.muted }}>
+                        EST.
+                      </span>
+                    )}
                   </span>
                 </button>
               );
@@ -119,6 +131,9 @@ export default function AdminDashboard() {
                   screen follows immediately.
                 </p>
               )}
+
+              {/* §9/§18 — the fare is settled here, on our scale, not on the booking form. */}
+              <WeighParcel order={selected} />
 
               <div
                 style={{
@@ -154,8 +169,16 @@ export default function AdminDashboard() {
                     ['Destination', selected.destination.label],
                     ['Distance', formatKm(selected.route.distanceKm)],
                     ['Journey', formatDuration(selected.route.durationSeconds)],
-                    ['Package', `${selected.parcel.weightKg} kg`],
-                    ['Fee', formatKes(selected.pricing.total)]
+                    [
+                      isWeightVerified(selected.parcel) ? 'Weight · measured' : 'Weight · declared',
+                      isWeightVerified(selected.parcel)
+                        ? `${selected.parcel.verifiedWeightKg} kg (${formatDelta(weightDiscrepancy(selected.parcel).deltaKg)})`
+                        : `${selected.parcel.weightKg} kg`
+                    ],
+                    [
+                      isWeightVerified(selected.parcel) ? 'Fee · final' : 'Fee · estimated',
+                      formatKes(selected.pricing.total)
+                    ]
                   ].map(([label, value]) => (
                     <div key={label} style={{ paddingTop: '12px', borderTop: '1px solid rgba(17,17,17,.1)' }}>
                       <div style={{ ...eyebrow, fontSize: '9.5px', marginBottom: '6px' }}>{label}</div>
