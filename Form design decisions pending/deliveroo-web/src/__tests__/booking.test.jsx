@@ -64,8 +64,10 @@ describe('booking flow', () => {
     withRoute(store);
     store.dispatch(goToStep(3));
 
-    // A 12 km hop across town: a van or a drone can do it, a plane and a ship cannot.
+    // A 12 km hop across town: a bike, a van or a drone can do it; a plane and a
+    // ship cannot.
     expect(await screen.findByRole('button', { name: /^Road, KES/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /^Motorbike, KES/ })).toBeEnabled();
     expect(screen.getByRole('button', { name: /^Drone, KES/ })).toBeEnabled();
 
     const air = screen.getByRole('button', { name: /^Air unavailable/ });
@@ -84,19 +86,22 @@ describe('booking flow', () => {
     withRoute(store);
     store.dispatch(goToStep(3));
 
-    // The step lands on the cheapest option that can run the route.
-    const drone = await screen.findByRole('button', { name: /^Drone, KES/ });
+    // The step lands on the cheapest option that can run the route — across town
+    // that is the bike, which undercuts the van on the same roads.
+    const road = await screen.findByRole('button', { name: /^Road, KES/ });
+    const motorbike = screen.getByRole('button', { name: /^Motorbike, KES/ });
+    expect(store.getState().booking.transport.mode).toBe('MOTORBIKE');
+    expect(motorbike).toHaveAttribute('aria-pressed', 'true');
+    const bikeTotal = motorbike.getAttribute('aria-label').split(', ')[1];
+    expect(total()).toBe(bikeTotal);
+
+    await userEvent.click(road);
+
     expect(store.getState().booking.transport.mode).toBe('ROAD');
-    expect(screen.getByRole('button', { name: /^Road, KES/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(road).toHaveAttribute('aria-pressed', 'true');
+    // The van costs more than the bike it replaced, and the quote follows.
     expect(total()).toBe('KES 650');
-
-    await userEvent.click(drone);
-
-    expect(store.getState().booking.transport.mode).toBe('DRONE');
-    expect(drone).toHaveAttribute('aria-pressed', 'true');
-    // A drone across town costs more than the van it replaced, and the quote follows.
-    expect(total()).not.toBe('KES 650');
-    expect(total()).toBe(drone.getAttribute('aria-label').split(', ')[1]);
+    expect(total()).not.toBe(bikeTotal);
   });
 
   it('prices the delivery from weight and route distance', async () => {
