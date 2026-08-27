@@ -24,12 +24,24 @@ const wait = (ms = LATENCY) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Pickup agents are road couriers whatever the parcel goes on afterwards: something
 // has to physically collect it before it can be put on a flight or a ship.
+//
+// `vehicleMode` is what they are actually riding or driving, which is not the same
+// question as how the parcel travels afterwards: a rider on a bike collects the
+// parcel that then flies to Mombasa. A motorbike *delivery*, though, is carried the
+// whole way by the person who collects it, so that one has to be matched to a rider.
 const COURIERS = [
-  { name: 'James K.', vehicle: 'Honda CG 125', plate: 'KMEB 214X', initial: 'J', rating: 4.9 },
-  { name: 'Alex M.', vehicle: 'TVS HLX 150', plate: 'KMFA 883J', initial: 'A', rating: 4.8 },
-  { name: 'Grace W.', vehicle: 'Toyota Probox', plate: 'KDA 123A', initial: 'G', rating: 4.9 },
-  { name: 'Daniel O.', vehicle: 'Nissan NV200', plate: 'KCX 907B', initial: 'D', rating: 4.7 }
+  { name: 'James K.', vehicle: 'Honda CG 125', plate: 'KMEB 214X', initial: 'J', rating: 4.9, vehicleMode: TRANSPORT.MOTORBIKE },
+  { name: 'Alex M.', vehicle: 'TVS HLX 150', plate: 'KMFA 883J', initial: 'A', rating: 4.8, vehicleMode: TRANSPORT.MOTORBIKE },
+  { name: 'John M.', vehicle: 'Bajaj Boxer 150', plate: 'KDA 123A', initial: 'J', rating: 4.9, vehicleMode: TRANSPORT.MOTORBIKE },
+  { name: 'Grace W.', vehicle: 'Toyota Probox', plate: 'KCP 441M', initial: 'G', rating: 4.9, vehicleMode: TRANSPORT.ROAD },
+  { name: 'Daniel O.', vehicle: 'Nissan NV200', plate: 'KCX 907B', initial: 'D', rating: 4.7, vehicleMode: TRANSPORT.ROAD }
 ];
+
+/** Who can be sent for this parcel — riders only when the bike carries it all the way. */
+const eligibleCouriers = (mode) =>
+  mode === TRANSPORT.MOTORBIKE
+    ? COURIERS.filter((courier) => courier.vehicleMode === TRANSPORT.MOTORBIKE)
+    : COURIERS;
 
 /**
  * Dispatch (§25). Picks the agent, places them a plausible distance from the pickup
@@ -37,7 +49,8 @@ const COURIERS = [
  * screen prints. A real backend would match on actual courier positions.
  */
 function makeAgent(order) {
-  const picked = COURIERS[Math.floor(Math.random() * COURIERS.length)];
+  const pool = eligibleCouriers(order.transport?.mode || DEFAULT_MODE);
+  const picked = pool[Math.floor(Math.random() * pool.length)];
   const distanceKm = Math.round((0.6 + Math.random() * 3.4) * 10) / 10;
   const bearing = Math.random() * 2 * Math.PI;
   const latRadians = (order.pickup.lat * Math.PI) / 180;
@@ -50,8 +63,9 @@ function makeAgent(order) {
     lat: order.pickup.lat + (distanceKm / 111) * Math.cos(bearing),
     lng: order.pickup.lng + (distanceKm / (111 * Math.cos(latRadians))) * Math.sin(bearing),
     distanceKm,
-    // ~22 km/h through city traffic, and never less than a minute.
-    etaMinutes: Math.max(1, Math.round((distanceKm / 22) * 60)),
+    // ~22 km/h through city traffic for a van, ~30 for a bike that can filter past
+    // it, and never less than a minute.
+    etaMinutes: Math.max(1, Math.round((distanceKm / (picked.vehicleMode === TRANSPORT.MOTORBIKE ? 30 : 22)) * 60)),
     assignedAt: new Date().toISOString()
   };
 }
@@ -417,6 +431,19 @@ export function seedIfEmpty() {
     },
     {
       from: 'CBD · Nairobi',
+      to: 'Westlands · Nairobi',
+      status: STATUS.IN_TRANSIT,
+      mode: TRANSPORT.MOTORBIKE,
+      weight: 2,
+      km: 12,
+      mins: 25,
+      startedMinsAgo: 4,
+      pickup: { lat: -1.2864, lng: 36.8172 },
+      drop: { lat: -1.2673, lng: 36.8065 },
+      at: 'Kilimani'
+    },
+    {
+      from: 'CBD · Nairobi',
       to: 'Karen · Nairobi',
       status: STATUS.PENDING,
       mode: TRANSPORT.ROAD,
@@ -502,7 +529,10 @@ export function seedIfEmpty() {
       recipient: { name: 'Demo Recipient', phone: '+254 700 000 002' },
       courier: assigned
         ? {
-            ...COURIERS[index % COURIERS.length],
+            ...(() => {
+              const pool = eligibleCouriers(row.mode);
+              return pool[index % pool.length];
+            })(),
             lat: moving ? (pickup.lat + destination.lat) / 2 : pickup.lat,
             lng: moving ? (pickup.lng + destination.lng) / 2 : pickup.lng,
             distanceKm: 2.4,
@@ -510,7 +540,17 @@ export function seedIfEmpty() {
             assignedAt: at
           }
         : null,
-      presentLocation: row.at ? { label: row.at, lat: pickup.lat, lng: pickup.lng, at } : null,
+      presentLocation: row.at
+        ? {
+            label: row.at,
+            // Mid-route when it is already moving, at the pickup point when it is not —
+            // a "current location" pin sitting on the origin of a parcel in transit
+            // contradicts the very screen it appears on.
+            lat: moving ? (pickup.lat + destination.lat) / 2 : pickup.lat,
+            lng: moving ? (pickup.lng + destination.lng) / 2 : pickup.lng,
+            at
+          }
+        : null,
       // In transit needs a timestamped entry: progress, the ETA and the "arriving"
       // stage are all worked out from when the leg actually started.
       history: moving
@@ -518,7 +558,7 @@ export function seedIfEmpty() {
             { status: STATUS.PENDING, at },
             { status: STATUS.ASSIGNED, at },
             { status: STATUS.PICKED_UP, at },
-            { status: STATUS.IN_TRANSIT, at: new Date(now - 15 * 60_000).toISOString() }
+            { status: STATUS.IN_TRANSIT, at: new Date(now - (row.startedMinsAgo ?? 15) * 60_000).toISOString() }
           ]
         : [{ status: row.status, at }]
     };
