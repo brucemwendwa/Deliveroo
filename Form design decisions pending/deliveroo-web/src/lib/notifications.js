@@ -66,3 +66,12 @@ export function notify(order, templateKey) {
 }
 
 export const outbox = readOutbox;
+
+/** §27 — the portal's demo reset empties the outbox with everything else. */
+export function clearOutbox() {
+  try {
+    localStorage.removeItem(OUTBOX_KEY);
+  } catch {
+    /* nothing to clear if storage is unavailable */
+  }
+}
