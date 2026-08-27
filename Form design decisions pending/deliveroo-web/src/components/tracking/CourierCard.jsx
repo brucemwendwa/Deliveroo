@@ -1,18 +1,31 @@
 import { STATUS, STATUS_LABEL } from '../../lib/orderStatus';
+import { DEFAULT_MODE, TRANSPORT, agentNounTitle } from '../../lib/transport';
 import { color, font, radius, statusTone } from '../../theme';
 import Icon from '../Icon';
+import TransportGlyph from '../transport/TransportGlyph';
 
 /**
  * The pickup agent (§14, §25). Before collection this is the Uber-style card — who is
  * coming, in what, how far out, how long — and after it, the person carrying the
  * parcel. Same facts either way; the ETA line simply stops being relevant once they
  * have it.
+ *
+ * On a motorbike delivery this is the rider, and the card says so: the bike's mark on
+ * the avatar, "Rider heading to pickup" on the status line. `arrived` splits ASSIGNED
+ * into on-the-way and waiting-at-the-door — see agentHasArrived in orderStatus.
  */
-export default function CourierCard({ courier, status, tone = 'dark' }) {
+export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arrived = false, tone = 'dark' }) {
   if (!courier) return null;
   const onDark = tone === 'dark';
   const accent = statusTone[status] || color.orange;
-  const approaching = status === STATUS.ASSIGNED && Number.isFinite(courier.etaMinutes);
+  const approaching = status === STATUS.ASSIGNED && !arrived && Number.isFinite(courier.etaMinutes);
+  // What they are actually riding or driving, which is the bike itself on a motorbike
+  // delivery and the collecting vehicle on every other mode.
+  const vehicleMode = courier.vehicleMode || (mode === TRANSPORT.MOTORBIKE ? TRANSPORT.MOTORBIKE : null);
+  const statusLine =
+    status === STATUS.ASSIGNED
+      ? `${agentNounTitle(mode)} ${arrived ? 'arrived at pickup' : 'heading to pickup'}`
+      : STATUS_LABEL[status] || status;
 
   const surface = onDark
     ? { background: 'rgba(243,241,237,.06)', border: '1px solid rgba(243,241,237,.1)' }
@@ -23,24 +36,43 @@ export default function CourierCard({ courier, status, tone = 'dark' }) {
   return (
     <div style={{ padding: '16px', borderRadius: radius.card, ...surface }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        <span
-          aria-hidden="true"
-          style={{
-            width: '52px',
-            height: '52px',
-            borderRadius: radius.pill,
-            background: color.orange,
-            color: color.ink,
-            fontFamily: font.display,
-            fontWeight: 700,
-            fontSize: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: 'none'
-          }}
-        >
-          {courier.initial || courier.name?.[0] || '?'}
+        <span aria-hidden="true" style={{ position: 'relative', flex: 'none' }}>
+          <span
+            style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: radius.pill,
+              background: color.orange,
+              color: color.ink,
+              fontFamily: font.display,
+              fontWeight: 700,
+              fontSize: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {courier.initial || courier.name?.[0] || '?'}
+          </span>
+          {vehicleMode && (
+            <span
+              style={{
+                position: 'absolute',
+                right: '-4px',
+                bottom: '-4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '25px',
+                height: '25px',
+                borderRadius: radius.pill,
+                background: onDark ? color.ink : color.white,
+                border: `1.5px solid ${onDark ? 'rgba(243,241,237,.24)' : 'rgba(17,17,17,.14)'}`
+              }}
+            >
+              <TransportGlyph mode={vehicleMode} size={15} color={color.orange} />
+            </span>
+          )}
         </span>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -126,7 +158,7 @@ export default function CourierCard({ courier, status, tone = 'dark' }) {
           }}
         >
           <span aria-hidden="true" style={{ width: '6px', height: '6px', borderRadius: '99px', background: accent }} />
-          {STATUS_LABEL[status] || status}
+          {statusLine}
         </span>
 
         {approaching && (
@@ -140,6 +172,12 @@ export default function CourierCard({ courier, status, tone = 'dark' }) {
               Arriving in <strong style={{ color: strong }}>{courier.etaMinutes} min</strong>
             </span>
           </>
+        )}
+
+        {status === STATUS.ASSIGNED && arrived && (
+          <span style={{ fontSize: '13.5px', color: quiet }}>
+            Waiting at <strong style={{ color: strong }}>pickup</strong> — hand the parcel over when you&apos;re ready.
+          </span>
         )}
       </div>
     </div>
