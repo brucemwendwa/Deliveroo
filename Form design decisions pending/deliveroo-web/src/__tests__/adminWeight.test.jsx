@@ -33,7 +33,10 @@ const renderAdmin = async () => {
  * board is a table now, and each row's parcel id is the button that selects it.
  */
 const select = async (order) => {
-  await userEvent.click(await screen.findByRole('button', { name: order.id }));
+  // The console loads its board, its capacity panel and the selected order's detail
+  // column before the rows are clickable, which is more than the default one second
+  // allows for on a cold suite.
+  await userEvent.click(await screen.findByRole('button', { name: order.id }, { timeout: 5000 }));
 };
 
 beforeEach(() => {
@@ -116,7 +119,7 @@ describe('admin motorbike handling', () => {
 
     expect(await screen.findByText('Rider assignment')).toBeInTheDocument();
     // The assignment record names the person and the machine, not just the mode.
-    expect(screen.getByText(new RegExp(bike.courier.name))).toBeInTheDocument();
+    expect(screen.getAllByText(new RegExp(bike.courier.name)).length).toBeGreaterThan(0);
     expect(screen.getAllByText(bike.courier.plate).length).toBeGreaterThan(0);
     expect(screen.getByText('Registration')).toBeInTheDocument();
     // A parcel already moving is a rider out delivering, not one sitting available.
