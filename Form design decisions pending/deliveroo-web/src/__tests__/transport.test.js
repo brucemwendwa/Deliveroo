@@ -29,10 +29,11 @@ const optionsFor = (pickup, destination, route, extra = {}) =>
   );
 
 describe('mode eligibility (§25)', () => {
-  it('offers road and drone across town, and explains the two it cannot offer', () => {
+  it('offers road, motorbike and drone across town, and explains the two it cannot offer', () => {
     const options = optionsFor(NAIROBI, WESTLANDS, localRoute);
 
     expect(options.ROAD.available).toBe(true);
+    expect(options.MOTORBIKE.available).toBe(true);
     expect(options.DRONE.available).toBe(true);
     expect(options.AIR.available).toBe(false);
     expect(options.SHIP.available).toBe(false);
@@ -42,12 +43,14 @@ describe('mode eligibility (§25)', () => {
     expect(options.SHIP.reason).toMatch(/sea freight starts at/i);
   });
 
-  it('offers road, air and sea to the coast, but not a drone', () => {
+  it('offers road, air and sea to the coast, but neither a bike nor a drone', () => {
     const options = optionsFor(NAIROBI, MOMBASA, coastRoute);
 
     expect(options.ROAD.available).toBe(true);
     expect(options.AIR.available).toBe(true);
     expect(options.SHIP.available).toBe(true);
+    expect(options.MOTORBIKE.available).toBe(false);
+    expect(options.MOTORBIKE.reason).toMatch(/covers routes up to 45 km/i);
     expect(options.DRONE.available).toBe(false);
     expect(options.DRONE.reason).toMatch(/covers routes up to 30 km/i);
     // Sea freight names the port it would sail from.
@@ -133,8 +136,11 @@ describe('multi-modal pricing (§25)', () => {
 
     expect(defaultModeFor(Object.values(light))).toBe(TRANSPORT.SHIP);
     expect(defaultModeFor(heavy)).toBe(TRANSPORT.SHIP);
-    // …and across town, road wins outright.
-    expect(defaultModeFor(Object.values(optionsFor(NAIROBI, WESTLANDS, localRoute)))).toBe(TRANSPORT.ROAD);
+    // …and across town a bike undercuts the van it replaces, which is the whole
+    // reason a small local parcel goes out on one.
+    expect(defaultModeFor(Object.values(optionsFor(NAIROBI, WESTLANDS, localRoute)))).toBe(
+      TRANSPORT.MOTORBIKE
+    );
   });
 
   it('charges more and arrives sooner on express', () => {
