@@ -3,7 +3,7 @@ import { MapContainer, Marker, Polyline, TileLayer, Tooltip, useMap, useMapEvent
 import L from 'leaflet';
 import { color, radius } from '../../theme';
 import { CITY_CENTER } from '../../api/geo';
-import { TRANSPORT, modeMeta } from '../../lib/transport';
+import { TRANSPORT, modeMeta, usesRoadNetwork } from '../../lib/transport';
 
 // §7 — the map is a primary component of the booking experience, so it gets a muted
 // basemap rather than default OSM tiles, and markers drawn from the site palette.
@@ -126,7 +126,9 @@ export default function RouteMap({
 }) {
   const points = [pickup, destination, courier, presentLocation].filter(Boolean).map((p) => [p.lat, p.lng]);
   const center = points[0] || [CITY_CENTER.lat, CITY_CENTER.lng];
-  const flies = mode && mode !== TRANSPORT.ROAD;
+  // Road and motorbike both drive the road network, so they get the router's real
+  // polyline; a flight, a sailing and a drone hop get an honest schematic arc.
+  const flies = Boolean(mode) && !usesRoadNetwork(mode);
 
   const path = useMemo(() => {
     if (flies && pickup && destination) return arcBetween(pickup, destination);
