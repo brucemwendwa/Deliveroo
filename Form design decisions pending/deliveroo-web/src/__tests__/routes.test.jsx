@@ -137,7 +137,7 @@ describe('routes', () => {
 
   it('sends a signed-out visitor to sign-in rather than to booking', async () => {
     const { store } = renderAt('/');
-    await userEvent.click(screen.getByRole('link', { name: 'Send a package' }));
+    await userEvent.click(screen.getByRole('link', { name: 'Request a Delivery' }));
 
     expect(store.getState().ui.authModal).toEqual({ open: true, returnTo: '/book' });
     expect(screen.queryByText('Where should we pick it up?')).not.toBeInTheDocument();
