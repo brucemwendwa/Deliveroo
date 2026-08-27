@@ -102,11 +102,11 @@ describe('landing page', () => {
     await userEvent.hover(screen.getByRole('button', { name: /Ada Lovelace/ }));
     expect(await screen.findByRole('menuitem', { name: 'My deliveries' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
-    // The dispatch console belongs to admins only.
-    expect(screen.queryByRole('menuitem', { name: 'Dispatch console' })).not.toBeInTheDocument();
+    // The admin portal belongs to staff only.
+    expect(screen.queryByRole('menuitem', { name: 'Admin portal' })).not.toBeInTheDocument();
   });
 
-  it('shows the dispatch console to an admin', async () => {
+  it('shows the admin portal to an admin', async () => {
     const store = makeStore();
     store.dispatch({
       type: 'auth/verifyOtp/fulfilled',
@@ -115,7 +115,7 @@ describe('landing page', () => {
     renderNav(store);
 
     await userEvent.hover(screen.getByRole('button', { name: /Grace/ }));
-    expect(await screen.findByRole('menuitem', { name: 'Dispatch console' })).toBeInTheDocument();
+    expect(await screen.findByRole('menuitem', { name: 'Admin portal' })).toBeInTheDocument();
   });
 
   it('closes an open nav menu on Escape', async () => {
