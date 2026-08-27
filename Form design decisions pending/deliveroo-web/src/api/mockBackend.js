@@ -300,6 +300,11 @@ export async function signOut() {
 
 export async function createOrder(draft) {
   await wait();
+  // §27 — bookings can be paused from the portal. Enforced here so the pause holds
+  // against a stale tab that still has the request button on screen.
+  if (!settingsNow().acceptingOrders) {
+    throw new Error('Deliveroo is not accepting new bookings right now. Please try again shortly.');
+  }
   const now = new Date().toISOString();
   const order = {
     id: newOrderId(),
@@ -369,9 +374,11 @@ export async function updateOrderStatus(id, status) {
     if (!allowedTransitions(order.status).includes(status)) {
       throw new Error(`Cannot move ${order.status} → ${status}.`);
     }
+    requirePermission(PERMISSION.DISPATCH);
     let next = stamp(order, status);
     if (status === STATUS.ASSIGNED && !next.courier) next = { ...next, courier: makeAgent(order) };
     notify(next, status);
+    record('ORDER_STATUS', { target: order.id, detail: `${order.status} → ${status}` });
     return next;
   });
 }
@@ -387,8 +394,7 @@ export async function updateOrderStatus(id, status) {
 export async function verifyWeight(id, { weightKg }) {
   await wait();
 
-  const session = read(SESSION_KEY, null);
-  if (!session?.isAdmin) throw new Error('Only staff can record a measured weight.');
+  const staff = requirePermission(PERMISSION.WEIGH_PARCEL);
 
   const measured = Number(weightKg);
   if (!Number.isFinite(measured) || measured <= 0) throw new Error('Enter the weight from the scale, in kilograms.');
@@ -402,7 +408,7 @@ export async function verifyWeight(id, { weightKg }) {
       ...order.parcel,
       verifiedWeightKg: Math.round(measured * 100) / 100,
       weighedAt: new Date().toISOString(),
-      weighedBy: session.email || session.phone || session.id
+      weighedBy: staff.email || staff.phone || staff.id
     };
     const next = {
       ...order,
@@ -414,6 +420,10 @@ export async function verifyWeight(id, { weightKg }) {
       updatedAt: new Date().toISOString()
     };
     notify(next, 'WEIGHT_VERIFIED');
+    record('WEIGHT_VERIFIED', {
+      target: order.id,
+      detail: `${order.parcel.weightKg} kg declared → ${parcel.verifiedWeightKg} kg measured`
+    });
     return next;
   });
 }
@@ -421,6 +431,7 @@ export async function verifyWeight(id, { weightKg }) {
 /** §18 — admin drags the courier marker. */
 export async function updateCourierPosition(id, { lat, lng }) {
   await wait(60);
+  requirePermission(PERMISSION.DISPATCH);
   return mutate(id, (order) => ({
     ...order,
     courier: order.courier ? { ...order.courier, lat, lng } : order.courier,
@@ -452,10 +463,10 @@ export async function assignAgent(id) {
  */
 export async function updatePresentLocation(id, { label, lat, lng } = {}) {
   await wait(60);
-  const session = read(SESSION_KEY, null);
-  if (!session?.isAdmin) throw new Error('Only staff can update a parcel location.');
+  requirePermission(PERMISSION.DISPATCH);
   if (!label?.trim()) throw new Error('Give the location a name.');
 
+  record('LOCATION_REPORTED', { target: id, detail: label.trim() });
   return mutate(id, (order) => ({
     ...order,
     presentLocation: {
@@ -481,13 +492,13 @@ export async function getFleet() {
 
 export async function setFleetStatus(mode, status) {
   await wait(60);
-  const session = read(SESSION_KEY, null);
-  if (!session?.isAdmin) throw new Error('Only staff can change transport availability.');
+  requirePermission(PERMISSION.SET_CAPACITY);
   if (!TRANSPORT[mode]) throw new Error(`Unknown transport mode ${mode}.`);
   if (!FLEET_STATUS[status]) throw new Error(`Unknown availability ${status}.`);
 
   const next = { ...DEFAULT_FLEET, ...read(FLEET_KEY, null), [mode]: status };
   write(FLEET_KEY, next);
+  record('CAPACITY_CHANGED', { target: mode, detail: status });
   return next;
 }
 
@@ -499,9 +510,9 @@ export async function setFleetStatus(mode, status) {
  */
 function assertOwner(order) {
   if (!order.userId) return;
-  const session = read(SESSION_KEY, null);
-  if (session?.isAdmin) return;
-  if (session?.id !== order.userId) {
+  const user = session();
+  if (isStaffRole(user?.role || (user?.isAdmin ? ROLE.ADMIN : ROLE.CUSTOMER))) return;
+  if (user?.id !== order.userId) {
     throw new Error('Only the customer who booked this delivery can change or cancel it.');
   }
 }
