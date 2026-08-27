@@ -14,13 +14,13 @@ const seeded = () => {
   return JSON.parse(localStorage.getItem('deliveroo.orders'));
 };
 
-/** Renders /admin with a real admin session already established (§18). */
+/** Renders the dispatch console with a real admin session already established (§18). */
 const renderAdmin = async () => {
   const store = makeStore();
   await store.dispatch(verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP }));
   render(
     <Provider store={store}>
-      <MemoryRouter initialEntries={['/admin']}>
+      <MemoryRouter initialEntries={['/admin/deliveries']}>
         <AppRoutes />
       </MemoryRouter>
     </Provider>
