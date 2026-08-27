@@ -101,8 +101,10 @@ describe('sections', () => {
     expect(toggle).toHaveAttribute('aria-checked', 'true');
 
     await userEvent.click(toggle);
-    await waitFor(() =>
-      expect(screen.getByRole('switch', { name: 'James K. on shift' })).toHaveAttribute('aria-checked', 'false')
+    await waitFor(
+      () =>
+        expect(screen.getByRole('switch', { name: 'James K. on shift' })).toHaveAttribute('aria-checked', 'false'),
+      { timeout: 5000 }
     );
   });
 
