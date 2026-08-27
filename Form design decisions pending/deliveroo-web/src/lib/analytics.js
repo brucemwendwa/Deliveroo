@@ -87,7 +87,16 @@ export function summarize(orders = []) {
   };
 }
 
-const dayKey = (ms) => new Date(ms).toISOString().slice(0, 10);
+/**
+ * A day is the operator's day. Keyed off local date parts rather than an ISO string,
+ * because ISO is UTC: in Nairobi that would file everything booked before 3am under
+ * the day before, and the last column of a 14-day chart would always read zero.
+ */
+const dayKey = (ms) => {
+  const date = new Date(ms);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${String(date.getDate()).padStart(2, '0')}`;
+};
 
 /**
  * Booked volume and revenue per day, oldest first, with empty days kept — a gap in a
