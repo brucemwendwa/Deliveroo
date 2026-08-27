@@ -677,10 +677,18 @@ const DEMO_PEOPLE = [
 ];
 
 function seedPeople() {
-  if (userDirectory().length) return;
+  const existing = userDirectory();
+  const known = new Set(existing.map((user) => user.id));
+  // Merged rather than written wholesale: whoever is already signed in got a record
+  // the moment they verified a code, and a seed that replaced the directory would
+  // hand their account back to the demo with whatever role the demo says.
+  const missing = DEMO_PEOPLE.filter((person) => !known.has(userIdFor(person.identifier)));
+  if (!missing.length) return;
+
   const now = Date.now();
-  saveUsers(
-    DEMO_PEOPLE.map((person, index) => {
+  saveUsers([
+    ...existing,
+    ...missing.map((person, index) => {
       const isEmail = person.identifier.includes('@');
       return {
         id: userIdFor(person.identifier),
@@ -694,7 +702,7 @@ function seedPeople() {
         lastSeenAt: new Date(now - (index + 1) * 3_600_000).toISOString()
       };
     })
-  );
+  ]);
 }
 
 /** Gives a fresh browser something for the admin console to show. */
