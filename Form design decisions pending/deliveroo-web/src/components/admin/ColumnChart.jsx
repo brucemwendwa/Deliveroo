@@ -12,8 +12,10 @@ import { color, ease, font } from '../../theme';
  */
 export default function ColumnChart({ data = [], height = 132, format = (value) => value, label = 'Volume' }) {
   const [hovered, setHovered] = useState(null);
+  // The floor of 1 keeps an all-zero series flat rather than dividing by nothing —
+  // and leaves peakIndex at -1, so a chart of nothing labels nothing.
   const peak = Math.max(1, ...data.map((row) => row.value));
-  const peakIndex = data.findIndex((row) => row.value === Math.max(...data.map((entry) => entry.value)));
+  const peakIndex = data.findIndex((row) => row.value === peak);
 
   return (
     <figure style={{ margin: 0 }}>
