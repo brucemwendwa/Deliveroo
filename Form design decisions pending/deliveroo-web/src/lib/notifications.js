@@ -3,11 +3,21 @@
 
 import { STATUS } from './orderStatus';
 import { formatKes } from './pricing';
+import { agentNoun, modeMeta, transportOf } from './transport';
 
 export const NOTIFICATION_TEMPLATES = {
-  [STATUS.ASSIGNED]: 'Your courier has been assigned.',
+  // §25 — the noun follows the vehicle: a motorbike delivery sends a rider, and the
+  // message a customer gets has to match the word the tracking screen is using.
+  [STATUS.ASSIGNED]: (order) => {
+    const mode = transportOf(order);
+    const noun = agentNoun(mode);
+    return order.courier?.name
+      ? `${order.courier.name} is your ${noun} and is on the way to collect your package.`
+      : `Your ${noun} has been assigned.`;
+  },
   [STATUS.PICKED_UP]: 'Your package has been picked up.',
-  [STATUS.IN_TRANSIT]: 'Your package is currently in transit.',
+  [STATUS.IN_TRANSIT]: (order) =>
+    `Your package is on its way by ${modeMeta(transportOf(order)).label.toLowerCase()}.`,
   [STATUS.DELIVERED]: 'Your package has been delivered.',
   DESTINATION_CHANGED: 'Your delivery location has been updated.',
   // §19 — the one template that has to quote figures: a fare that moved after
