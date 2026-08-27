@@ -96,7 +96,10 @@ export const TRANSPORT_MODES = [
     freightLabel: 'Motorbike delivery',
     tagline: 'Fast for small local deliveries',
     blurb: 'A rider on a bike, straight through the traffic. Small parcels, short hops, quickest way across a city.',
-    tariff: { base: 0, perKm: 28, perKg: 22, minimum: 150 },
+    // A flag-fall, like every other on-demand ride: the rider is dispatched to you
+    // whether the hop is one kilometre or ten. The per-km and per-kg rates then sit
+    // below road's, which is what puts a small local parcel on a bike.
+    tariff: { base: 60, perKm: 28, perKg: 22, minimum: 150 },
     speedKmh: 34,
     // The rider collects and goes — there is no depot leg to wait on.
     handlingSeconds: 5 * 60,
