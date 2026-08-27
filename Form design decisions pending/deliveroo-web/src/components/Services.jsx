@@ -4,36 +4,41 @@ import useStartBooking, { BOOKING_PATH } from '../hooks/useStartBooking';
 import { color, ease, eyebrow, font, layout, radius } from '../theme';
 import Icon from './Icon';
 
-// §4 — one feature service carries the photography, the rest are editorial rows.
-// Deliberately not four matching cards: the asymmetry is what stops this reading as
-// a template, and it keeps a single strong image instead of four competing ones.
-const FEATURE = {
-  number: '01',
-  icon: 'bolt',
-  title: 'Same-Day Delivery',
-  copy: 'Fast door-to-door delivery for packages that cannot wait.',
-  photo: 'https://images.pexels.com/photos/6869065/pexels-photo-6869065.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200',
-  alt: 'Courier handing over a parcel at a doorstep'
-};
-
+// §4 — four equal photo cards. Each service carries its own image so the grid reads
+// as a catalogue rather than one hero plus a list of runners-up. Photos are the local
+// mode shots, mapped to the service that actually uses that vehicle.
 const SERVICES = [
+  {
+    number: '01',
+    icon: 'bolt',
+    title: 'Same-Day Delivery',
+    copy: 'Fast door-to-door delivery for packages that cannot wait.',
+    photo: '/photos/hero-motorbike-city.jpeg',
+    alt: 'Rider on a motorbike carrying a delivery box through city traffic'
+  },
   {
     number: '02',
     icon: 'storefront',
     title: 'Business Delivery',
-    copy: 'Reliable courier solutions for businesses, shops and growing brands.'
+    copy: 'Reliable courier solutions for businesses, shops and growing brands.',
+    photo: '/photos/hero-truck-sunset.jpeg',
+    alt: 'Delivery truck on the road at sunset'
   },
   {
     number: '03',
     icon: 'inventory_2',
     title: 'Bulk & Package Delivery',
-    copy: 'Safe transportation for larger or multiple packages.'
+    copy: 'Safe transportation for larger or multiple packages.',
+    photo: '/photos/hero-ship-ocean.jpeg',
+    alt: 'Container ship carrying freight across open water'
   },
   {
     number: '04',
     icon: 'bolt',
     title: 'Express Courier',
-    copy: 'Priority delivery for time-sensitive packages.'
+    copy: 'Priority delivery for time-sensitive packages.',
+    photo: '/photos/hero-air-freight.jpeg',
+    alt: 'Cargo aircraft being loaded for an air freight run'
   }
 ];
 
@@ -44,103 +49,13 @@ const numeral = {
   color: color.muted
 };
 
-function FeatureService() {
-  const [hovered, bind] = useHover();
-  const startBooking = useStartBooking();
-  return (
-    <Link
-      to={BOOKING_PATH}
-      onClick={startBooking}
-      {...bind}
-      data-reveal=""
-      style={{
-        position: 'relative',
-        flex: '1 1 460px',
-        minWidth: 'min(100%,300px)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        minHeight: 'clamp(380px,44vw,540px)',
-        padding: 'clamp(22px,2.6vw,34px)',
-        borderRadius: radius.card,
-        overflow: 'hidden',
-        background: color.paperWarm,
-        color: color.white
-      }}
-    >
-      <img
-        src={FEATURE.photo}
-        alt={FEATURE.alt}
-        loading="lazy"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          transform: hovered ? 'scale(1.04)' : 'scale(1)',
-          transition: `transform .9s ${ease.out}`
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(to top, rgba(17,17,17,.88) 0%, rgba(17,17,17,.35) 45%, rgba(17,17,17,.05) 100%)'
-        }}
-      />
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-        <span style={{ ...numeral, color: 'rgba(255,255,255,.7)' }}>{FEATURE.number}</span>
-        <Icon name={FEATURE.icon} size={19} color={color.orange} />
-      </div>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '20px' }}>
-        <div style={{ flex: 1 }}>
-          <h3
-            style={{
-              margin: '0 0 10px',
-              fontFamily: font.display,
-              fontWeight: 700,
-              fontSize: 'clamp(30px,3.6vw,50px)',
-              lineHeight: 0.98,
-              textTransform: 'uppercase',
-              letterSpacing: '.005em',
-              transform: hovered ? 'translateX(4px)' : 'none',
-              transition: `transform .5s ${ease.out}`
-            }}
-          >
-            {FEATURE.title}
-          </h3>
-          <p style={{ margin: 0, maxWidth: '34ch', fontSize: '15.5px', lineHeight: 1.55, color: 'rgba(255,255,255,.78)', textWrap: 'pretty' }}>
-            {FEATURE.copy}
-          </p>
-        </div>
-        <span
-          aria-hidden="true"
-          style={{
-            flex: 'none',
-            width: '52px',
-            height: '52px',
-            borderRadius: radius.pill,
-            background: color.orange,
-            color: color.ink,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transform: hovered ? 'translate(4px,-4px)' : 'none',
-            transition: `transform .5s ${ease.out}`
-          }}
-        >
-          <Icon name="arrow_outward" size={22} />
-        </span>
-      </div>
-    </Link>
-  );
-}
+const restShadow = '0 1px 2px rgba(17,17,17,.05), 0 14px 28px -22px rgba(17,17,17,.4)';
+const liftShadow = '0 2px 4px rgba(17,17,17,.05), 0 30px 50px -30px rgba(17,17,17,.45)';
 
-function ServiceRow({ service, delay }) {
+function ServiceCard({ service, delay }) {
   const [hovered, bind] = useHover();
   const startBooking = useStartBooking();
+
   return (
     <Link
       to={BOOKING_PATH}
@@ -150,26 +65,63 @@ function ServiceRow({ service, delay }) {
       data-reveal-delay={delay}
       style={{
         display: 'flex',
-        alignItems: 'flex-start',
-        gap: 'clamp(14px,2vw,24px)',
-        padding: 'clamp(20px,2.4vw,30px) 0',
-        borderTop: `1px solid ${hovered ? 'rgba(17,17,17,.32)' : 'rgba(17,17,17,.13)'}`,
-        transition: 'border-color .32s',
-        color: color.ink
+        flexDirection: 'column',
+        borderRadius: radius.card,
+        overflow: 'hidden',
+        background: color.white,
+        color: color.ink,
+        boxShadow: hovered ? liftShadow : restShadow,
+        transform: hovered ? 'translateY(-6px)' : 'none',
+        transition: `transform .4s ${ease.out}, box-shadow .4s ${ease.out}`
       }}
     >
-      <span style={{ ...numeral, paddingTop: '7px', flex: 'none' }}>{service.number}</span>
-      <Icon name={service.icon} size={21} color={color.ink} style={{ flex: 'none', paddingTop: '3px' }} />
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ position: 'relative', aspectRatio: '16 / 11', overflow: 'hidden', background: color.paperWarm }}>
+        <img
+          src={service.photo}
+          alt={service.alt}
+          loading="lazy"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transform: hovered ? 'scale(1.05)' : 'scale(1)',
+            transition: `transform .9s ${ease.out}`
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: 'clamp(18px,1.9vw,26px)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+          <Icon name={service.icon} size={20} color={color.ink} />
+          <span style={numeral}>{service.number}</span>
+          <Icon
+            name="arrow_outward"
+            size={18}
+            color={hovered ? color.orange : 'rgba(17,17,17,.22)'}
+            style={{
+              marginLeft: 'auto',
+              transform: hovered ? 'translate(3px,-3px)' : 'none',
+              transition: `transform .4s ${ease.out}, color .3s`
+            }}
+          />
+        </div>
         <h3
           style={{
-            margin: '0 0 6px',
-            fontSize: 'clamp(19px,1.9vw,25px)',
+            margin: '0 0 8px',
+            fontSize: 'clamp(19px,1.7vw,23px)',
             fontWeight: 800,
             letterSpacing: '-.028em',
-            color: color.ink,
-            transform: hovered ? 'translateX(4px)' : 'none',
-            transition: `transform .4s ${ease.out}`
+            lineHeight: 1.15,
+            color: color.ink
           }}
         >
           {service.title}
@@ -178,17 +130,6 @@ function ServiceRow({ service, delay }) {
           {service.copy}
         </p>
       </div>
-      <Icon
-        name="arrow_outward"
-        size={20}
-        color={hovered ? color.orange : color.muted}
-        style={{
-          flex: 'none',
-          paddingTop: '4px',
-          transform: hovered ? 'translate(4px,-4px)' : 'none',
-          transition: `transform .4s ${ease.out}, color .3s`
-        }}
-      />
     </Link>
   );
 }
@@ -223,13 +164,17 @@ export default function Services() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(24px,3.4vw,56px)', alignItems: 'stretch' }}>
-          <FeatureService />
-          <div style={{ flex: '1 1 380px', minWidth: 'min(100%,280px)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            {SERVICES.map((service, index) => (
-              <ServiceRow key={service.number} service={service} delay={`${80 + index * 80}ms`} />
-            ))}
-          </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))',
+            gap: 'clamp(18px,2.2vw,28px)',
+            alignItems: 'stretch'
+          }}
+        >
+          {SERVICES.map((service, index) => (
+            <ServiceCard key={service.number} service={service} delay={`${80 + index * 80}ms`} />
+          ))}
         </div>
       </div>
     </section>
