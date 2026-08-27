@@ -6,6 +6,7 @@ import { selectAuditLog, selectCouriers, selectOnShiftCount } from '../../store/
 import { selectFleet } from '../../store/fleetSlice';
 import useNow from '../../hooks/useNow';
 import {
+  ISSUE,
   ISSUE_LABEL,
   ISSUE_NOTE,
   byMode,
@@ -133,7 +134,7 @@ export default function AdminOverview() {
                     </span>
                     <span style={{ display: 'block', marginTop: '2px', fontSize: '12.5px', color: color.muted }}>
                       {ISSUE_NOTE[issue]}
-                      {minutes ? ` (${minutes} min)` : ''}
+                      {minutes ? ` · ${minutes} min${issue === ISSUE.OVERDUE ? ' late' : ' ago'}` : ''}
                     </span>
                   </span>
                   <span
