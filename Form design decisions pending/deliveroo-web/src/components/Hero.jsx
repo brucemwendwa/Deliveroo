@@ -22,10 +22,13 @@ const pin = {
   boxShadow: '0 10px 20px -12px rgba(17,17,17,.55)'
 };
 
+// Each pin sits on one of WorldMap's route nodes (node/512 across, node/232 down),
+// so the modes read as stops on the drawn routes rather than as loose decoration.
 const MAP_PINS = [
   { icon: 'directions_boat', left: '28%', top: '48%' },
   { icon: 'local_shipping', left: '78%', top: '30%' },
-  { icon: 'flight', left: '55%', top: '62%' }
+  { icon: 'flight', left: '55%', top: '62%' },
+  { icon: 'drone', left: '66%', top: '32%' }
 ];
 
 export default function Hero() {
