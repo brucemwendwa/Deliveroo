@@ -49,6 +49,11 @@ const http = {
   listNotifications: () => api('/admin/notifications'),
   getSettings: () => api('/settings'),
   updateSettings: (patch) => api('/admin/settings', { method: 'PATCH', body: patch }),
+  // Demo-only: there is nothing to re-seed on a real database, and a button that
+  // wiped one would be the worst button in the product.
+  resetDemoData: () => {
+    throw new Error('Demo data can only be reset against the local demo backend.');
+  },
   changeDestination: (id, payload) => api(`/orders/${id}/destination`, { method: 'PATCH', body: payload }),
   cancelOrder: (id) => api(`/orders/${id}/cancel`, { method: 'POST' }),
 
@@ -89,6 +94,7 @@ export const listAuditLog = (...args) => impl.listAuditLog(...args);
 export const listNotifications = (...args) => impl.listNotifications(...args);
 export const getSettings = (...args) => impl.getSettings(...args);
 export const updateSettings = (...args) => impl.updateSettings(...args);
+export const resetDemoData = (...args) => impl.resetDemoData(...args);
 export const changeDestination = (...args) => impl.changeDestination(...args);
 export const cancelOrder = (...args) => impl.cancelOrder(...args);
 
