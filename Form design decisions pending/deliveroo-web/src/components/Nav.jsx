@@ -55,7 +55,7 @@ function ProfileMenu({ user }) {
 
   const items = [
     { label: 'My deliveries', to: '/orders' },
-    ...(user.isAdmin ? [{ label: 'Dispatch console', to: '/admin' }] : []),
+    ...(user.isAdmin ? [{ label: 'Admin portal', to: '/admin' }] : []),
     {
       label: 'Sign out',
       tone: 'quiet',
