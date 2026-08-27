@@ -226,13 +226,26 @@ dependable drone glyph and a missing ligature renders as the literal word "drone
 live stage of a timeline breathing, skeletons while a quote is worked out. Keyframes live in
 `global.css`, and a `prefers-reduced-motion` block turns all of it off.
 
-**The hero is fixed.** Its photo, crop maths, type and composition are approved and should
-not be redesigned. The crop: the photo sits in a stage sized `width:max(100cqw,150cqh)` /
-`height:max(100cqh,calc(100cqw / 1.5))`, reproducing `object-fit:cover` while keeping
-image-percentage coordinates usable for pinned overlays. The negative `marginLeft` clamp
-anchors the crop on the truck (27% across the image) so it stays framed on phones. Swapping
-in a photo with a different aspect ratio means changing the `1.5` (width ÷ height) and the
-`150cqh` (`1.5 × 100cqh`) to match.
+**The hero is a full-bleed carousel.** Three slides — drone, sea, air — crossfade over
+photography that fills the whole section (`clamp(560px,82vh,750px)` tall, no card, no
+gutter). `HERO_SLIDES` in `src/components/Hero.jsx` is the whole of the content: label,
+headline lines, copy, photo and the two `object-position` values that keep the subject in
+frame. `focus` is used above the 980px breakpoint, `focusNarrow` below it, because a phone
+crops the photo horizontally where a desktop crops it vertically — the second value is what
+stops the drone, the ship or the aircraft being cut out of its own slide. Photos live in
+`public/photos/hero-*.jpeg`.
+
+Each slide is its own absolutely positioned layer, so the change is an opacity crossfade
+with nothing to reflow, and the active photo drifts under `heroDrift` (`global.css`). Two
+light scrims carry the type: one across the frame on desktop, one up from the bottom edge on
+narrow, where the copy sits under the subject rather than on it. The carousel advances every
+`SLIDE_MS` (6s) and holds while the pointer or the keyboard is inside it, while the tab is in
+the background, and for `prefers-reduced-motion`. Indicators name the mode and fill over the
+slide's own duration; arrows are desktop-only, and a swipe does the same job on touch.
+
+The primary CTA is the approved goo pill, still routed through `useStartBooking`, so the hero
+uses the same booking gate as every other "request a delivery" in the app; the secondary one
+goes to `/#modes`.
 
 **Icons** are Material Symbols ligatures via `<Icon name="arrow_outward" />`; the font is
 loaded in `index.html`.
@@ -246,9 +259,9 @@ import { makeStore } from './store';
 render(<Provider store={makeStore()}><MemoryRouter><Nav /></MemoryRouter></Provider>);
 ```
 
-Ten suites: `pricing` · `transport` · `orderStatus` · `mockBackend` (the rules that are
-actually enforced) and `App` · `routes` · `booking` · `adminWeight` · `experience` · `uiSlice`
-(what the screens do with them). `experience.test.jsx` covers the two things that are hard to
+Eleven suites: `pricing` · `transport` · `orderStatus` · `mockBackend` (the rules that are
+actually enforced) and `App` · `routes` · `booking` · `adminWeight` · `experience` · `hero` ·
+`uiSlice` (what the screens do with them). `experience.test.jsx` covers the two things that are hard to
 eyeball — the dispatch wait resolving into an assigned agent, and the narrow-viewport layout.
 It also covers the customer dashboard, whose active-delivery panel is otherwise only reachable
 with a signed-in session and a live order. It sets `window.innerWidth` rather than dispatching
