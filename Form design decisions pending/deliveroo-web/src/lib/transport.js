@@ -91,7 +91,7 @@ export const TRANSPORT_MODES = [
   {
     id: TRANSPORT.MOTORBIKE,
     label: 'Motorbike',
-    glyph: '\ud83c\udfcd\ufe0f',
+    glyph: '🏍️',
     icon: 'two_wheeler',
     freightLabel: 'Motorbike delivery',
     tagline: 'Fast for small local deliveries',
