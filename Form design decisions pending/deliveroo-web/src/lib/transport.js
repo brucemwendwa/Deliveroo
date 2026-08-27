@@ -8,6 +8,7 @@
 
 export const TRANSPORT = {
   ROAD: 'ROAD',
+  MOTORBIKE: 'MOTORBIKE',
   AIR: 'AIR',
   SHIP: 'SHIP',
   DRONE: 'DRONE'
@@ -56,6 +57,13 @@ export const priorityOption = (id) =>
 // where the same van is running a scheduled route rather than a dedicated errand,
 // so anything past the first 50 km is charged at the line-haul rate instead.
 //
+// Motorbike is the other road-network vehicle, and it is cheaper than the van on
+// every count that matters in a city: less fuel, one rider, no loading bay. It also
+// beats the van on time, because a bike filters through traffic the van sits in —
+// which is why it takes the router's measured driving time and scales it down rather
+// than inventing an average speed of its own. What it cannot do is carry much, or go
+// far: past roughly an hour in the saddle a parcel belongs in a van.
+//
 // The other three are flat per-km: they are shared-capacity freight, not a vehicle
 // hired by the parcel. That is also why sea freight undercuts road over distance
 // while taking a day, and why air costs multiples of both.
@@ -73,7 +81,33 @@ export const TRANSPORT_MODES = [
     tariff: { base: 0, perKm: 40, perKg: 50, minimum: 200, cityKm: 50, lineHaulPerKm: 6 },
     speedKmh: 45,
     handlingSeconds: 15 * 60,
+    // Drives the road network, so it uses the router's own driving time (§25) and
+    // draws the real polyline rather than a schematic arc.
+    roadNetwork: true,
+    agentNoun: 'pickup agent',
+    capacity: { units: 38, offline: 5 },
     limits: { maxDistanceKm: 1500, maxWeightKg: 2000 }
+  },
+  {
+    id: TRANSPORT.MOTORBIKE,
+    label: 'Motorbike',
+    glyph: '\ud83c\udfcd\ufe0f',
+    icon: 'two_wheeler',
+    freightLabel: 'Motorbike delivery',
+    tagline: 'Fast for small local deliveries',
+    blurb: 'A rider on a bike, straight through the traffic. Small parcels, short hops, quickest way across a city.',
+    tariff: { base: 0, perKm: 28, perKg: 22, minimum: 150 },
+    speedKmh: 34,
+    // The rider collects and goes — there is no depot leg to wait on.
+    handlingSeconds: 5 * 60,
+    roadNetwork: true,
+    // A bike filters past the queue the van joins, so it covers the same measured
+    // route in appreciably less time. Applied to the router's figure, not instead
+    // of it: the road is still the road.
+    trafficFactor: 0.72,
+    agentNoun: 'rider',
+    capacity: { units: 40, offline: 4 },
+    limits: { maxDistanceKm: 45, maxWeightKg: 20, maxLongestSideCm: 70 }
   },
   {
     id: TRANSPORT.AIR,
@@ -86,6 +120,8 @@ export const TRANSPORT_MODES = [
     tariff: { base: 1500, perKm: 11, perKg: 240, minimum: 2000 },
     speedKmh: 700,
     handlingSeconds: 95 * 60,
+    agentNoun: 'pickup agent',
+    capacity: { units: 12, offline: 2 },
     limits: { minDistanceKm: 120, maxWeightKg: 250 }
   },
   {
@@ -99,6 +135,8 @@ export const TRANSPORT_MODES = [
     tariff: { base: 900, perKm: 4.5, perKg: 28, minimum: 1400 },
     speedKmh: 32,
     handlingSeconds: 10 * 3600,
+    agentNoun: 'pickup agent',
+    capacity: { units: 8, offline: 1 },
     limits: { minDistanceKm: 200, requiresPort: true }
   },
   {
@@ -112,6 +150,8 @@ export const TRANSPORT_MODES = [
     tariff: { base: 350, perKm: 60, perKg: 110, minimum: 700 },
     speedKmh: 48,
     handlingSeconds: 8 * 60,
+    agentNoun: 'pickup agent',
+    capacity: { units: 14, offline: 3 },
     limits: { maxDistanceKm: 30, maxWeightKg: 5, maxLongestSideCm: 45 }
   }
 ];
@@ -120,6 +160,28 @@ export const modeMeta = (mode) =>
   TRANSPORT_MODES.find((entry) => entry.id === mode) || TRANSPORT_MODES[0];
 
 export const modeLabel = (mode) => modeMeta(mode).label;
+
+/**
+ * Whether the vehicle actually drives the road network. Road and motorbike do, so
+ * they follow the router's measured line and its measured time; a flight, a sailing
+ * and a drone hop do not, and drawing them on the road would be a lie on the one
+ * screen that has to be true.
+ */
+export const usesRoadNetwork = (mode) => Boolean(modeMeta(mode).roadNetwork);
+
+/**
+ * What we call the person coming to collect the parcel. A motorbike delivery sends a
+ * rider — that is the word the customer is expecting from every other on-demand app —
+ * while everything else sends a pickup agent. Defined here so "Finding a rider near
+ * you…", the timeline and the notifications cannot drift apart.
+ */
+export const agentNoun = (mode) => modeMeta(mode).agentNoun || 'pickup agent';
+
+/** Same word, sentence-initial: "Rider assigned." */
+export const agentNounTitle = (mode) => {
+  const noun = agentNoun(mode);
+  return noun.charAt(0).toUpperCase() + noun.slice(1);
+};
 
 /** Mode of an order, defaulting to road — orders placed before §25 have no mode. */
 export const transportOf = (order) => order?.transport?.mode || DEFAULT_MODE;
@@ -366,8 +428,8 @@ export function quoteTransport({
  * mode needs at either end (a flight is 45 minutes; getting the parcel through both
  * airports is not).
  *
- * Road prefers the router's own driving time when we have it — a measured route beats
- * an average speed.
+ * Road and motorbike prefer the router's own driving time when we have it — a measured
+ * route beats an average speed — and the bike scales that figure by its traffic factor.
  */
 export function estimateDurationSeconds({
   mode = DEFAULT_MODE,
@@ -379,9 +441,12 @@ export function estimateDurationSeconds({
   const meta = modeMeta(mode);
   const tier = priorityOption(priority);
 
+  // A road-network vehicle prefers the router's own driving time — a measured route
+  // beats an average speed. The bike then scales it, because it does not sit in the
+  // queue the van does.
   const inMotion =
-    mode === TRANSPORT.ROAD && Number.isFinite(durationSeconds) && durationSeconds > 0
-      ? durationSeconds
+    meta.roadNetwork && Number.isFinite(durationSeconds) && durationSeconds > 0
+      ? durationSeconds * (meta.trafficFactor ?? 1)
       : (distanceKm / meta.speedKmh) * 3600;
 
   const total = (inMotion + meta.handlingSeconds) * tier.timeFactor + (busy ? BUSY_DELAY_SECONDS : 0);
