@@ -25,6 +25,7 @@ import {
 } from '../../store/bookingSlice';
 import { selectIsSignedIn, selectUser } from '../../store/authSlice';
 import { fetchFleet } from '../../store/fleetSlice';
+import { selectSettings } from '../../store/adminSlice';
 import { openAuthModal, showToast } from '../../store/uiSlice';
 import { reverseGeocode } from '../../api/geo';
 import { formatDuration, formatKes, formatKm } from '../../lib/pricing';
@@ -67,6 +68,7 @@ export default function BookDelivery() {
   const defaultMode = useSelector(selectDefaultMode);
   const signedIn = useSelector(selectIsSignedIn);
   const user = useSelector(selectUser);
+  const { acceptingOrders } = useSelector(selectSettings);
   const narrow = useSelector((state) => state.ui.narrow);
 
   const { step, pickup, destination, route, routeStatus, parcel, transport, sender, recipient, submitStatus } = booking;
@@ -169,6 +171,33 @@ export default function BookDelivery() {
             Tell us where to pick it up, where to take it, and how fast you need it there.
             We&apos;ll come and collect it — you don&apos;t need to work out the logistics.
           </p>
+
+          {/* §27 — staff can pause bookings platform-wide. The backend refuses the
+              request either way; this is so nobody fills in four steps to find out. */}
+          {!acceptingOrders && (
+            <p
+              role="status"
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                margin: '22px 0 0',
+                padding: '14px 18px',
+                borderRadius: '16px',
+                border: `1.5px solid ${color.orangeDeep}`,
+                background: 'rgba(196,112,15,.1)',
+                fontSize: '14.5px',
+                lineHeight: 1.55,
+                color: color.ink
+              }}
+            >
+              <Icon name="pause_circle" size={19} color={color.orangeDeep} style={{ flex: 'none', marginTop: '1px' }} />
+              <span>
+                We have paused new pickups for the moment. You can still work out a price here — the
+                request itself will be turned away until we are taking bookings again.
+              </span>
+            </p>
+          )}
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(24px,3.4vw,56px)', alignItems: 'flex-start' }}>
