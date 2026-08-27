@@ -99,8 +99,6 @@ export const SECTIONS = [
   }
 ];
 
-export const sectionById = (id) => SECTIONS.find((section) => section.id === id) || SECTIONS[0];
-
 /** The section a URL is on. Longest match wins, so /admin never shadows /admin/x. */
 export const sectionForPath = (pathname) =>
   [...SECTIONS]
