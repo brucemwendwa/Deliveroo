@@ -1,5 +1,7 @@
+import { DEFAULT_MODE, TRANSPORT, agentNoun } from '../../lib/transport';
 import { color, eyebrow, font, radius } from '../../theme';
 import Icon from '../Icon';
+import TransportGlyph from '../transport/TransportGlyph';
 
 /**
  * §25 — the seconds between requesting a pickup and being matched with an agent.
@@ -7,11 +9,20 @@ import Icon from '../Icon';
  * A spinner would say "loading"; this says "we are out looking for someone near you",
  * which is what is actually happening and what makes the product feel on-demand rather
  * than like a form that has been submitted.
+ *
+ * The noun follows the vehicle: a motorbike delivery is looking for a *rider*, which
+ * is the word every other on-demand app uses and the word the timeline, the card and
+ * the notification will all use next.
  */
-export default function FindingAgent({ pickupLabel, tone = 'dark' }) {
+export default function FindingAgent({ pickupLabel, mode = DEFAULT_MODE, tone = 'dark' }) {
   const onDark = tone === 'dark';
   const strong = onDark ? color.paper : color.ink;
   const quiet = onDark ? 'rgba(243,241,237,.66)' : color.muted;
+  const noun = agentNoun(mode);
+  // On a motorbike delivery the rider *is* the vehicle, so the bike is the honest
+  // mark to search with. On the others we are looking for whoever collects the parcel
+  // before it flies or sails, so it stays a person.
+  const rider = mode === TRANSPORT.MOTORBIKE;
 
   return (
     <div
@@ -64,14 +75,14 @@ export default function FindingAgent({ pickupLabel, tone = 'dark' }) {
             color: color.ink
           }}
         >
-          <Icon name="person_search" size={21} />
+          {rider ? <TransportGlyph mode={mode} size={22} color={color.ink} /> : <Icon name="person_search" size={21} />}
         </span>
       </span>
 
       <div style={{ minWidth: 0 }}>
         <div style={{ ...eyebrow, color: color.orange, marginBottom: '6px' }}>Dispatching</div>
         <div style={{ fontFamily: font.body, fontSize: '16.5px', fontWeight: 800, letterSpacing: '-.02em', color: strong }}>
-          Finding a pickup agent near you…
+          Finding a {noun} near you…
         </div>
         {pickupLabel && (
           <div style={{ marginTop: '4px', fontSize: '13.5px', lineHeight: 1.5, color: quiet }}>
