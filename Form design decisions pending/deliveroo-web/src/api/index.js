@@ -34,6 +34,21 @@ const http = {
     api('/admin/transport/availability', { method: 'PATCH', body: { mode, status } }),
   // Staff-only on the server. The console gates the button, the route gates the data.
   verifyWeight: (id, payload) => api(`/admin/orders/${id}/weight`, { method: 'PATCH', body: payload }),
+
+  // §27 — the rest of the admin portal. Everything under /admin is staff-only, and
+  // the three account routes are administrator-only; see src/lib/roles.js for the
+  // grant table the Flask side has to mirror.
+  listUsers: () => api('/admin/users'),
+  setUserRole: (id, role) => api(`/admin/users/${id}/role`, { method: 'PATCH', body: { role } }),
+  setUserSuspended: (id, suspended) =>
+    api(`/admin/users/${id}/suspension`, { method: 'PATCH', body: { suspended } }),
+  listCouriers: () => api('/admin/couriers'),
+  setCourierShift: (id, onShift) =>
+    api(`/admin/couriers/${id}/shift`, { method: 'PATCH', body: { onShift } }),
+  listAuditLog: () => api('/admin/audit'),
+  listNotifications: () => api('/admin/notifications'),
+  getSettings: () => api('/settings'),
+  updateSettings: (patch) => api('/admin/settings', { method: 'PATCH', body: patch }),
   changeDestination: (id, payload) => api(`/orders/${id}/destination`, { method: 'PATCH', body: payload }),
   cancelOrder: (id) => api(`/orders/${id}/cancel`, { method: 'POST' }),
 
@@ -64,11 +79,21 @@ export const updatePresentLocation = (...args) => impl.updatePresentLocation(...
 export const getFleet = (...args) => impl.getFleet(...args);
 export const setFleetStatus = (...args) => impl.setFleetStatus(...args);
 export const verifyWeight = (...args) => impl.verifyWeight(...args);
+
+export const listUsers = (...args) => impl.listUsers(...args);
+export const setUserRole = (...args) => impl.setUserRole(...args);
+export const setUserSuspended = (...args) => impl.setUserSuspended(...args);
+export const listCouriers = (...args) => impl.listCouriers(...args);
+export const setCourierShift = (...args) => impl.setCourierShift(...args);
+export const listAuditLog = (...args) => impl.listAuditLog(...args);
+export const listNotifications = (...args) => impl.listNotifications(...args);
+export const getSettings = (...args) => impl.getSettings(...args);
+export const updateSettings = (...args) => impl.updateSettings(...args);
 export const changeDestination = (...args) => impl.changeDestination(...args);
 export const cancelOrder = (...args) => impl.cancelOrder(...args);
 
 export const seedIfEmpty = (...args) => impl.seedIfEmpty(...args);
 export const subscribe = (...args) => impl.subscribe(...args);
 
-export { MOCK_OTP } from './mockBackend';
+export { MOCK_OTP, DEFAULT_SETTINGS } from './mockBackend';
 export * from './geo';
