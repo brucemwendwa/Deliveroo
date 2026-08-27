@@ -32,6 +32,7 @@ export const setCourierShift = failable('admin/setCourierShift', ({ id, onShift 
   apiClient.setCourierShift(id, onShift)
 );
 export const updateSettings = failable('admin/updateSettings', (patch) => apiClient.updateSettings(patch));
+export const resetDemoData = failable('admin/resetDemoData', () => apiClient.resetDemoData());
 
 const { DEFAULT_SETTINGS } = apiClient;
 
