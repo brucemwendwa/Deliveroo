@@ -17,6 +17,7 @@ import StatTile from '../components/ui/StatTile';
 import Icon from '../components/Icon';
 import ActiveDelivery from '../components/orders/ActiveDelivery';
 import DeliveryCard from '../components/orders/DeliveryCard';
+import TransportGlyph from '../components/transport/TransportGlyph';
 
 const STATUS_FILTERS = [
   { id: 'ALL', label: 'All' },
@@ -89,7 +90,7 @@ export default function MyOrders() {
         <EmptyState
           icon="local_shipping"
           title="Nothing on the road yet"
-          body="Tell us where to collect a parcel and where it's going. We'll come and get it — road, air, sea or drone, whichever suits the route."
+          body="Tell us where to collect a parcel and where it's going. We'll come and get it — motorbike, road, air, sea or drone, whichever suits the route."
           action={
             <Button as={Link} to="/book" icon="arrow_forward">
               Request your first delivery
@@ -174,16 +175,25 @@ export default function MyOrders() {
             <Chip active={mode === 'ALL'} onClick={() => setMode('ALL')} style={{ minHeight: '40px', fontSize: '13.5px' }}>
               Every mode
             </Chip>
-            {TRANSPORT_MODES.map((meta) => (
-              <Chip
-                key={meta.id}
-                active={mode === meta.id}
-                onClick={() => setMode(meta.id)}
-                style={{ minHeight: '40px', fontSize: '13.5px', gap: '8px' }}
-              >
-                {meta.label}
-              </Chip>
-            ))}
+            {TRANSPORT_MODES.map((meta) => {
+              const on = mode === meta.id;
+              return (
+                <Chip
+                  key={meta.id}
+                  active={on}
+                  onClick={() => setMode(meta.id)}
+                  style={{ minHeight: '40px', fontSize: '13.5px', gap: '8px' }}
+                >
+                  <TransportGlyph
+                    mode={meta.id}
+                    size={17}
+                    color={on ? color.orange : color.orangeDeep}
+                    style={{ marginRight: '7px' }}
+                  />
+                  {meta.label}
+                </Chip>
+              );
+            })}
           </div>
 
           {filtered.length === 0 ? (
