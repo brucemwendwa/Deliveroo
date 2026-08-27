@@ -14,19 +14,21 @@ const seeded = () => {
   return JSON.parse(localStorage.getItem('deliveroo.orders'));
 };
 
-/** Renders the dispatch console with a real admin session already established (§18). */
-const renderAdmin = async () => {
+/** Renders a portal section with a real admin session already established (§18). */
+const renderPortal = async (path = '/admin/deliveries') => {
   const store = makeStore();
   await store.dispatch(verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP }));
   render(
     <Provider store={store}>
-      <MemoryRouter initialEntries={['/admin/deliveries']}>
+      <MemoryRouter initialEntries={[path]}>
         <AppRoutes />
       </MemoryRouter>
     </Provider>
   );
   return store;
 };
+
+const renderAdmin = () => renderPortal('/admin/deliveries');
 
 /**
  * The console defaults to the first order; click through to a specific one. The
@@ -128,7 +130,8 @@ describe('admin motorbike handling', () => {
 
   it('counts motorbike capacity alongside every other mode', async () => {
     seeded();
-    await renderAdmin();
+    // §27 — availability moved out of the board and into its own portal section.
+    await renderPortal('/admin/capacity');
 
     expect(await screen.findByText('Motorbike fleet')).toBeInTheDocument();
     // Every mode reports the same three figures, motorbike included.
