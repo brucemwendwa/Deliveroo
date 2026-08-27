@@ -173,6 +173,53 @@ describe('multi-modal pricing (§25)', () => {
   });
 });
 
+describe('motorbike (§25)', () => {
+  it('undercuts the van on the same roads, and beats it on time', () => {
+    const options = optionsFor(NAIROBI, WESTLANDS, localRoute);
+
+    // The reason a small local parcel goes out on a bike at all: cheaper to run and
+    // it filters past the traffic the van sits in.
+    expect(options.MOTORBIKE.quote.total).toBeLessThan(options.ROAD.quote.total);
+    expect(options.MOTORBIKE.quote.durationSeconds).toBeLessThan(options.ROAD.quote.durationSeconds);
+    // …and cheaper than flying it over the traffic, which is the other local option.
+    expect(options.MOTORBIKE.quote.total).toBeLessThan(options.DRONE.quote.total);
+  });
+
+  it('quotes a flag-fall, a distance charge and a weight charge', () => {
+    // §25 — the quote screen prints all three lines, so all three have to exist.
+    const quoted = quoteTransport({ mode: TRANSPORT.MOTORBIKE, weightKg: 2, distanceKm: 12 });
+    expect(quoted.baseFare).toBe(60);
+    expect(quoted.distanceCost).toBe(12 * 28);
+    expect(quoted.weightCost).toBe(2 * 22);
+    expect(quoted.total).toBe(440);
+  });
+
+  it('turns the bike away on distance, on weight and on size, separately', () => {
+    const far = modeAvailability({ mode: TRANSPORT.MOTORBIKE, distanceKm: 485, weightKg: 2 });
+    expect(far.available).toBe(false);
+    expect(far.reason).toMatch(/covers routes up to 45 km/i);
+
+    const heavy = modeAvailability({ mode: TRANSPORT.MOTORBIKE, distanceKm: 8, weightKg: 34 });
+    expect(heavy.available).toBe(false);
+    expect(heavy.reason).toMatch(/up to 20 kg/i);
+
+    const bulky = modeAvailability({ mode: TRANSPORT.MOTORBIKE, distanceKm: 8, weightKg: 2, longestSideCm: 95 });
+    expect(bulky.available).toBe(false);
+    expect(bulky.reason).toMatch(/70 cm on the longest side/i);
+  });
+
+  it('scales the measured driving time rather than inventing a speed', () => {
+    // It drives the same road the van does, so it starts from the same measurement.
+    const bike = estimateDurationSeconds({ mode: TRANSPORT.MOTORBIKE, distanceKm: 12.4, durationSeconds: 2100 });
+    expect(bike).toBe(Math.round(2100 * 0.72 + 5 * 60));
+
+    // Road's own figure is untouched by that change.
+    expect(estimateDurationSeconds({ mode: TRANSPORT.ROAD, distanceKm: 12.4, durationSeconds: 2100 })).toBe(
+      2100 + 15 * 60
+    );
+  });
+});
+
 describe('parcel measurements', () => {
   it('charges the space a light, bulky parcel occupies', () => {
     expect(volumetricWeightKg({ lengthCm: 60, widthCm: 40, heightCm: 30 })).toBe(14.4);
