@@ -393,6 +393,13 @@ Real payments, real email delivery (§19 is scaffolding only), Google sign-in, a
 apps. Notification templates exist in `src/lib/notifications.js` and write to a local outbox,
 ready to be pointed at a mail service.
 
+The courier roster is a prototype too: these are people dispatch matches to parcels, not
+employees the portal rosters shifts for, and a shift toggle only decides who is handed work
+next. The audit trail is capped at the last 300 actions because it lives in a browser; a real
+deployment keeps it server-side and keeps it for good. **Reset demo data** exists only against
+the local backend — there is nothing to re-seed on a real database, and a button that wiped one
+would be the worst button in the product.
+
 The transport availability console is a **prototype interface over partner capacity Deliveroo
 would book into** — it does not imply owned aircraft, ships or drones, and the wording on that
 panel is deliberate. Air and sea routes are drawn as schematic arcs rather than real flight or
