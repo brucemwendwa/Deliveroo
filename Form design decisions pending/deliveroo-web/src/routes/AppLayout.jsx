@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loadSession } from '../store/authSlice';
 import { clearFleetError, fetchFleet, selectFleetError } from '../store/fleetSlice';
 import { clearOrderError, selectOrdersError } from '../store/ordersSlice';
+import { clearAdminError, fetchSettings, selectAdminError } from '../store/adminSlice';
 import { showToast } from '../store/uiSlice';
 import useNarrowViewport from '../hooks/useNarrowViewport';
 import { seedIfEmpty } from '../api';
@@ -44,7 +45,8 @@ export default function AppLayout() {
   // inventing its own error strip — or worse, failing silently.
   const orderError = useSelector(selectOrdersError);
   const fleetError = useSelector(selectFleetError);
-  const failure = orderError || fleetError;
+  const adminError = useSelector(selectAdminError);
+  const failure = orderError || fleetError || adminError;
   useNarrowViewport();
 
   useEffect(() => {
@@ -53,14 +55,18 @@ export default function AppLayout() {
     // Cleared once shown, or the same failure would toast again on the next render.
     dispatch(clearOrderError());
     dispatch(clearFleetError());
+    dispatch(clearAdminError());
   }, [dispatch, failure]);
 
   useEffect(() => {
     dispatch(loadSession());
     seedIfEmpty();
     // Transport availability gates what booking may offer, so it is loaded once at
-    // the top rather than by each screen that happens to need it.
+    // the top rather than by each screen that happens to need it. Platform settings
+    // are read here for the same reason: a paused platform has to be visible on the
+    // booking screen, not only inside the portal that paused it.
     dispatch(fetchFleet());
+    dispatch(fetchSettings());
   }, [dispatch]);
 
   // The booking flow carries its own fixed quote bar; two stacked bars on a phone is
