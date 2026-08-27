@@ -148,6 +148,27 @@ describe('mock backend', () => {
       });
     });
 
+    it('sends a rider, on a bike, to a motorbike delivery', async () => {
+      // §25 — the bike carries this one the whole way, so the agent who collects it
+      // has to be someone who can. Run it enough times to catch a random pick that
+      // reaches outside the rider pool.
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        const order = await createOrder({ ...draft, transport: { mode: TRANSPORT.MOTORBIKE } });
+        const { courier } = await assignAgent(order.id);
+        expect(courier.vehicleMode).toBe(TRANSPORT.MOTORBIKE);
+      }
+    });
+
+    it('prices and stores a motorbike delivery as one', async () => {
+      const order = await createOrder({ ...draft, transport: { mode: TRANSPORT.MOTORBIKE } });
+
+      expect(order.transport.mode).toBe(TRANSPORT.MOTORBIKE);
+      // The bike's own tariff, not the van's — road would charge 650 for this parcel.
+      expect(order.pricing.mode).toBe(TRANSPORT.MOTORBIKE);
+      expect(order.pricing.total).toBeLessThan(650);
+      expect(order.pricing.baseFare).toBe(60);
+    });
+
     it('is idempotent, so a retry or a second tab cannot double-assign', async () => {
       const order = await createOrder(draft);
       const first = await assignAgent(order.id);
