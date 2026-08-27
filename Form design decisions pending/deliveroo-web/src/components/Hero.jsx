@@ -20,16 +20,16 @@ const FADE_MS = 1100;
 const MODES_PATH = '/#modes';
 
 /**
- * The four hero slides, in the order they play. `focus` is the object-position used
+ * The five hero slides, in the order they play. `focus` is the object-position used
  * on the wide desktop crop, `focusNarrow` the one used under the 980px breakpoint —
  * a phone crops the photo horizontally instead of vertically, and each subject needs
  * its own anchor to survive that. Nothing here is derived from the transport
  * catalogue on purpose: this is hero copy, not the modes the pricing knows about.
  *
  * Two optional fields: `align: 'right'` moves the copy to the other side of the frame
- * on desktop (the motorbike photo puts its rider under the usual text column, and
- * there is no horizontal slack to crop him out of the way), and `meta` adds the small
- * glass chip of at-a-glance facts under the copy.
+ * on desktop (the motorbike and truck photos put their subject under the usual text
+ * column, and there is no horizontal slack to crop it out of the way), and `meta` adds
+ * the small glass chip of at-a-glance facts under the copy.
  */
 export const HERO_SLIDES = [
   {
@@ -58,6 +58,21 @@ export const HERO_SLIDES = [
     focusNarrow: '28% 50%',
     mode: TRANSPORT.MOTORBIKE,
     meta: ['Fast local delivery', 'ETA ~20–40 min']
+  },
+  {
+    id: 'ROAD',
+    label: 'Road Delivery',
+    tab: 'Road',
+    headline: ['Every parcel.', 'Every route.'],
+    copy: 'Vans and trucks on the road network — door to door, town to town.',
+    photo: '/photos/hero-truck-sunset.jpeg',
+    alt: 'Freight truck on an open road at sunset',
+    // The trailer fills the left half of the frame and the desktop crop is vertical,
+    // so it cannot be moved aside; the copy takes the other side instead. On a phone
+    // the crop is horizontal and is anchored on the truck.
+    align: 'right',
+    focus: '50% 66%',
+    focusNarrow: '34% 50%'
   },
   {
     id: 'AIR',
@@ -412,7 +427,7 @@ export default function Hero() {
             <img
               src={item.photo}
               alt={active ? item.alt : ''}
-              // Every slide loads up front: all three are above the fold, and a lazy
+              // Every slide loads up front: they are all above the fold, and a lazy
               // one would hand its turn a blank frame.
               loading="eager"
               decoding="async"
