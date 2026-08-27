@@ -30,10 +30,17 @@ export const STATUS_LABEL = {
   [STATUS.CANCELLED]: 'Cancelled'
 };
 
-/** Timeline wording (§13) — past tense, customer-facing. */
+/**
+ * Timeline wording (§13) — past tense, customer-facing.
+ *
+ * Note that the tracking timeline itself does *not* read from here: since §25 its
+ * rows are finer than the statuses and their wording follows the transport mode, so
+ * they are built by journeyStages() below. This stays as the plain per-status
+ * phrasing for anywhere that wants one line per state.
+ */
 export const TIMELINE_LABEL = {
   [STATUS.PENDING]: 'Order received',
-  [STATUS.ASSIGNED]: 'Courier assigned',
+  [STATUS.ASSIGNED]: 'Pickup agent assigned',
   [STATUS.PICKED_UP]: 'Picked up',
   [STATUS.IN_TRANSIT]: 'In transit',
   [STATUS.DELIVERED]: 'Delivered'
