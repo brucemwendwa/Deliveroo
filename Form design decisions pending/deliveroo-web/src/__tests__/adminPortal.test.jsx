@@ -9,14 +9,7 @@ import { Provider } from 'react-redux';
 import { makeStore } from '../store';
 import { AppRoutes } from '../App';
 import { verifyOtp } from '../store/authSlice';
-import {
-  MOCK_OTP,
-  seedIfEmpty,
-  setUserRole,
-  updateSettings,
-  userIdFor,
-  verifyOtp as apiVerifyOtp
-} from '../api/mockBackend';
+import { MOCK_OTP, seedIfEmpty, updateSettings, verifyOtp as apiVerifyOtp } from '../api/mockBackend';
 import { ROLE } from '../lib/roles';
 
 const seeded = () => {
@@ -37,14 +30,8 @@ const renderPortal = async (path = '/admin', identifier = 'admin@deliveroo.co') 
   return store;
 };
 
-/** Promotes someone to dispatcher through the API, as an administrator would. */
-const makeDispatcher = async (identifier) => {
-  seedIfEmpty();
-  await apiVerifyOtp({ identifier, code: MOCK_OTP });
-  await apiVerifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
-  await setUserRole(userIdFor(identifier), ROLE.DISPATCHER);
-  localStorage.removeItem('deliveroo.session');
-};
+/** The demo seeds one colleague who is a dispatcher rather than an administrator. */
+const DISPATCHER = 'dispatch@deliveroo.co';
 
 beforeEach(() => {
   localStorage.clear();
@@ -78,8 +65,7 @@ describe('who gets in', () => {
 describe('a dispatcher', () => {
   it('runs the board without being offered the settings', async () => {
     seeded();
-    await makeDispatcher('peter@deliveroo.co');
-    await renderPortal('/admin', 'peter@deliveroo.co');
+    await renderPortal('/admin', DISPATCHER);
 
     const nav = await screen.findByRole('navigation', { name: 'Admin sections' });
     expect(within(nav).getByRole('link', { name: 'Deliveries' })).toBeInTheDocument();
@@ -87,8 +73,8 @@ describe('a dispatcher', () => {
   });
 
   it('is refused the settings even by typing the URL — the sidebar is not the control', async () => {
-    await makeDispatcher('peter@deliveroo.co');
-    await renderPortal('/admin/settings', 'peter@deliveroo.co');
+    seeded();
+    await renderPortal('/admin/settings', DISPATCHER);
 
     expect(await screen.findByText('Not your section')).toBeInTheDocument();
     expect(screen.queryByRole('switch', { name: 'Accepting new bookings' })).not.toBeInTheDocument();
@@ -139,9 +125,24 @@ describe('sections', () => {
 
     // Their own row prints the role rather than offering the control that could
     // strand the install with nobody able to grant one.
-    await screen.findByText('People and access');
-    expect(screen.queryByRole('combobox', { name: /Role for Amina/ })).not.toBeInTheDocument();
+    await screen.findByRole('combobox', { name: 'Role for Peter Otieno' }, { timeout: 5000 });
+    expect(screen.queryByRole('combobox', { name: /Role for Amina Njoroge/ })).not.toBeInTheDocument();
     expect(screen.getByText('· you')).toBeInTheDocument();
+  });
+
+  it('shows the trail of what staff have done', async () => {
+    seeded();
+    await apiVerifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    await updateSettings({ supportPhone: '+254 700 111 222' });
+
+    await renderPortal('/admin/audit');
+
+    // The filter chip and the row it filters both name the action, so the row is
+    // found through the table rather than by the text alone.
+    const table = await screen.findByRole('table');
+    expect(within(table).getByText('Settings updated')).toBeInTheDocument();
+    expect(within(table).getByText('admin@deliveroo.co')).toBeInTheDocument();
+    expect(within(table).getByText('supportPhone')).toBeInTheDocument();
   });
 
   it('lists what the platform has told customers', async () => {
@@ -168,6 +169,14 @@ describe('platform settings', () => {
 
     await userEvent.click(toggle);
     expect(await screen.findByText(/being turned away/i)).toBeInTheDocument();
+  });
+
+  it('reaches the customer: a paused platform says so on the booking screen', async () => {
+    await apiVerifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    await updateSettings({ acceptingOrders: false });
+
+    await renderPortal('/book', 'buyer@one.co');
+    expect(await screen.findByText(/paused new pickups/i)).toBeInTheDocument();
   });
 
   it('shows a posted notice at the top of every portal screen', async () => {
