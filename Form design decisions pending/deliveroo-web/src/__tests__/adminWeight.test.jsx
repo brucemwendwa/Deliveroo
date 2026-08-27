@@ -7,6 +7,7 @@ import { AppRoutes } from '../App';
 import { verifyOtp } from '../store/authSlice';
 import { MOCK_OTP, seedIfEmpty } from '../api/mockBackend';
 import { STATUS } from '../lib/orderStatus';
+import { TRANSPORT, transportOf } from '../lib/transport';
 
 const seeded = () => {
   seedIfEmpty();
@@ -101,5 +102,36 @@ describe('admin scale', () => {
     await renderAdmin();
 
     await waitFor(() => expect(screen.getAllByText('EST.')).toHaveLength(unweighed));
+  });
+});
+
+
+// §26 — the console has to recognise a motorbike delivery as one: who is riding it,
+// and how much rider capacity there is to book into.
+describe('admin motorbike handling', () => {
+  it('shows the rider, the bike and its registration on a motorbike delivery', async () => {
+    const bike = seeded().find((order) => transportOf(order) === TRANSPORT.MOTORBIKE);
+    await renderAdmin();
+    await select(bike);
+
+    expect(await screen.findByText('Rider assignment')).toBeInTheDocument();
+    // The assignment record names the person and the machine, not just the mode.
+    expect(screen.getByText(new RegExp(bike.courier.name))).toBeInTheDocument();
+    expect(screen.getAllByText(bike.courier.plate).length).toBeGreaterThan(0);
+    expect(screen.getByText('Registration')).toBeInTheDocument();
+    // A parcel already moving is a rider out delivering, not one sitting available.
+    expect(screen.getByText('Delivering')).toBeInTheDocument();
+  });
+
+  it('counts motorbike capacity alongside every other mode', async () => {
+    seeded();
+    await renderAdmin();
+
+    expect(await screen.findByText('Motorbike fleet')).toBeInTheDocument();
+    // Every mode reports the same three figures, motorbike included.
+    const capacity = screen.getByLabelText('Motorbike capacity');
+    expect(capacity).toHaveTextContent('Available');
+    expect(capacity).toHaveTextContent('Assigned');
+    expect(capacity).toHaveTextContent('Offline');
   });
 });
