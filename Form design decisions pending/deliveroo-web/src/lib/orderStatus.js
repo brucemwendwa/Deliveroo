@@ -1,6 +1,8 @@
 // §18 status vocabulary plus the §16/§17 permission guards. Kept free of React and
 // of the store so both the customer screens and the admin console read one source.
 
+import { agentNounTitle, transportOf } from './transport';
+
 export const STATUS = {
   PENDING: 'PENDING',
   ASSIGNED: 'ASSIGNED',
@@ -156,31 +158,60 @@ export function remainingKm(order, now = Date.now()) {
 export const isArriving = (order, now = Date.now()) =>
   order?.status === STATUS.IN_TRANSIT && progressFor(order, now) >= ARRIVING_AT;
 
-/** The seven rows of the tracking timeline, in order. */
+/**
+ * The eight rows of the tracking timeline, in order.
+ *
+ * `label` is a function of the transport mode, because the person coming to collect
+ * the parcel is a *rider* on a motorbike delivery and a *pickup agent* on everything
+ * else — the noun is settled once in transport.js and read here (§25).
+ */
 export const JOURNEY_STAGES = [
-  { key: 'REQUESTED', label: 'Delivery requested', at: STATUS.PENDING },
-  { key: 'ASSIGNED', label: 'Pickup agent assigned', at: STATUS.ASSIGNED },
-  { key: 'PICKED_UP', label: 'Parcel picked up', at: STATUS.PICKED_UP },
-  { key: 'DISPATCHED', label: 'Parcel dispatched', at: STATUS.IN_TRANSIT },
-  { key: 'IN_TRANSIT', label: 'In transit', at: STATUS.IN_TRANSIT },
-  { key: 'ARRIVING', label: 'Arriving', at: STATUS.IN_TRANSIT },
-  { key: 'DELIVERED', label: 'Delivered', at: STATUS.DELIVERED }
+  { key: 'REQUESTED', label: () => 'Delivery requested', at: STATUS.PENDING },
+  { key: 'ASSIGNED', label: (mode) => `${agentNounTitle(mode)} assigned`, at: STATUS.ASSIGNED },
+  { key: 'AT_PICKUP', label: (mode) => `${agentNounTitle(mode)} arrived`, at: STATUS.ASSIGNED },
+  { key: 'PICKED_UP', label: () => 'Parcel picked up', at: STATUS.PICKED_UP },
+  { key: 'DISPATCHED', label: () => 'Parcel dispatched', at: STATUS.IN_TRANSIT },
+  { key: 'IN_TRANSIT', label: () => 'In transit', at: STATUS.IN_TRANSIT },
+  { key: 'ARRIVING', label: () => 'Arriving', at: STATUS.IN_TRANSIT },
+  { key: 'DELIVERED', label: () => 'Delivered', at: STATUS.DELIVERED }
 ];
 
 /**
+ * True once the agent's own ETA has run out — they said six minutes, and six minutes
+ * have passed. Used to split ASSIGNED into "on the way" and "waiting at the door"
+ * without asking the API for a status it does not have.
+ */
+export function agentHasArrived(order, now = Date.now()) {
+  const courier = order?.courier;
+  if (!courier?.assignedAt || !Number.isFinite(courier.etaMinutes)) return false;
+  return now - new Date(courier.assignedAt).getTime() >= courier.etaMinutes * 60_000;
+}
+
+/**
  * The timeline, resolved against one order: every stage tagged done / current / todo.
- * Dispatched, in transit and arriving all sit on IN_TRANSIT, so they are separated by
- * how far through the journey the parcel is.
+ *
+ * Rows outnumber statuses on purpose. Assigned and arrived share ASSIGNED and are
+ * separated by the agent's own ETA; dispatched, in transit and arriving share
+ * IN_TRANSIT and are separated by how far through the journey the parcel is. The API
+ * keeps its six statuses; the customer gets the detail they actually want.
  */
 export function journeyStages(order, now = Date.now()) {
   const status = order?.status;
+  const mode = transportOf(order);
   const current = stepIndex(status);
   const progress = progressFor(order, now);
   const arriving = progress >= ARRIVING_AT;
+  const arrived = agentHasArrived(order, now);
 
   return JOURNEY_STAGES.map((stage) => {
     const at = stepIndex(stage.at);
     let state = at < current ? 'done' : at > current ? 'todo' : 'current';
+
+    if (status === STATUS.ASSIGNED && at === current) {
+      // Two rows share ASSIGNED; the agent's ETA decides which of them is live.
+      if (stage.key === 'ASSIGNED') state = arrived ? 'done' : 'current';
+      else state = arrived ? 'current' : 'todo';
+    }
 
     if (status === STATUS.IN_TRANSIT && at === current) {
       // Three rows share IN_TRANSIT; time decides which of them is live.
@@ -189,8 +220,23 @@ export function journeyStages(order, now = Date.now()) {
       else state = arriving ? 'current' : 'todo';
     }
 
-    return { ...stage, state };
+    return { ...stage, label: stage.label(mode), state };
   });
+}
+
+/**
+ * The status line a *customer* reads, which names the vehicle where the API only has
+ * a state: "Rider heading to pickup" rather than "Courier Assigned" (§25). The six
+ * STATUS values stay exactly as they are — this is wording, not vocabulary.
+ */
+export function statusLabelFor(order, now = Date.now()) {
+  if (!order) return '';
+  const noun = agentNounTitle(transportOf(order));
+  if (order.status === STATUS.ASSIGNED) {
+    return agentHasArrived(order, now) ? `${noun} arrived at pickup` : `${noun} heading to pickup`;
+  }
+  if (order.status === STATUS.PENDING) return order.courier ? STATUS_LABEL[order.status] : `Finding a ${noun.toLowerCase()}`;
+  return STATUS_LABEL[order.status];
 }
 
 /**
