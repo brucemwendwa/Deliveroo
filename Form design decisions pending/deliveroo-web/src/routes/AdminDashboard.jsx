@@ -12,7 +12,7 @@ import { fetchFleet } from '../store/fleetSlice';
 import { selectIsAdmin } from '../store/authSlice';
 import { openAuthModal, showToast } from '../store/uiSlice';
 import useOrderSync from '../hooks/useOrderSync';
-import { STATUS, STATUS_LABEL, allowedTransitions, isTerminal } from '../lib/orderStatus';
+import { STATUS, STATUS_LABEL, agentHasArrived, allowedTransitions, isTerminal, statusLabelFor } from '../lib/orderStatus';
 import { formatDelta, formatDuration, formatKes, formatKm, isWeightVerified, weightDiscrepancy } from '../lib/pricing';
 import { modeMeta, priorityOf, transportOf } from '../lib/transport';
 import { color, control, eyebrow, font, radius } from '../theme';
@@ -22,6 +22,7 @@ import CourierCard from '../components/tracking/CourierCard';
 import WeighParcel from '../components/admin/WeighParcel';
 import FleetPanel from '../components/admin/FleetPanel';
 import DeliveryTable from '../components/admin/DeliveryTable';
+import RiderAssignment from '../components/admin/RiderAssignment';
 import LocationUpdater from '../components/admin/LocationUpdater';
 import TrackingHistory from '../components/admin/TrackingHistory';
 import TransportBadge from '../components/transport/TransportBadge';
@@ -223,7 +224,20 @@ export default function AdminDashboard() {
               </p>
             )}
 
-            {selected.courier && <CourierCard courier={selected.courier} status={selected.status} tone="light" />}
+            {selected.courier && (
+              <CourierCard
+                courier={selected.courier}
+                status={selected.status}
+                mode={transportOf(selected)}
+                arrived={agentHasArrived(selected)}
+                tone="light"
+              />
+            )}
+
+            {/* §26 — who is carrying it, and the way to match one when nobody is. */}
+            <div style={card}>
+              <RiderAssignment order={selected} />
+            </div>
 
             {/* §9/§18 — the fare is settled here, on our scale, not on the booking form. */}
             <WeighParcel order={selected} />
@@ -254,6 +268,7 @@ export default function AdminDashboard() {
                   ['Pickup', selected.pickup.label],
                   ['Destination', selected.destination.label],
                   ['Transport', modeMeta(transportOf(selected)).label],
+                  ['Status', statusLabelFor(selected)],
                   ['Distance', formatKm(selected.route.distanceKm)],
                   ['Door to door', formatDuration(selected.pricing.durationSeconds || selected.route.durationSeconds)],
                   [
