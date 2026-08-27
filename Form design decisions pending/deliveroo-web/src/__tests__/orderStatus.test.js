@@ -78,16 +78,43 @@ describe('journey stages', () => {
 
   const stageState = (order, key) => journeyStages(order, NOW).find((stage) => stage.key === key).state;
 
-  it('shows seven steps without adding a single status to the API', () => {
+  it('shows eight steps without adding a single status to the API', () => {
     expect(journeyStages({ status: STATUS.PENDING }, NOW).map((stage) => stage.key)).toEqual([
       'REQUESTED',
       'ASSIGNED',
+      'AT_PICKUP',
       'PICKED_UP',
       'DISPATCHED',
       'IN_TRANSIT',
       'ARRIVING',
       'DELIVERED'
     ]);
+  });
+
+  it('splits "assigned" into on the way and arrived, on the agent\'s own ETA', () => {
+    const assigned = (minutesAgo, etaMinutes) => ({
+      status: STATUS.ASSIGNED,
+      courier: { assignedAt: new Date(NOW - minutesAgo * 60_000).toISOString(), etaMinutes }
+    });
+
+    const onTheWay = assigned(2, 6);
+    expect(stageState(onTheWay, 'ASSIGNED')).toBe('current');
+    expect(stageState(onTheWay, 'AT_PICKUP')).toBe('todo');
+
+    const atTheDoor = assigned(7, 6);
+    expect(stageState(atTheDoor, 'ASSIGNED')).toBe('done');
+    expect(stageState(atTheDoor, 'AT_PICKUP')).toBe('current');
+  });
+
+  it('calls the agent a rider on a motorbike delivery, and a pickup agent otherwise', () => {
+    const labelOf = (order, key) => journeyStages(order, NOW).find((stage) => stage.key === key).label;
+
+    const bike = { status: STATUS.ASSIGNED, transport: { mode: 'MOTORBIKE' } };
+    expect(labelOf(bike, 'ASSIGNED')).toBe('Rider assigned');
+    expect(labelOf(bike, 'AT_PICKUP')).toBe('Rider arrived');
+
+    // An order with no transport is a road order, and its wording must not move.
+    expect(labelOf({ status: STATUS.ASSIGNED }, 'ASSIGNED')).toBe('Pickup agent assigned');
   });
 
   it('marks the steps behind the current one done, and the rest to come', () => {
