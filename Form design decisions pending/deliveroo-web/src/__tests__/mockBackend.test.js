@@ -34,6 +34,21 @@ beforeEach(() => {
   localStorage.clear();
 });
 
+/**
+ * §27 — moving an order along is dispatch's job, so a fixture that needs a status
+ * arranges it as staff and hands the session back to whoever the test is about.
+ */
+const asStaff = async (run) => {
+  const before = localStorage.getItem('deliveroo.session');
+  await verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+  try {
+    return await run();
+  } finally {
+    if (before) localStorage.setItem('deliveroo.session', before);
+    else localStorage.removeItem('deliveroo.session');
+  }
+};
+
 describe('mock backend', () => {
   it('prices an order on creation from its own weight and distance', async () => {
     const order = await createOrder(draft);
@@ -44,7 +59,7 @@ describe('mock backend', () => {
 
   it('assigns a pickup agent the moment the order moves off pending', async () => {
     const order = await createOrder(draft);
-    const assigned = await updateOrderStatus(order.id, STATUS.ASSIGNED);
+    const assigned = await asStaff(() => updateOrderStatus(order.id, STATUS.ASSIGNED));
 
     expect(assigned.courier).toMatchObject({
       name: expect.any(String),
@@ -66,22 +81,22 @@ describe('mock backend', () => {
     const listener = jest.fn();
     const unsubscribe = subscribe(listener);
 
-    await updateOrderStatus(order.id, STATUS.ASSIGNED);
+    await asStaff(() => updateOrderStatus(order.id, STATUS.ASSIGNED));
     expect(listener).toHaveBeenCalled();
 
     const callsAfterStatus = listener.mock.calls.length;
-    await updateCourierPosition(order.id, { lat: -1.28, lng: 36.79 });
+    await asStaff(() => updateCourierPosition(order.id, { lat: -1.28, lng: 36.79 }));
     expect(listener.mock.calls.length).toBeGreaterThan(callsAfterStatus);
 
     unsubscribe();
-    await updateOrderStatus(order.id, STATUS.PICKED_UP);
+    await asStaff(() => updateOrderStatus(order.id, STATUS.PICKED_UP));
     expect(listener.mock.calls.length).toBe(listener.mock.calls.length);
   });
 
   it('re-prices when the destination changes mid-flight (§16)', async () => {
     const owner = await verifyOtp({ identifier: 'owner@one.co', code: MOCK_OTP });
     const order = await createOrder({ ...draft, userId: owner.id });
-    await updateOrderStatus(order.id, STATUS.ASSIGNED);
+    await asStaff(() => updateOrderStatus(order.id, STATUS.ASSIGNED));
 
     const updated = await changeDestination(order.id, {
       destination: { ...DESTINATION, label: 'Karen · Nairobi', name: 'Karen' },
@@ -96,7 +111,7 @@ describe('mock backend', () => {
   it('refuses to cancel or re-route a delivered order (§16, §17)', async () => {
     const order = await createOrder(draft);
     for (const status of [STATUS.ASSIGNED, STATUS.PICKED_UP, STATUS.IN_TRANSIT, STATUS.DELIVERED]) {
-      await updateOrderStatus(order.id, status);
+      await asStaff(() => updateOrderStatus(order.id, status));
     }
 
     await expect(cancelOrder(order.id)).rejects.toThrow(/no longer be cancelled/i);
@@ -180,8 +195,8 @@ describe('mock backend', () => {
 
     it('will not drag an order that has already moved on back to assigned', async () => {
       const order = await createOrder(draft);
-      await updateOrderStatus(order.id, STATUS.ASSIGNED);
-      await updateOrderStatus(order.id, STATUS.PICKED_UP);
+      await asStaff(() => updateOrderStatus(order.id, STATUS.ASSIGNED));
+      await asStaff(() => updateOrderStatus(order.id, STATUS.PICKED_UP));
 
       expect((await assignAgent(order.id)).status).toBe(STATUS.PICKED_UP);
     });
@@ -220,8 +235,10 @@ describe('mock backend', () => {
 
   it('rejects backwards status transitions', async () => {
     const order = await createOrder(draft);
-    await updateOrderStatus(order.id, STATUS.IN_TRANSIT);
-    await expect(updateOrderStatus(order.id, STATUS.ASSIGNED)).rejects.toThrow(/Cannot move/i);
+    await asStaff(async () => {
+      await updateOrderStatus(order.id, STATUS.IN_TRANSIT);
+      await expect(updateOrderStatus(order.id, STATUS.ASSIGNED)).rejects.toThrow(/Cannot move/i);
+    });
   });
 
   it('grants the admin flag only to the admin address', async () => {
