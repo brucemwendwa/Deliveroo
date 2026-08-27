@@ -22,13 +22,14 @@ const pin = {
   boxShadow: '0 10px 20px -12px rgba(17,17,17,.55)'
 };
 
-// Each pin sits on one of WorldMap's route nodes (node/512 across, node/232 down),
-// so the modes read as stops on the drawn routes rather than as loose decoration.
+// Percentages of the WorldMap box. The first three land on its route nodes; the drone
+// sits over Australia instead, because the free nodes are either mid-ocean or close
+// enough to the truck that the two pins touch once the map hits its 320px floor.
 const MAP_PINS = [
   { icon: 'directions_boat', left: '28%', top: '48%' },
   { icon: 'local_shipping', left: '78%', top: '30%' },
   { icon: 'flight', left: '55%', top: '62%' },
-  { icon: 'drone', left: '66%', top: '32%' }
+  { icon: 'drone', left: '87%', top: '74%' }
 ];
 
 export default function Hero() {
