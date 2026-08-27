@@ -21,7 +21,7 @@ export default function AdminNav() {
   const user = useSelector(selectUser);
   const visible = SECTIONS.filter((section) => can(user, section.permission));
 
-  const item = (section) => ({ isActive }) => ({
+  const item = ({ isActive }) => ({
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
@@ -66,7 +66,7 @@ export default function AdminNav() {
       }
     >
       {visible.map((section) => (
-        <NavLink key={section.id} to={section.to} end={section.to === '/admin'} style={item(section)}>
+        <NavLink key={section.id} to={section.to} end={section.to === '/admin'} style={item}>
           {({ isActive }) => (
             <>
               <Icon name={section.icon} size={18} color={isActive ? color.orange : color.muted} />
