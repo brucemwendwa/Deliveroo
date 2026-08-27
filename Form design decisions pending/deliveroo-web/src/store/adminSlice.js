@@ -6,7 +6,6 @@
 
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import * as apiClient from '../api';
-import { DEFAULT_SETTINGS } from '../api';
 import { ROLE, isStaffRole, roleOf } from '../lib/roles';
 
 /** Every mutation reports its failure the same way — AppLayout turns it into a toast. */
@@ -33,6 +32,8 @@ export const setCourierShift = failable('admin/setCourierShift', ({ id, onShift 
   apiClient.setCourierShift(id, onShift)
 );
 export const updateSettings = failable('admin/updateSettings', (patch) => apiClient.updateSettings(patch));
+
+const { DEFAULT_SETTINGS } = apiClient;
 
 const initialState = {
   users: [],
