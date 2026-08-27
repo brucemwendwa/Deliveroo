@@ -235,9 +235,15 @@ export const MOCK_OTP = '000000';
 /** The address that bootstraps the first administrator on a fresh install. */
 export const FOUNDING_ADMIN = 'admin@deliveroo.co';
 
-/** The account id an identifier maps to. Shared, so a seeded colleague and the same
- *  person signing in are one record rather than two. */
-export const userIdFor = (identifier) => `usr_${identifier.replace(/\W/g, '').slice(-8)}`;
+/**
+ * The account id an identifier maps to. Shared, so a seeded colleague and the same
+ * person signing in are one record rather than two.
+ *
+ * The whole identifier, not a tail of it: two colleagues on the same domain end the
+ * same way, and once accounts carry roles, a collision is not a cosmetic duplicate —
+ * it is one person inheriting another's access.
+ */
+export const userIdFor = (identifier) => `usr_${identifier.trim().toLowerCase().replace(/\W/g, '')}`;
 
 const userDirectory = () => read(USERS_KEY, []);
 
