@@ -11,8 +11,9 @@ sends a rider or an agent to come and get it.
 WHERE? → WHAT? → HOW? → PRICE → REQUEST PICKUP → AGENT ASSIGNED → PICKED UP → TRANSPORTING → TRACK → DELIVERED
 ```
 
-Covers the whole customer journey — request, price, dispatch, track — plus an admin dispatch
-console with transport availability.
+Covers the whole customer journey — request, price, dispatch, track — plus a nine-section
+admin portal: the dispatch board, the courier roster, transport capacity, accounts and roles,
+reports, the notification outbox, an audit trail and the platform settings.
 
 ## Run it
 
@@ -39,10 +40,13 @@ Node 18+.
    `000000`.
 5. The confirmation screen goes looking for an agent, then shows who is coming, in what, how
    far out and their ETA. **Track pickup** opens the live map.
-6. Open `/admin` in a second tab and sign in as `admin@deliveroo.co` (code `000000`). Change
-   the order's status, drag the vehicle marker, or set where the parcel currently is — **the
-   tracking tab updates without a reload**. Take drone capacity offline and it disappears from
-   the customer's options.
+6. Open `/admin` in a second tab and sign in as `admin@deliveroo.co` (code `000000`). The
+   overview leads with what needs a person; **Deliveries** is the board. Change the order's
+   status, drag the vehicle marker, or set where the parcel currently is — **the tracking tab
+   updates without a reload**. Take drone capacity offline under **Capacity** and it
+   disappears from the customer's options.
+7. Sign in as `dispatch@deliveroo.co` instead to see the same portal as a dispatcher: the
+   board, the roster and capacity, but no accounts and no settings — including by URL.
 
 ## Multi-modal transport (`src/lib/transport.js`)
 
@@ -173,14 +177,19 @@ src/
     TrackOrder §14    live map, ETA, distance remaining, journey timeline
     MyOrders §15      customer dashboard: active delivery, stats, search + filters
     OrderDetails      §15–17 details, change destination, cancel
-    TrackLookup       AdminDashboard §18/§26
+    TrackLookup       §14 look a parcel up by id
+    admin/            §27 the portal — AdminPortal (gate + shell + live refresh) and
+                      Overview · Deliveries · Couriers · Capacity · Accounts ·
+                      Reports · Notifications · Audit · Settings
   lib/
     transport.js      §25 mode catalogue, eligibility, tariffs, ETAs, availability
     pricing.js        priceOrder()/quote() and the money/distance/duration formatters
     orderStatus.js    status vocabulary, §16/§17 guards, derived journey stages
-    notifications.js  §19 templates and a local outbox (not surfaced in the UI)
+    roles.js          §27 roles, the permission grant table, `can(user, permission)`
+    analytics.js      §27 the portal's aggregates: KPIs, series, exceptions, CSV
+    notifications.js  §19 templates and a local outbox (read by the portal)
   api/                index (selector) · mockBackend · client · geo · viteEnv
-  store/              ui · auth · booking · orders · fleet
+  store/              ui · auth · booking · orders · fleet · admin
   hooks/              useScrollEffects · useNarrowViewport · useReveal · useHover
                       useOrder · useOrderSync · useNow · useStartBooking
   components/
@@ -190,6 +199,8 @@ src/
     orders/           ActiveDelivery · DeliveryCard · StatusPill
     tracking/         EtaPanel · CourierCard · FindingAgent · StatusTimeline
     admin/            WeighParcel · DeliveryTable · FleetPanel · LocationUpdater · TrackingHistory
+                      AdminNav · adminSections · Panel · CourierTable · UserTable
+                      ColumnChart · BarList
     auth/             AuthModal
     ui/               Button · Field · Chip · Modal · Toast · StatTile · EmptyState · Skeleton
     Nav · MobileMenu · BottomNav · Hero · ModesBand · Services · SiteFooter
