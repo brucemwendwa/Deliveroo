@@ -161,6 +161,42 @@ describe('exceptions', () => {
     expect(rows.map((row) => row.issue)).not.toContain(ISSUE.UNASSIGNED);
   });
 
+  it('flags a parcel that should have arrived by now', () => {
+    // Quoted 35 minutes, moving for two hours.
+    const late = makeOrder({
+      status: STATUS.IN_TRANSIT,
+      durationSeconds: 2100,
+      history: [
+        { status: STATUS.PENDING, at: new Date(now - 3 * HOUR).toISOString() },
+        { status: STATUS.PICKED_UP, at: new Date(now - 2.5 * HOUR).toISOString() },
+        { status: STATUS.IN_TRANSIT, at: new Date(now - 2 * HOUR).toISOString() }
+      ],
+      now
+    });
+    const rows = needsAttention([late], now);
+    expect(rows.map((row) => row.issue)).toContain(ISSUE.OVERDUE);
+    expect(rows.find((row) => row.issue === ISSUE.OVERDUE).minutes).toBe(85);
+  });
+
+  it('does not call a parcel late while it is still inside its quoted time', () => {
+    const moving = makeOrder({
+      status: STATUS.IN_TRANSIT,
+      durationSeconds: 2100,
+      history: [
+        { status: STATUS.PENDING, at: new Date(now - 40 * 60_000).toISOString() },
+        { status: STATUS.PICKED_UP, at: new Date(now - 20 * 60_000).toISOString() },
+        { status: STATUS.IN_TRANSIT, at: new Date(now - 10 * 60_000).toISOString() }
+      ],
+      now
+    });
+    expect(needsAttention([moving], now).map((row) => row.issue)).not.toContain(ISSUE.OVERDUE);
+  });
+
+  it('will not call a parcel late before anyone has collected it', () => {
+    const waiting = makeOrder({ status: STATUS.ASSIGNED, bookedAgo: 5 * HOUR, now });
+    expect(needsAttention([waiting], now).map((row) => row.issue)).not.toContain(ISSUE.OVERDUE);
+  });
+
   it('flags a parcel collected without going on a scale', () => {
     const rows = needsAttention([makeOrder({ status: STATUS.PICKED_UP, bookedAgo: 30 * 60_000, now })], now);
     expect(rows.map((row) => row.issue)).toContain(ISSUE.UNWEIGHED);
