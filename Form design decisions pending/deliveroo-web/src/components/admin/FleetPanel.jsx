@@ -13,6 +13,29 @@ const TONE = {
 };
 
 /**
+ * §26 — how much of a mode's capacity is doing what right now.
+ *
+ * `assigned` is real: it counts the live orders on that mode. `units` and the
+ * baseline `offline` are prototype figures from the catalogue, standing in for what
+ * a carrier partner's API would report — Deliveroo books into this capacity, it does
+ * not own it. Taking a mode offline puts every unit that isn't already out on a job
+ * into the offline column, which is exactly what withdrawing it from quotes means.
+ */
+function capacityOf(meta, status, assigned) {
+  const units = meta.capacity?.units ?? 0;
+  const baseline = meta.capacity?.offline ?? 0;
+  const working = Math.min(assigned, units);
+  const offline = status === FLEET_STATUS.OFFLINE ? Math.max(0, units - working) : baseline;
+  return { assigned: working, offline, available: Math.max(0, units - working - offline) };
+}
+
+const FIGURES = [
+  { key: 'available', label: 'Available' },
+  { key: 'assigned', label: 'Assigned' },
+  { key: 'offline', label: 'Offline' }
+];
+
+/**
  * §26 — transport availability.
  *
  * Prototype controls over *partner capacity dispatch can book into today* — not a
@@ -43,14 +66,16 @@ export default function FleetPanel() {
     >
       <div style={{ ...eyebrow, marginBottom: '6px' }}>Transport availability</div>
       <p style={{ margin: '0 0 18px', fontSize: '13px', lineHeight: 1.55, color: color.muted, maxWidth: '58ch' }}>
-        Capacity Deliveroo can book into right now, across its carrier partners. Taking a mode
-        offline withdraws it from customer quotes immediately.
+        Capacity Deliveroo can book into right now, across its carrier partners — riders,
+        drivers, freight and airline space. Taking a mode offline withdraws it from customer
+        quotes immediately.
       </p>
 
       <div style={{ display: 'grid', gap: '10px' }}>
         {TRANSPORT_MODES.map((meta) => {
           const status = fleet[meta.id] || FLEET_STATUS.AVAILABLE;
           const active = load[meta.id] || 0;
+          const counts = capacityOf(meta, status, active);
 
           return (
             <div
@@ -84,13 +109,49 @@ export default function FleetPanel() {
 
               <span style={{ flex: '1 1 130px', minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: '15px', fontWeight: 700, letterSpacing: '-.02em', color: color.ink }}>
-                  {meta.label}
+                  {meta.label} fleet
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '7px', marginTop: '3px', fontFamily: font.mono, fontSize: '10.5px', letterSpacing: '.1em', textTransform: 'uppercase', color: TONE[status] }}>
                   <span aria-hidden="true" style={{ width: '6px', height: '6px', borderRadius: '99px', background: TONE[status] }} />
                   {FLEET_STATUS_LABEL[status]}
                   <span style={{ color: color.muted }}>· {active} active</span>
                 </span>
+              </span>
+
+              <span
+                aria-label={`${meta.label} capacity`}
+                style={{ display: 'flex', flex: '1 1 190px', gap: '16px', minWidth: 0 }}
+              >
+                {FIGURES.map((figure) => (
+                  <span key={figure.key} style={{ minWidth: 0 }}>
+                    <span
+                      style={{
+                        display: 'block',
+                        fontFamily: font.display,
+                        fontWeight: 700,
+                        fontSize: '19px',
+                        lineHeight: 1,
+                        letterSpacing: '-.02em',
+                        color: counts[figure.key] ? color.ink : color.muted
+                      }}
+                    >
+                      {counts[figure.key]}
+                    </span>
+                    <span
+                      style={{
+                        display: 'block',
+                        marginTop: '4px',
+                        fontFamily: font.mono,
+                        fontSize: '9.5px',
+                        letterSpacing: '.12em',
+                        textTransform: 'uppercase',
+                        color: color.muted
+                      }}
+                    >
+                      {figure.label}
+                    </span>
+                  </span>
+                ))}
               </span>
 
               <span
