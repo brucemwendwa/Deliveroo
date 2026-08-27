@@ -235,6 +235,10 @@ export const MOCK_OTP = '000000';
 /** The address that bootstraps the first administrator on a fresh install. */
 export const FOUNDING_ADMIN = 'admin@deliveroo.co';
 
+/** The account id an identifier maps to. Shared, so a seeded colleague and the same
+ *  person signing in are one record rather than two. */
+export const userIdFor = (identifier) => `usr_${identifier.replace(/\W/g, '').slice(-8)}`;
+
 const userDirectory = () => read(USERS_KEY, []);
 
 const saveUsers = (users) => write(USERS_KEY, users);
@@ -250,7 +254,7 @@ export async function verifyOtp({ identifier, code, name }) {
   if (code !== MOCK_OTP) throw new Error('That code is not right. Check it and try again.');
 
   const isEmail = identifier.includes('@');
-  const id = `usr_${identifier.replace(/\W/g, '').slice(-8)}`;
+  const id = userIdFor(identifier);
   const users = userDirectory();
   const existing = users.find((entry) => entry.id === id);
 
@@ -633,8 +637,44 @@ export async function cancelOrder(id) {
   });
 }
 
+/**
+ * §27 — colleagues and customers, so the portal's accounts screen has something to
+ * be about on a fresh browser. Everyone here signs in the ordinary way (any code is
+ * `000000`); seeding only decides what they already are when they arrive.
+ */
+const DEMO_PEOPLE = [
+  { identifier: 'admin@deliveroo.co', name: 'Amina Njoroge', role: ROLE.ADMIN },
+  { identifier: 'dispatch@deliveroo.co', name: 'Peter Otieno', role: ROLE.DISPATCHER },
+  { identifier: 'ada@one.co', name: 'Ada Kimani', role: ROLE.CUSTOMER },
+  { identifier: 'joseph@two.co', name: 'Joseph Mwangi', role: ROLE.CUSTOMER },
+  { identifier: 'wanjiru@three.co', name: 'Wanjiru Kariuki', role: ROLE.CUSTOMER },
+  { identifier: '+254711222333', name: 'Brian Oduor', role: ROLE.CUSTOMER }
+];
+
+function seedPeople() {
+  if (userDirectory().length) return;
+  const now = Date.now();
+  saveUsers(
+    DEMO_PEOPLE.map((person, index) => {
+      const isEmail = person.identifier.includes('@');
+      return {
+        id: userIdFor(person.identifier),
+        name: person.name,
+        email: isEmail ? person.identifier : null,
+        phone: isEmail ? null : person.identifier,
+        role: person.role,
+        isAdmin: isStaffRole(person.role),
+        suspended: false,
+        createdAt: new Date(now - (index + 2) * 86_400_000).toISOString(),
+        lastSeenAt: new Date(now - (index + 1) * 3_600_000).toISOString()
+      };
+    })
+  );
+}
+
 /** Gives a fresh browser something for the admin console to show. */
 export function seedIfEmpty() {
+  seedPeople();
   if (allOrders().length) return;
   const now = Date.now();
   const demo = [
