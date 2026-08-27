@@ -42,8 +42,32 @@ const initialState = {
   audit: [],
   notifications: [],
   settings: DEFAULT_SETTINGS,
+  /**
+   * The most recent request per collection. The portal re-reads everything on every
+   * write in any tab, so several reads of the same list are in flight at once and
+   * they do not have to come back in order — an early one landing late would put the
+   * roster back the way it was a moment before the click that changed it. Whatever
+   * was asked for last is what the screen shows.
+   */
+  latest: {},
   status: 'idle',
   error: null
+};
+
+/** Wires a read so only the newest request for that collection may apply. */
+const readInto = (builder, thunk, key, apply) =>
+  builder
+    .addCase(thunk.pending, (state, action) => {
+      state.latest[key] = action.meta.requestId;
+    })
+    .addCase(thunk.fulfilled, (state, action) => {
+      if (state.latest[key] !== action.meta.requestId) return;
+      apply(state, action);
+    });
+
+/** A write is newer than anything already in flight, so it claims the slot. */
+const claim = (state, key, action) => {
+  state.latest[key] = action.meta.requestId;
 };
 
 const adminSlice = createSlice({
@@ -55,43 +79,48 @@ const adminSlice = createSlice({
     }
   },
   extraReducers: (builder) => {
-    builder
-      .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.users = action.payload || [];
-        state.status = 'succeeded';
-      })
-      .addCase(fetchCouriers.fulfilled, (state, action) => {
-        state.couriers = action.payload || [];
-        state.status = 'succeeded';
-      })
-      .addCase(fetchAuditLog.fulfilled, (state, action) => {
-        state.audit = action.payload || [];
-      })
-      .addCase(fetchNotifications.fulfilled, (state, action) => {
-        state.notifications = action.payload || [];
-      })
-      // setCourierShift returns the whole roster: a shift change moves one row's
-      // status and every row's share of the workload, so the list is re-read rather
-      // than patched.
-      .addCase(setCourierShift.fulfilled, (state, action) => {
-        state.couriers = action.payload || [];
-        state.error = null;
-      });
+    readInto(builder, fetchUsers, 'users', (state, action) => {
+      state.users = action.payload || [];
+      state.status = 'succeeded';
+    });
+    readInto(builder, fetchCouriers, 'couriers', (state, action) => {
+      state.couriers = action.payload || [];
+      state.status = 'succeeded';
+    });
+    readInto(builder, fetchAuditLog, 'audit', (state, action) => {
+      state.audit = action.payload || [];
+    });
+    readInto(builder, fetchNotifications, 'notifications', (state, action) => {
+      state.notifications = action.payload || [];
+    });
+    readInto(builder, fetchSettings, 'settings', (state, action) => {
+      if (action.payload) state.settings = { ...DEFAULT_SETTINGS, ...action.payload };
+      state.error = null;
+    });
+
+    // setCourierShift returns the whole roster: a shift change moves one row's
+    // status and every row's share of the workload, so the list is re-read rather
+    // than patched.
+    builder.addCase(setCourierShift.fulfilled, (state, action) => {
+      state.couriers = action.payload || [];
+      claim(state, 'couriers', action);
+      state.error = null;
+    });
 
     for (const thunk of [setUserRole, setUserSuspended]) {
       builder.addCase(thunk.fulfilled, (state, action) => {
         const updated = action.payload;
         state.users = state.users.map((user) => (user.id === updated.id ? updated : user));
+        claim(state, 'users', action);
         state.error = null;
       });
     }
 
-    for (const thunk of [fetchSettings, updateSettings]) {
-      builder.addCase(thunk.fulfilled, (state, action) => {
-        if (action.payload) state.settings = { ...DEFAULT_SETTINGS, ...action.payload };
-        state.error = null;
-      });
-    }
+    builder.addCase(updateSettings.fulfilled, (state, action) => {
+      if (action.payload) state.settings = { ...DEFAULT_SETTINGS, ...action.payload };
+      claim(state, 'settings', action);
+      state.error = null;
+    });
 
     builder.addMatcher(
       (action) => action.type.startsWith('admin/') && action.type.endsWith('/rejected'),
