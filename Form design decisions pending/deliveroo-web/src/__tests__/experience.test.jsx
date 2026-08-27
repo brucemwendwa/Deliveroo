@@ -65,6 +65,40 @@ describe('requesting a pickup', () => {
 
 });
 
+// §25 — the same Uber moment, in the words a motorbike delivery uses.
+describe('requesting a motorbike pickup', () => {
+  let order;
+
+  // Created before the clock is frozen: the backend's own latency is a real timer,
+  // and a fake one would never let createOrder resolve.
+  beforeEach(async () => {
+    order = await createOrder({
+      pickup: { label: 'CBD \u00b7 Nairobi', name: 'CBD', lat: -1.2864, lng: 36.8172 },
+      destination: { label: 'Westlands \u00b7 Nairobi', name: 'Westlands', lat: -1.2673, lng: 36.8065 },
+      route: { distanceKm: 12, durationSeconds: 1800, coordinates: [], estimated: false },
+      parcel: { weightKg: 2, description: 'Documents' },
+      transport: { mode: TRANSPORT.MOTORBIKE },
+      sender: { name: 'Sender', phone: '+254700000001' },
+      recipient: { name: 'Recipient', phone: '+254700000002' }
+    });
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('goes looking for a rider, then shows which rider is coming', async () => {
+    renderAt(`/orders/${order.id}/confirmation`);
+
+    // The word follows the vehicle, all the way through the match.
+    expect(await screen.findByText(/finding a rider near you/i)).toBeInTheDocument();
+    expect(await screen.findByText('Rider assigned.', {}, { timeout: 8000 })).toBeInTheDocument();
+    // On the agent card and on the status line above the timeline.
+    expect(screen.getAllByText(/rider heading to pickup/i).length).toBeGreaterThan(1);
+    expect(screen.getByRole('link', { name: /track rider/i })).toBeInTheDocument();
+  });
+});
+
 // §25 — a motorbike delivery is tracked by the same screen as every other mode.
 describe('tracking a motorbike delivery', () => {
   it('names the vehicle, the rider and the stage the rider is at', async () => {
