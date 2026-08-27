@@ -226,14 +226,20 @@ dependable drone glyph and a missing ligature renders as the literal word "drone
 live stage of a timeline breathing, skeletons while a quote is worked out. Keyframes live in
 `global.css`, and a `prefers-reduced-motion` block turns all of it off.
 
-**The hero is a full-bleed carousel.** Three slides — drone, sea, air — crossfade over
-photography that fills the whole section (`clamp(560px,82vh,750px)` tall, no card, no
+**The hero is a full-bleed carousel.** Four slides — drone, motorbike, air, sea — crossfade
+over photography that fills the whole section (`clamp(560px,82vh,750px)` tall, no card, no
 gutter). `HERO_SLIDES` in `src/components/Hero.jsx` is the whole of the content: label,
 headline lines, copy, photo and the two `object-position` values that keep the subject in
 frame. `focus` is used above the 980px breakpoint, `focusNarrow` below it, because a phone
 crops the photo horizontally where a desktop crops it vertically — the second value is what
-stops the drone, the ship or the aircraft being cut out of its own slide. Photos live in
-`public/photos/hero-*.jpeg`.
+stops the rider, the drone, the ship or the aircraft being cut out of its own slide. Photos
+live in `public/photos/hero-*.jpeg`.
+
+Two optional fields. `align: 'right'` puts the copy on the other side of the frame on
+desktop — the motorbike photo has its rider under the usual text column and no horizontal
+slack to crop him aside, so the words move instead and the scrim flips with them. `meta` adds
+the small glass chip of at-a-glance facts under the copy (with `mode`, it carries that mode's
+`<TransportGlyph>`); only the motorbike slide has one.
 
 Each slide is its own absolutely positioned layer, so the change is an opacity crossfade
 with nothing to reflow, and the active photo drifts under `heroDrift` (`global.css`). Two
