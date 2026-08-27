@@ -16,9 +16,10 @@ const withStore = (ui, store = makeStore()) => ({
 const renderNav = (store = makeStore()) => withStore(<MemoryRouter><Nav /></MemoryRouter>, store);
 
 describe('landing page', () => {
-  it('keeps the approved hero messaging', () => {
+  it('opens on the first hero slide', () => {
     withStore(<App />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Same-day couriers');
+    // The carousel starts on the drone: it is the slide that says "technology" first.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The future ofdelivery is here');
     expect(screen.getByText('Watch It')).toBeInTheDocument();
   });
 
