@@ -19,7 +19,7 @@ const renderHero = (store = makeStore()) => ({
 
 const headline = () => screen.getByRole('heading', { level: 1 }).textContent;
 
-// §2 — the hero is a four-slide carousel over full-bleed photography.
+// §2 — the hero is a five-slide carousel over full-bleed photography.
 describe('hero carousel', () => {
   it('shows the drone slide first, with the label, copy and both CTAs', () => {
     renderHero();
@@ -47,14 +47,14 @@ describe('hero carousel', () => {
     for (const image of images) {
       expect(image.style.objectFit).toBe('cover');
     }
-    // Only the visible slide describes itself; the two behind it are decorative.
+    // Only the visible slide describes itself; the ones behind it are decorative.
     expect([...images].filter((image) => image.alt !== '')).toHaveLength(1);
   });
 
   it('jumps to the slide an indicator names', async () => {
     renderHero();
 
-    await userEvent.click(screen.getByRole('button', { name: /Show slide 3 of 4: Air Delivery/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Show slide 4 of 5: Air Delivery/ }));
 
     expect(headline()).toBe('When speedmatters.');
     expect(screen.getByText('Get your parcels where they need to be, faster.')).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe('hero carousel', () => {
   it('carries the motorbike slide, its notes and its own side of the frame', async () => {
     const { container } = renderHero();
 
-    await userEvent.click(screen.getByRole('button', { name: /Show slide 2 of 4: Motorbike Delivery/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Show slide 2 of 5: Motorbike Delivery/ }));
 
     expect(headline()).toBe('Fast. Local.At your door.');
     expect(screen.getByText(/Request a rider and we/)).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe('hero carousel', () => {
     renderHero();
 
     expect(screen.getByText('01')).toBeInTheDocument();
-    expect(screen.getByText('/ 04')).toBeInTheDocument();
+    expect(screen.getByText('/ 05')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Next slide' }));
     expect(screen.getByText('02')).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe('hero carousel', () => {
       act(() => {
         jest.advanceTimersByTime(SLIDE_MS + 50);
       });
-      expect(headline()).toBe('When speedmatters.');
+      expect(headline()).toBe('Every parcel.Every route.');
     } finally {
       jest.useRealTimers();
     }
@@ -138,19 +138,19 @@ describe('hero carousel', () => {
     expect(screen.queryByRole('button', { name: 'Next slide' })).not.toBeInTheDocument();
     // The indicators stay: they are the only way through the slides on touch, short
     // of the swipe.
-    expect(screen.getByRole('button', { name: /Show slide 4 of 4: Sea Delivery/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Show slide 5 of 5: Sea Delivery/ })).toBeInTheDocument();
   });
 });
 
-// The three slides are content, not a lookup table — but a typo in one would ship a
-// blank headline, so the shape is checked once.
+// The slides are content, not a lookup table — but a typo in one would ship a blank
+// headline, so the shape is checked once.
 describe('hero slide data', () => {
-  it('plays drone, motorbike, air, sea — and gives each one a photo and words', () => {
-    expect(HERO_SLIDES.map((slide) => slide.id)).toEqual(['DRONE', 'MOTORBIKE', 'AIR', 'SHIP']);
+  it('plays drone, motorbike, road, air, sea — and gives each one a photo and words', () => {
+    expect(HERO_SLIDES.map((slide) => slide.id)).toEqual(['DRONE', 'MOTORBIKE', 'ROAD', 'AIR', 'SHIP']);
   });
 
   it('gives every slide a photo, a label, a headline and copy', () => {
-    expect(HERO_SLIDES).toHaveLength(4);
+    expect(HERO_SLIDES).toHaveLength(5);
     for (const slide of HERO_SLIDES) {
       expect(slide.photo).toMatch(/^\/photos\/hero-.+\.(jpeg|jpg|webp|png)$/);
       expect(slide.label).toBeTruthy();
