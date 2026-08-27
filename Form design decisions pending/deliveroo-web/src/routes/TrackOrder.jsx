@@ -13,16 +13,17 @@ import PageShell from './PageShell';
 import { TrackingSkeleton } from '../components/ui/Skeleton';
 import {
   STATUS,
-  STATUS_LABEL,
+  agentHasArrived,
   currentLocationLabel,
   isArriving,
   isTerminal,
   progressFor,
   remainingKm,
-  remainingSeconds
+  remainingSeconds,
+  statusLabelFor
 } from '../lib/orderStatus';
 import { etaClock, formatDuration, formatKes, formatKm } from '../lib/pricing';
-import { modeMeta, priorityOf, transportOf } from '../lib/transport';
+import { agentNoun, modeMeta, priorityOf, transportOf } from '../lib/transport';
 import { color, eyebrow, font, layout, radius, statusTone } from '../theme';
 
 /** One live figure: label above, value below. Four of them sit under the map. */
@@ -89,6 +90,8 @@ export default function TrackOrder() {
   const arriving = isArriving(order, now);
   const live = !isTerminal(order.status);
   const tone = statusTone[order.status];
+  const noun = agentNoun(mode);
+  const arrived = agentHasArrived(order, now);
 
   const headline =
     order.status === STATUS.DELIVERED
@@ -98,9 +101,11 @@ export default function TrackOrder() {
         : arriving
           ? 'Arriving now.'
           : order.status === STATUS.PENDING
-            ? 'Finding you a pickup agent.'
+            ? `Finding you a ${noun}.`
             : order.status === STATUS.ASSIGNED
-              ? 'Your agent is on the way.'
+              ? arrived
+                ? `Your ${noun} is at the pickup point.`
+                : `Your ${noun} is on the way.`
               : `On the way by ${meta.label.toLowerCase()}.`;
 
   return (
@@ -145,7 +150,7 @@ export default function TrackOrder() {
                   animation: live ? 'livePulse 1.8s ease-in-out infinite' : 'none'
                 }}
               />
-              {STATUS_LABEL[order.status]}
+              {statusLabelFor(order, now)}
             </span>
             <TransportBadge mode={mode} priority={priorityOf(order)} tone="dark" size="sm" />
           </div>
@@ -176,9 +181,9 @@ export default function TrackOrder() {
           )}
 
           {order.status === STATUS.PENDING && !order.courier ? (
-            <FindingAgent pickupLabel={order.pickup.name || order.pickup.label} />
+            <FindingAgent pickupLabel={order.pickup.name || order.pickup.label} mode={mode} />
           ) : order.courier ? (
-            <CourierCard courier={order.courier} status={order.status} />
+            <CourierCard courier={order.courier} status={order.status} mode={mode} arrived={arrived} />
           ) : (
             <div
               style={{
@@ -191,14 +196,14 @@ export default function TrackOrder() {
               }}
             >
               {order.status === STATUS.CANCELLED
-                ? 'No agent was assigned to this delivery.'
-                : 'An agent will be assigned shortly.'}
+                ? `No ${noun} was assigned to this delivery.`
+                : `A ${noun} will be assigned shortly.`}
             </div>
           )}
 
           <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid rgba(243,241,237,.16)' }}>
             <div style={{ ...eyebrow, color: 'rgba(243,241,237,.5)', marginBottom: '20px' }}>
-              Status · {STATUS_LABEL[order.status]}
+              Status · {statusLabelFor(order, now)}
             </div>
             <StatusTimeline order={order} tone="dark" />
           </div>
@@ -236,6 +241,9 @@ export default function TrackOrder() {
               value={live ? formatKm(kmLeft) : formatKm(order.route.distanceKm)}
             />
             <LiveStat label="Transport" value={meta.label} mode={mode} />
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+            <LiveStat label="Status" value={statusLabelFor(order, now)} />
           </div>
 
           <div
