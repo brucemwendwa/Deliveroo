@@ -23,6 +23,66 @@ const day = (iso) =>
 const contact = (user) => user.email || user.phone || user.id;
 
 /**
+ * Both controls live at module scope on purpose. Declared inside the table they
+ * would be a new component type on every render, so React would tear the <select>
+ * down and rebuild it mid-interaction — and the change event would land on a node
+ * that is no longer in the document.
+ */
+function RoleControl({ user, self, mayManage, onChange }) {
+  const role = roleOf(user);
+
+  if (!mayManage || self) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontWeight: 600 }}>
+        {ROLE_LABEL[role]}
+        {self && <span style={{ fontSize: '12px', fontWeight: 400, color: color.muted }}>· you</span>}
+      </span>
+    );
+  }
+
+  return (
+    <select
+      value={role}
+      aria-label={`Role for ${user.name}`}
+      onChange={(event) => onChange(user, event.target.value)}
+      style={{ ...control.field, width: 'auto', height: '40px', fontSize: '13.5px', cursor: 'pointer' }}
+    >
+      {Object.values(ROLE).map((option) => (
+        <option key={option} value={option}>
+          {ROLE_LABEL[option]}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function AccountControl({ user, self, mayManage, onToggle }) {
+  if (!mayManage || self) {
+    return (
+      <span style={{ color: user.suspended ? color.orangeDeep : color.body, fontWeight: 600 }}>
+        {user.suspended ? 'Suspended' : 'Active'}
+      </span>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => onToggle(user, !user.suspended)}
+      style={{
+        ...control.chip,
+        minHeight: '40px',
+        fontSize: '13px',
+        padding: '0 14px',
+        borderColor: user.suspended ? color.orangeDeep : 'rgba(17,17,17,.14)',
+        color: user.suspended ? color.orangeDeep : color.ink
+      }}
+    >
+      {user.suspended ? 'Restore access' : 'Suspend'}
+    </button>
+  );
+}
+
+/**
  * §27 — the account directory.
  *
  * Two powers live here and both are administrator-only: what someone may do, and
@@ -55,62 +115,6 @@ export default function UserTable({ users = [], orderCounts = {} }) {
     }
   };
 
-  const RoleControl = ({ user }) => {
-    const role = roleOf(user);
-    const self = user.id === me?.id;
-
-    if (!mayManage || self) {
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontWeight: 600 }}>
-          {ROLE_LABEL[role]}
-          {self && <span style={{ fontSize: '12px', fontWeight: 400, color: color.muted }}>· you</span>}
-        </span>
-      );
-    }
-
-    return (
-      <select
-        value={role}
-        aria-label={`Role for ${user.name}`}
-        onChange={(event) => changeRole(user, event.target.value)}
-        style={{ ...control.field, width: 'auto', height: '40px', fontSize: '13.5px', cursor: 'pointer' }}
-      >
-        {Object.values(ROLE).map((option) => (
-          <option key={option} value={option}>
-            {ROLE_LABEL[option]}
-          </option>
-        ))}
-      </select>
-    );
-  };
-
-  const AccountControl = ({ user }) => {
-    const self = user.id === me?.id;
-    if (!mayManage || self) {
-      return (
-        <span style={{ color: user.suspended ? color.orangeDeep : color.body, fontWeight: 600 }}>
-          {user.suspended ? 'Suspended' : 'Active'}
-        </span>
-      );
-    }
-    return (
-      <button
-        type="button"
-        onClick={() => changeSuspension(user, !user.suspended)}
-        style={{
-          ...control.chip,
-          minHeight: '40px',
-          fontSize: '13px',
-          padding: '0 14px',
-          borderColor: user.suspended ? color.orangeDeep : 'rgba(17,17,17,.14)',
-          color: user.suspended ? color.orangeDeep : color.ink
-        }}
-      >
-        {user.suspended ? 'Restore access' : 'Suspend'}
-      </button>
-    );
-  };
-
   if (narrow) {
     return (
       <div style={{ display: 'grid', gap: '10px' }}>
@@ -137,8 +141,13 @@ export default function UserTable({ users = [], orderCounts = {} }) {
               <span>Joined {day(user.createdAt)}</span>
             </span>
             <span style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-              <RoleControl user={user} />
-              <AccountControl user={user} />
+              <RoleControl user={user} self={user.id === me?.id} mayManage={mayManage} onChange={changeRole} />
+              <AccountControl
+                user={user}
+                self={user.id === me?.id}
+                mayManage={mayManage}
+                onToggle={changeSuspension}
+              />
             </span>
           </div>
         ))}
@@ -179,13 +188,18 @@ export default function UserTable({ users = [], orderCounts = {} }) {
                 <span style={{ display: 'block', fontSize: '12px', color: color.muted }}>{contact(user)}</span>
               </td>
               <td style={cell}>
-                <RoleControl user={user} />
+                <RoleControl user={user} self={user.id === me?.id} mayManage={mayManage} onChange={changeRole} />
               </td>
               <td style={quiet}>{orderCounts[user.id] || 0}</td>
               <td style={{ ...quiet, whiteSpace: 'nowrap' }}>{day(user.createdAt)}</td>
               <td style={{ ...quiet, whiteSpace: 'nowrap' }}>{day(user.lastSeenAt)}</td>
               <td style={cell}>
-                <AccountControl user={user} />
+                <AccountControl
+                  user={user}
+                  self={user.id === me?.id}
+                  mayManage={mayManage}
+                  onToggle={changeSuspension}
+                />
               </td>
             </tr>
           ))}
