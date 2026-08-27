@@ -11,9 +11,9 @@ import TransportBadge from '../components/transport/TransportBadge';
 import Button from '../components/ui/Button';
 import PageShell from './PageShell';
 import { TrackingSkeleton } from '../components/ui/Skeleton';
-import { STATUS, STATUS_LABEL } from '../lib/orderStatus';
+import { STATUS, agentHasArrived, statusLabelFor } from '../lib/orderStatus';
 import { formatDuration, formatKes, formatKm, isWeightVerified } from '../lib/pricing';
-import { priorityOf, transportOf } from '../lib/transport';
+import { agentNoun, agentNounTitle, modeMeta, priorityOf, transportOf } from '../lib/transport';
 import { color, eyebrow, font, layout, radius } from '../theme';
 
 /** How long the search runs before an agent is matched. Long enough to read. */
@@ -48,18 +48,22 @@ export default function Confirmation() {
   if (!order) return <PageShell eyebrow="Delivery" title="Order not found." />;
 
   const mode = transportOf(order);
+  const meta = modeMeta(mode);
   const weighed = isWeightVerified(order.parcel);
   const justAssigned = order.status === STATUS.ASSIGNED;
+  const noun = agentNoun(mode);
+  const arrived = agentHasArrived(order);
 
   const headline = awaitingAgent
-    ? 'Finding your pickup agent.'
+    ? `Finding your ${noun}.`
     : justAssigned
-      ? 'Pickup agent assigned.'
+      ? `${agentNounTitle(mode)} assigned.`
       : order.status === STATUS.CANCELLED
         ? 'Delivery cancelled.'
         : 'Delivery confirmed';
 
   const facts = [
+    ['Delivery method', meta.label],
     ['Pickup', order.pickup.label],
     ['Destination', order.destination.label],
     [
@@ -106,9 +110,9 @@ export default function Confirmation() {
           </h1>
 
           {awaitingAgent ? (
-            <FindingAgent pickupLabel={order.pickup.name || order.pickup.label} />
+            <FindingAgent pickupLabel={order.pickup.name || order.pickup.label} mode={mode} />
           ) : order.courier ? (
-            <CourierCard courier={order.courier} status={order.status} />
+            <CourierCard courier={order.courier} status={order.status} mode={mode} arrived={arrived} />
           ) : (
             <div
               style={{
@@ -121,14 +125,14 @@ export default function Confirmation() {
               }}
             >
               {order.status === STATUS.CANCELLED
-                ? 'No agent was assigned to this delivery.'
-                : 'An agent will be assigned shortly.'}
+                ? `No ${noun} was assigned to this delivery.`
+                : `A ${noun} will be assigned shortly.`}
             </div>
           )}
 
           <div style={{ marginTop: '26px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <Button as={Link} to={`/track/${order.id}`} icon="arrow_forward">
-              Track pickup
+              {order.courier ? `Track ${noun}` : 'Track pickup'}
             </Button>
             <Button as={Link} to={`/orders/${order.id}`} variant="ghostLight">
               Manage delivery
@@ -137,7 +141,7 @@ export default function Confirmation() {
 
           <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid rgba(243,241,237,.16)' }}>
             <div style={{ ...eyebrow, color: 'rgba(243,241,237,.5)', marginBottom: '20px' }}>
-              Status · {STATUS_LABEL[order.status]}
+              Status · {statusLabelFor(order)}
             </div>
             <StatusTimeline order={order} tone="dark" />
           </div>
@@ -183,8 +187,8 @@ export default function Confirmation() {
 
           {!weighed && (
             <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.55, color: 'rgba(243,241,237,.6)' }}>
-              We&apos;ll weigh the package at pickup and confirm the final fee from the measured
-              weight. Keep order <span style={{ fontFamily: font.mono, letterSpacing: '.04em', color: color.paper }}>#{order.id}</span> to
+              We&apos;ll weigh the package when your {noun} collects it, and confirm the final fee
+              from the measured weight. Keep order <span style={{ fontFamily: font.mono, letterSpacing: '.04em', color: color.paper }}>#{order.id}</span> to
               track this delivery later.
             </p>
           )}
