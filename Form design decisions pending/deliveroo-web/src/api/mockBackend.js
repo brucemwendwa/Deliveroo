@@ -502,6 +502,92 @@ export async function setFleetStatus(mode, status) {
   return next;
 }
 
+// --- people (§27) -----------------------------------------------------------
+//
+// Two registers, because they answer different questions. The *directory* is who has
+// an account and what they may do with it. The *roster* is who is on shift to carry
+// a parcel today. A courier is not an account holder and an account holder is not a
+// courier, and conflating them is how a portal ends up unable to say either.
+
+/** §27 — staff read the directory; only an administrator changes anyone in it. */
+export async function listUsers() {
+  await wait(60);
+  requirePermission(PERMISSION.VIEW_ACCOUNTS);
+  return userDirectory();
+}
+
+function mutateUser(id, fn) {
+  const users = userDirectory();
+  const index = users.findIndex((entry) => entry.id === id);
+  if (index === -1) throw new Error('That account no longer exists.');
+  const updated = fn(users[index]);
+  users[index] = updated;
+  saveUsers(users);
+  return updated;
+}
+
+export async function setUserRole(id, role) {
+  await wait(60);
+  const actor = requirePermission(PERMISSION.MANAGE_ACCOUNTS);
+  if (!ROLE[role]) throw new Error(`Unknown role ${role}.`);
+  // An administrator demoting themselves could leave an install with nobody able to
+  // promote anyone, and they would be locked out mid-click.
+  if (id === actor.id && role !== ROLE.ADMIN) {
+    throw new Error('You cannot change your own role. Ask another administrator.');
+  }
+
+  const updated = mutateUser(id, (user) => ({ ...user, role, isAdmin: isStaffRole(role) }));
+  record('ROLE_CHANGED', { target: updated.email || updated.phone || updated.id, detail: role });
+  return updated;
+}
+
+export async function setUserSuspended(id, suspended) {
+  await wait(60);
+  const actor = requirePermission(PERMISSION.MANAGE_ACCOUNTS);
+  if (id === actor.id) throw new Error('You cannot suspend your own account.');
+
+  const updated = mutateUser(id, (user) => ({ ...user, suspended: Boolean(suspended) }));
+  record(suspended ? 'ACCOUNT_SUSPENDED' : 'ACCOUNT_RESTORED', {
+    target: updated.email || updated.phone || updated.id
+  });
+  return updated;
+}
+
+/** §27 — the roster, with each courier's live workload attached. */
+export async function listCouriers() {
+  await wait(60);
+  requirePermission(PERMISSION.VIEW_PORTAL);
+  const orders = allOrders();
+  return rosteredCouriers().map((courier) => {
+    const jobs = orders.filter((order) => order.courier?.plate === courier.plate);
+    return {
+      ...courier,
+      activeJobs: jobs.filter((order) => !isTerminal(order.status)).length,
+      completedJobs: jobs.filter((order) => order.status === STATUS.DELIVERED).length
+    };
+  });
+}
+
+export async function setCourierShift(id, onShift) {
+  await wait(60);
+  requirePermission(PERMISSION.MANAGE_COURIERS);
+  const courier = COURIERS.find((entry) => entry.id === id);
+  if (!courier) throw new Error(`Unknown courier ${id}.`);
+
+  // Taking someone off shift is about what dispatch may hand out next; it does not
+  // abandon a parcel they are already carrying.
+  write(COURIERS_KEY, { ...courierRoster(), [id]: { onShift: Boolean(onShift) } });
+  record('COURIER_SHIFT', { target: courier.name, detail: onShift ? 'On shift' : 'Off shift' });
+  return listCouriers();
+}
+
+/** §19/§27 — what the platform has told customers. Read-only, staff-only. */
+export async function listNotifications() {
+  await wait(40);
+  requirePermission(PERMISSION.VIEW_NOTIFICATIONS);
+  return outbox();
+}
+
 /**
  * §17 — a delivery belongs to the account that booked it. Enforced here rather than
  * in the screen, because a rule that lives only in the UI is not a rule: anyone could
