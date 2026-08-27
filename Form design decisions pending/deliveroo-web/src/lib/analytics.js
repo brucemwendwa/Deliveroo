@@ -5,7 +5,7 @@
 // rather than tangled up in a screen. Everything here takes a plain array of orders
 // and returns plain data — no React, no store, no formatting. The screens format.
 
-import { STATUS, isTerminal, remainingSeconds, stepIndex } from './orderStatus';
+import { STATUS, isTerminal } from './orderStatus';
 import { billableWeightKg, isWeightVerified } from './pricing';
 import { DEFAULT_MODE, TRANSPORT_MODES, transportOf } from './transport';
 
@@ -27,6 +27,22 @@ export function deliveryMinutes(order) {
   const to = at(order, STATUS.DELIVERED) ?? Date.parse(order.updatedAt);
   if (!Number.isFinite(from) || !Number.isFinite(to) || to < from) return null;
   return Math.round((to - from) / MINUTE);
+}
+
+/**
+ * When the parcel was due: the leg actually starting, plus the duration it was
+ * quoted. Null until it has started, because a parcel nobody has collected cannot
+ * be late — it is unassigned, which is a different problem with a different fix.
+ *
+ * Worked out here rather than from `remainingSeconds()`, which is a progress bar:
+ * it is deliberately capped short of 100% so a late parcel still reads as moving,
+ * and it therefore never reaches zero to be tested against.
+ */
+function dueAt(order) {
+  const started = at(order, STATUS.IN_TRANSIT) ?? at(order, STATUS.PICKED_UP);
+  const quoted = order.pricing?.durationSeconds || order.route?.durationSeconds;
+  if (!Number.isFinite(started) || !quoted) return null;
+  return started + quoted * 1000;
 }
 
 /**
@@ -246,8 +262,9 @@ export function needsAttention(orders = [], now = Date.now()) {
     if (order.status === STATUS.PENDING && !order.courier && waited >= THRESHOLD.unassignedMinutes) {
       rows.push({ order, issue: ISSUE.UNASSIGNED, minutes: Math.round(waited) });
     }
-    if (stepIndex(order.status) >= stepIndex(STATUS.PICKED_UP) && remainingSeconds(order, now) <= 0) {
-      rows.push({ order, issue: ISSUE.OVERDUE, minutes: null });
+    const due = dueAt(order);
+    if (due !== null && now > due) {
+      rows.push({ order, issue: ISSUE.OVERDUE, minutes: Math.round((now - due) / MINUTE) });
     }
     if (order.status === STATUS.PICKED_UP && !isWeightVerified(order.parcel)) {
       rows.push({ order, issue: ISSUE.UNWEIGHED, minutes: null });
