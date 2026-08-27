@@ -102,6 +102,83 @@ delivered) from the status and how far through the journey the parcel is. One vo
 the API, one for the human. `progressFor()` moves with the clock once a parcel is in transit,
 which is what makes the ETA count down and the timeline reach "Arriving" on its own.
 
+## The admin portal (`/admin`)
+
+One gated shell — `routes/admin/AdminPortal.jsx` — around nine sections. It decides whether
+the person may be here at all, loads everything the portal reads, keeps it live through the
+same cross-tab subscription the customer's tracking screen uses, and gives each section its
+heading. The sections are then free to be about their own subject.
+
+| Section | What it is for | Needs |
+| --- | --- | --- |
+| Overview | The four figures a shift lead acts on, then the exceptions, then the shape of the fortnight | staff |
+| Deliveries | The dispatch board: search, sort, filter, and the levers on the selected parcel | staff |
+| Couriers | The roster — who is on shift, what they are carrying, what they have moved | staff |
+| Capacity | Availability per mode, live load, and the tariff table printed from `transport.js` | staff |
+| Accounts | Customers and colleagues; roles and suspension | staff to read, **administrator** to change |
+| Reports | Volume, revenue, punctuality, busiest routes, courier performance, CSV export | staff |
+| Notifications | Every message the platform has written about a delivery (§19's outbox) | staff |
+| Audit trail | Who did what, to whose delivery, and when | staff |
+| Settings | Pause bookings, post a notice to staff, support contacts, reset the demo | **administrator** |
+
+### Roles (`src/lib/roles.js`)
+
+`isAdmin` was fine while the console did one job. A portal that can also promote colleagues
+and pause the platform needs the finer answer, so a session carries a `role`:
+
+| Role | Can |
+| --- | --- |
+| `CUSTOMER` | Book and track their own deliveries. No portal at all. |
+| `DISPATCHER` | Run the board: statuses, the scale, the parcel's location, capacity, the roster. |
+| `ADMIN` | All of that, plus accounts, roles, suspension and platform settings. |
+
+One grant table answers every question — the sidebar builds itself from it, each screen gates
+its own controls with it, and **the backend enforces it**. A section a dispatcher may not open
+is absent from the navigation *and* refused when its URL is typed, because a sidebar that hides
+a link is a convenience, not a control. `isAdmin` is still written into the session (`role !==
+CUSTOMER`), so everything that asked the old question keeps working, and a session stored
+before roles existed reads as an administrator rather than being locked out.
+
+The founding address `admin@deliveroo.co` is the bootstrap: a fresh install has no directory,
+so it needs one address that is an administrator by definition. Everyone else's role comes
+from the directory, which is why a promotion survives the next sign-in. An administrator
+cannot demote or suspend themselves — an install whose last administrator clicks the wrong row
+has nobody left to undo it.
+
+### What is enforced, not just displayed
+
+Four rules live in the data layer, where a hand-written `fetch` meets them too:
+
+- only staff may move an order along, weigh a parcel, report its location or change capacity;
+- only an administrator may change a role, suspend an account or touch settings;
+- a suspended account cannot get a session at all — refused at sign-in, not per endpoint;
+- while bookings are paused, `createOrder` refuses, so the pause holds against a stale tab
+  that still has the request button on screen. The booking screen says so up front as well.
+
+Every staff action against someone else's delivery or account writes an audit entry with the
+account that took it. The trail is append-only and nothing in the portal can edit it.
+
+### The figures (`src/lib/analytics.js`)
+
+Pure, like `pricing.js` and `transport.js`: it takes an array of orders and returns plain data,
+so the definitions are portable to the SQL aggregates a real backend would compute. Worth
+knowing what the words mean:
+
+- **Revenue** counts every delivery that was not cancelled, at the fare currently on the order
+  — the measured one where the parcel has been weighed, the estimate where it has not.
+- **On time** compares a delivery against the duration it was quoted, counted from *collection*.
+  Counting from the booking would charge the carrier for how long the customer took to hand the
+  parcel over.
+- **Needs attention** is the point of the screen: unassigned requests past 15 minutes, anything
+  past its ETA, parcels collected without going on a scale, and orders with no movement in six
+  hours. One parcel can raise several rows — being late and never having been weighed are two
+  jobs for two different people.
+- A day is the **operator's** day, bucketed on local date parts. ISO days are UTC, which in
+  Nairobi would file everything booked before 3am under the day before.
+
+Charts are one series on one axis — never two scales on one chart — with the value printed on
+every ranked bar so the chart still works with the colour taken away.
+
 ## Data layer
 
 There is no backend yet. `src/api/index.js` picks an implementation:
@@ -124,6 +201,17 @@ Three new endpoints and three new fields. Nothing existing changes shape.
 | `POST /orders/:id/assign` | Dispatch matches a pickup agent. **Must be idempotent** — the confirmation screen may retry, and two tabs may both ask. Returns the order with `courier` attached and status `ASSIGNED`; an order that has already moved on comes back untouched. |
 | `PATCH /orders/:id/location` | Staff-only. `{ label, lat, lng }` → where the parcel is *in words*. |
 | `GET /transport/availability` · `PATCH /admin/transport/availability` | Read/write a status per mode — `AVAILABLE`, `BUSY` or `OFFLINE`. The PATCH is staff-only. |
+
+And for the portal (§27) — everything under `/admin` is staff-only, and the three account
+routes are administrator-only:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /admin/users` · `PATCH /admin/users/:id/role` · `PATCH /admin/users/:id/suspension` | The account directory. A suspended account must be refused a session at sign-in. |
+| `GET /admin/couriers` · `PATCH /admin/couriers/:id/shift` | The roster. Off shift means dispatch stops matching them to new parcels; it does not take a parcel off someone already carrying one. |
+| `GET /admin/audit` | Append-only trail of staff actions: actor, role, action, subject, detail. |
+| `GET /admin/notifications` | §19's outbox. |
+| `GET /settings` · `PATCH /admin/settings` | `acceptingOrders` (the platform pause, enforced in the create-order route), `noticeToStaff`, support contacts. The GET is public — the booking screen reads it. |
 
 New fields on an order:
 
@@ -277,9 +365,14 @@ import { makeStore } from './store';
 render(<Provider store={makeStore()}><MemoryRouter><Nav /></MemoryRouter></Provider>);
 ```
 
-Eleven suites: `pricing` · `transport` · `orderStatus` · `mockBackend` (the rules that are
-actually enforced) and `App` · `routes` · `booking` · `adminWeight` · `experience` · `hero` ·
-`uiSlice` (what the screens do with them). `experience.test.jsx` covers the two things that are hard to
+Fourteen suites: `pricing` · `transport` · `orderStatus` · `analytics` · `mockBackend` ·
+`adminAccess` (the rules that are actually enforced) and `App` · `routes` · `booking` ·
+`adminWeight` · `adminPortal` · `experience` · `hero` · `uiSlice` (what the screens do with
+them). The split is deliberate: `adminAccess.test.js` goes straight at the data layer with no
+screen involved, because the console can hide a button but only the backend can refuse the
+call behind it; `adminPortal.test.jsx` then checks the screens obey the same rules — a
+dispatcher is refused `/admin/settings` by URL, an administrator is not offered a control that
+would change their own role. `experience.test.jsx` covers the two things that are hard to
 eyeball — the dispatch wait resolving into an assigned agent, and the narrow-viewport layout.
 It also covers the customer dashboard, whose active-delivery panel is otherwise only reachable
 with a signed-in session and a live order. It sets `window.innerWidth` rather than dispatching
