@@ -7,6 +7,7 @@ import { AppRoutes } from '../App';
 import { verifyOtp } from '../store/authSlice';
 import { MOCK_OTP, createOrder, seedIfEmpty, updateOrderStatus } from '../api/mockBackend';
 import { STATUS } from '../lib/orderStatus';
+import { TRANSPORT, transportOf } from '../lib/transport';
 
 const seeded = () => {
   seedIfEmpty();
@@ -60,6 +61,44 @@ describe('requesting a pickup', () => {
     expect(screen.getByText(/away/)).toBeInTheDocument();
     expect(screen.getByText(/arriving in/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /track pickup/i })).toBeInTheDocument();
+  });
+
+  it('goes looking for a rider when the parcel is going by motorbike', async () => {
+    seedIfEmpty();
+    const order = await createOrder({
+      pickup: { label: 'CBD · Nairobi', name: 'CBD', lat: -1.2864, lng: 36.8172 },
+      destination: { label: 'Westlands · Nairobi', name: 'Westlands', lat: -1.2673, lng: 36.8065 },
+      route: { distanceKm: 12, durationSeconds: 1800, coordinates: [], estimated: false },
+      parcel: { weightKg: 2, description: 'Documents' },
+      transport: { mode: TRANSPORT.MOTORBIKE },
+      sender: { name: 'Sender', phone: '+254700000001' },
+      recipient: { name: 'Recipient', phone: '+254700000002' }
+    });
+
+    renderAt(`/orders/${order.id}/confirmation`);
+
+    // §25 — the word follows the vehicle, all the way through the match.
+    expect(await screen.findByText(/finding a rider near you/i)).toBeInTheDocument();
+    expect(await screen.findByText('Rider assigned.', {}, { timeout: 8000 })).toBeInTheDocument();
+    expect(screen.getByText(/rider heading to pickup/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /track rider/i })).toBeInTheDocument();
+  });
+});
+
+// §25 — a motorbike delivery is tracked by the same screen as every other mode.
+describe('tracking a motorbike delivery', () => {
+  it('names the vehicle, the rider and the stage the rider is at', async () => {
+    const bike = seeded().find((order) => transportOf(order) === TRANSPORT.MOTORBIKE);
+    expect(bike).toBeDefined();
+
+    renderAt(`/track/${bike.id}`);
+
+    expect(await screen.findByText(/on the way by motorbike/i)).toBeInTheDocument();
+    // The transport figure under the map, and the timeline wording above it.
+    expect(screen.getByText('Motorbike')).toBeInTheDocument();
+    expect(screen.getByText('Rider assigned')).toBeInTheDocument();
+    expect(screen.getByText('Rider arrived')).toBeInTheDocument();
+    expect(screen.getByText(bike.presentLocation.label)).toBeInTheDocument();
   });
 });
 
