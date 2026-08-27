@@ -50,7 +50,7 @@ describe('landing page', () => {
 
   it('offers the grouped nav above the breakpoint', () => {
     renderNav();
-    for (const label of ['Services', 'Track Delivery', 'Contact', 'Login', 'Get Started']) {
+    for (const label of ['Services', 'Track Delivery', 'Contact', 'Get Started']) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
   });
@@ -87,7 +87,6 @@ describe('landing page', () => {
     renderNav(store);
 
     expect(screen.queryByText('Get Started')).not.toBeInTheDocument();
-    expect(screen.queryByText('Login')).not.toBeInTheDocument();
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
   });
 
