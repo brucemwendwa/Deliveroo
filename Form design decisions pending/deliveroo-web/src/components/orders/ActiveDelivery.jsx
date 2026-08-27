@@ -1,12 +1,20 @@
 import { Link } from 'react-router-dom';
 import useNow from '../../hooks/useNow';
-import { STATUS, currentLocationLabel, progressFor, remainingKm, remainingSeconds } from '../../lib/orderStatus';
+import {
+  STATUS,
+  agentHasArrived,
+  currentLocationLabel,
+  progressFor,
+  remainingKm,
+  remainingSeconds,
+  statusLabelFor
+} from '../../lib/orderStatus';
 import { etaClock, formatKm } from '../../lib/pricing';
-import { modeMeta, priorityOf, transportOf } from '../../lib/transport';
+import { agentNoun, agentNounTitle, modeMeta, priorityOf, transportOf } from '../../lib/transport';
 import { color, ease, eyebrow, font } from '../../theme';
 import Button from '../ui/Button';
-import Icon from '../Icon';
 import TransportBadge from '../transport/TransportBadge';
+import TransportGlyph from '../transport/TransportGlyph';
 import StatusPill from './StatusPill';
 
 /**
@@ -24,13 +32,18 @@ export default function ActiveDelivery({ order }) {
   const secondsLeft = remainingSeconds(order, now);
   const minutesLeft = Math.max(1, Math.round(secondsLeft / 60));
   const searching = order.status === STATUS.PENDING && !order.courier;
+  const noun = agentNoun(mode);
 
   const facts = [
+    // Who has it comes first once someone does: on a motorbike delivery that is the
+    // single fact the customer opens the dashboard for.
+    order.courier && [agentNounTitle(mode), order.courier.name],
     ['Current location', currentLocationLabel(order)],
     ['Destination', order.destination.name || order.destination.label],
     ['Distance remaining', formatKm(remainingKm(order, now))],
-    ['ETA', etaClock(secondsLeft, now)]
-  ];
+    ['ETA', etaClock(secondsLeft, now)],
+    ['Status', statusLabelFor(order, now)]
+  ].filter(Boolean);
 
   return (
     <section
@@ -70,9 +83,11 @@ export default function ActiveDelivery({ order }) {
           </h2>
           <p style={{ margin: 0, fontSize: '14.5px', color: 'rgba(243,241,237,.66)' }}>
             {searching
-              ? 'Finding a pickup agent near you…'
+              ? `Finding a ${noun} near you…`
               : order.status === STATUS.ASSIGNED && order.courier
-                ? `${order.courier.name} is ${order.courier.distanceKm} km away · arriving in ${order.courier.etaMinutes} min`
+                ? agentHasArrived(order, now)
+                  ? `${order.courier.name} is at the pickup point, ready to collect`
+                  : `${order.courier.name} is ${order.courier.distanceKm} km away · arriving in ${order.courier.etaMinutes} min`
                 : `Travelling by ${meta.label.toLowerCase()} · ${meta.tagline.toLowerCase()}`}
           </p>
         </div>
@@ -130,7 +145,7 @@ export default function ActiveDelivery({ order }) {
         <div style={{ flex: '1 1 130px', minWidth: 0 }}>
           <div style={{ ...eyebrow, fontSize: '9px', color: 'rgba(243,241,237,.45)', marginBottom: '5px' }}>Transport</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '14.5px', fontWeight: 700, color: color.paper }}>
-            <Icon name="conversion_path" size={16} color={color.orange} />
+            <TransportGlyph mode={mode} size={17} color={color.orange} />
             {meta.label}
           </div>
         </div>
