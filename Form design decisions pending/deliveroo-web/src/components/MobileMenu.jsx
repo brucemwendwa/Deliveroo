@@ -114,6 +114,13 @@ export default function MobileMenu() {
             <Link to="/orders" onClick={close} style={outlineControl}>
               {user.name} · My deliveries
             </Link>
+            {/* §27 — staff get the portal here too: the desktop profile menu offers
+                it, and a phone is where a shift lead actually reads the board. */}
+            {user.isAdmin && (
+              <Link to="/admin" onClick={close} style={outlineControl}>
+                Admin portal
+              </Link>
+            )}
             <button
               type="button"
               onClick={async () => {
