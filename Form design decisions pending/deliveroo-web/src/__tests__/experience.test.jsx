@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { makeStore } from '../store';
 import { AppRoutes } from '../App';
 import { verifyOtp } from '../store/authSlice';
-import { MOCK_OTP, createOrder, seedIfEmpty, updateOrderStatus } from '../api/mockBackend';
+import { MOCK_OTP, assignAgent, createOrder, seedIfEmpty } from '../api/mockBackend';
 import { STATUS } from '../lib/orderStatus';
 import { TRANSPORT, transportOf } from '../lib/transport';
 
@@ -147,7 +147,7 @@ describe('mobile layout', () => {
     const orders = seeded();
     const store = makeStore();
     await store.dispatch(verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP }));
-    renderNarrow('/admin', store);
+    renderNarrow('/admin/deliveries', store);
 
     // Every delivery is still there, as a card each rather than a row each.
     expect(await screen.findByRole('button', { name: new RegExp(orders[0].id) })).toBeInTheDocument();
@@ -175,7 +175,9 @@ describe('customer dashboard', () => {
   it('leads with the delivery in progress, and how it is travelling', async () => {
     const store = makeStore();
     const order = await book(store);
-    await updateOrderStatus(order.id, STATUS.ASSIGNED);
+    // The customer's own request is what finds them an agent (§25) — moving an
+    // order along by hand is dispatch's job, and this test is not signed in as staff.
+    await assignAgent(order.id);
 
     renderAt('/orders', store);
 
