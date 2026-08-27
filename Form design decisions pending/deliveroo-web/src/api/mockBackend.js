@@ -11,7 +11,7 @@
 import { MAX_WEIGHT_KG, priceOrder } from '../lib/pricing';
 import { STATUS, allowedTransitions, canVerifyWeight, isTerminal, weightLockedReason } from '../lib/orderStatus';
 import { DEFAULT_FLEET, DEFAULT_MODE, DEFAULT_PRIORITY, FLEET_STATUS, TRANSPORT } from '../lib/transport';
-import { notify, outbox } from '../lib/notifications';
+import { clearOutbox, notify, outbox } from '../lib/notifications';
 import { PERMISSION, ROLE, can, isStaffRole } from '../lib/roles';
 
 const ORDERS_KEY = 'deliveroo.orders';
@@ -583,6 +583,31 @@ export async function setCourierShift(id, onShift) {
   write(COURIERS_KEY, { ...courierRoster(), [id]: { onShift: Boolean(onShift) } });
   record('COURIER_SHIFT', { target: courier.name, detail: onShift ? 'On shift' : 'Off shift' });
   return listCouriers();
+}
+
+/**
+ * §27 — put the demo back the way it shipped.
+ *
+ * Mock-only, and deliberately narrow: it clears the deliveries, the capacity
+ * switches, the roster, the outbox and the trail, then re-seeds the board. It does
+ * not touch the account directory or anyone's session, because signing the
+ * administrator out mid-click is not a reset, it is a lockout.
+ */
+export async function resetDemoData() {
+  await wait();
+  requirePermission(PERMISSION.MANAGE_SETTINGS);
+  for (const key of [ORDERS_KEY, FLEET_KEY, COURIERS_KEY]) {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* nothing to clear */
+    }
+  }
+  clearOutbox();
+  write(AUDIT_KEY, []);
+  seedIfEmpty();
+  record('DEMO_DATA_RESET');
+  return allOrders();
 }
 
 /** §19/§27 — what the platform has told customers. Read-only, staff-only. */
