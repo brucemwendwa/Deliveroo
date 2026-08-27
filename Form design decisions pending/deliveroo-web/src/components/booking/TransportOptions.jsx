@@ -1,4 +1,4 @@
-import { PRIORITY_OPTIONS } from '../../lib/transport';
+import { PRIORITY_OPTIONS, TRANSPORT_MODES } from '../../lib/transport';
 import { formatDuration, formatKes } from '../../lib/pricing';
 import useHover from '../../hooks/useHover';
 import { color, ease, eyebrow, font, radius } from '../../theme';
@@ -6,8 +6,8 @@ import Icon from '../Icon';
 import TransportGlyph from '../transport/TransportGlyph';
 
 /**
- * §25 — "how should it be transported?". Four cards, priced live against this route
- * and this parcel.
+ * §25 — "how should it be transported?". One card per mode, priced live against this
+ * route and this parcel.
  *
  * A mode that can't run the route stays on screen, greyed, carrying the reason it
  * can't. Hiding it would leave the customer wondering whether Deliveroo flies at all;
@@ -184,9 +184,9 @@ function OptionCard({ option, selected, onSelect }) {
 function LoadingCards() {
   return (
     <>
-      {[0, 1, 2, 3].map((index) => (
+      {TRANSPORT_MODES.map((meta, index) => (
         <div
-          key={index}
+          key={meta.id}
           aria-hidden="true"
           style={{
             height: '186px',
