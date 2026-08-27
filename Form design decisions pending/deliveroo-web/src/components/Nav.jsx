@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { openAuthModal, showToast, toggleMobileMenu } from '../store/uiSlice';
+import { showToast, toggleMobileMenu } from '../store/uiSlice';
 import { selectIsSignedIn, selectUser, signOut } from '../store/authSlice';
 import useStartBooking, { BOOKING_PATH } from '../hooks/useStartBooking';
 import { color, ease, hover, layout, radius } from '../theme';
@@ -221,39 +221,28 @@ export default function Nav() {
                 <ProfileMenu user={user} />
               </>
             ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => dispatch(openAuthModal(null))}
-                  style={{ ...topLink, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                >
-                  Login
-                </button>
-
-                <HoverLink
-                  as={Link}
-                  to={BOOKING_PATH}
-                  onClick={startBooking}
-                  hoverStyle={hover.yellow}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    height: '44px',
-                    padding: '0 22px',
-                    borderRadius: radius.pill,
-                    background: color.orange,
-                    color: color.ink,
-                    fontSize: '14.5px',
-                    fontWeight: 700,
-                    marginLeft: '8px',
-                    transition: `transform .2s ${ease.out}, box-shadow .2s`
-                  }}
-                >
-                  Get Started
-                  <Icon name="arrow_outward" size={17} />
-                </HoverLink>
-              </>
+              <HoverLink
+                as={Link}
+                to={BOOKING_PATH}
+                onClick={startBooking}
+                hoverStyle={hover.yellow}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  height: '44px',
+                  padding: '0 22px',
+                  borderRadius: radius.pill,
+                  background: color.orange,
+                  color: color.ink,
+                  fontSize: '14.5px',
+                  fontWeight: 700,
+                  transition: `transform .2s ${ease.out}, box-shadow .2s`
+                }}
+              >
+                Get Started
+                <Icon name="arrow_outward" size={17} />
+              </HoverLink>
             )}
           </div>
         )}
