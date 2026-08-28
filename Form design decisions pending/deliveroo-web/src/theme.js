@@ -18,11 +18,10 @@ export const font = {
   mono: "'JetBrains Mono', monospace",
   icon: "'Material Symbols Rounded'",
   /**
-   * The wordmark only. Its box, van and wheels are positioned in `em` against this
-   * face's condensed letterforms, so it does not survive a family swap — and a logo
-   * keeping its own typeface is normal anyway.
+   * The wordmark only. It shares a face with `display` today, but stays its own
+   * entry so the logo can be retyped without dragging every heading with it.
    */
-  brand: "'Anton', 'Space Grotesk', sans-serif"
+  brand: "'Space Grotesk', system-ui, sans-serif"
 };
 
 export const ease = {
