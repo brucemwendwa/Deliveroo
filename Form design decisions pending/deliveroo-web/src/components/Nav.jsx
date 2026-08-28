@@ -173,11 +173,11 @@ export default function Nav() {
               textShadow: '0 1px 10px rgba(17,17,17,.6)'
             }}
           >
-            <span>Ship It</span>
+            <span>Door To Door</span>
             <span aria-hidden="true" style={{ width: '3px', height: '3px', borderRadius: '999px', background: 'rgba(255,255,255,.5)' }} />
-            <span style={{ color: color.orange }}>Watch It</span>
+            <span style={{ color: color.orange }}>Any Mode</span>
             <span aria-hidden="true" style={{ width: '3px', height: '3px', borderRadius: '999px', background: 'rgba(255,255,255,.5)' }} />
-            <span>Land It</span>
+            <span>Tracked Live</span>
           </div>
         </div>
 
