@@ -88,7 +88,7 @@ export default function AppLayout() {
       <Nav />
       <MobileMenu />
       <Outlet />
-      <SiteFooter brand="Deliveroo" />
+      <SiteFooter brand="Send it" />
       {showBottomNav && <BottomNav />}
       <AuthModal />
       <Toast />
