@@ -50,7 +50,7 @@ export const HERO_SLIDES = [
     headline: ['Fast. Local.', 'At your door.'],
     copy: 'Need it delivered across town? Request a rider and we’ll come straight to you.',
     photo: '/photos/hero-motorbike-city.jpeg',
-    alt: 'Deliveroo rider carrying a delivery box on a motorbike, heading into the city at sunset',
+    alt: 'Courier carrying a delivery box on a motorbike, heading into the city at sunset',
     // The rider sits left of centre and cannot be cropped aside, so the copy moves
     // instead; on a phone the crop is horizontal and is anchored on him.
     align: 'right',
@@ -386,7 +386,7 @@ export default function Hero() {
       id="top"
       role="region"
       aria-roledescription="carousel"
-      aria-label="Deliveroo delivery modes"
+      aria-label="Send it delivery modes"
       onMouseEnter={() => setEngaged(true)}
       onMouseLeave={() => setEngaged(false)}
       onFocusCapture={() => setEngaged(true)}
