@@ -20,7 +20,7 @@ describe('landing page', () => {
     withStore(<App />);
     // The carousel starts on the drone: it is the slide that says "technology" first.
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The future ofdelivery is here');
-    expect(screen.getByText('Watch It')).toBeInTheDocument();
+    expect(screen.getByText('Any Mode')).toBeInTheDocument();
   });
 
   it('renders the landing sections, booking now living on its own route', () => {
