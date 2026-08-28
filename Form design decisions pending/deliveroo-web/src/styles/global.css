@@ -101,3 +101,22 @@ button { font-family: inherit; }
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
+
+/* §4 — the services catalogue. Five cards, so the column count is stated rather than
+   left to auto-fit: auto-fit would put four across and leave the fifth alone in a row
+   of holes. One up on a phone, two on a tablet, then a 3 + 2 layout on the desktop
+   grid — every row full at every width. */
+.services-grid {
+  display: grid;
+  gap: clamp(18px, 2.2vw, 28px);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 620px) {
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 940px) {
+  .services-grid { grid-template-columns: repeat(6, 1fr); }
+  .services-grid > * { grid-column: span 2; }
+  .services-grid > *:nth-child(4),
+  .services-grid > *:nth-child(5) { grid-column: span 3; }
+}
