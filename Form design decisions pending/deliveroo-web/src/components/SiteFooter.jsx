@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { color, font, hover, layout, radius } from '../theme';
 import HoverLink from './HoverLink';
+import SocialIcon, { SOCIAL_NETWORKS } from './SocialIcon';
 import Wordmark from './Wordmark';
 
 // §20 — four columns under a closing line, nothing more.
@@ -116,14 +117,9 @@ export default function SiteFooter({ brand = 'Deliveroo' }) {
           <div style={{ flex: '1 1 140px' }}>
             <div style={colTitle}>Social</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '9px' }}>
-              {[
-                { tag: 'IG', label: 'Instagram' },
-                { tag: 'FB', label: 'Facebook' },
-                { tag: 'LI', label: 'LinkedIn' },
-                { tag: 'X', label: 'X' }
-              ].map((social) => (
+              {SOCIAL_NETWORKS.map((social) => (
                 <HoverLink
-                  key={social.tag}
+                  key={social.id}
                   href="#footer"
                   aria-label={social.label}
                   hoverStyle={hover.social}
@@ -135,14 +131,11 @@ export default function SiteFooter({ brand = 'Deliveroo' }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontFamily: font.mono,
-                    fontSize: '11px',
-                    fontWeight: 700,
                     color: 'rgba(243,241,237,.75)',
                     transition: 'background .2s, color .2s'
                   }}
                 >
-                  {social.tag}
+                  <SocialIcon network={social.id} size={18} />
                 </HoverLink>
               ))}
             </div>
