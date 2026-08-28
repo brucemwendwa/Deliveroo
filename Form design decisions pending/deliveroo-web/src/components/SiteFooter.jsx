@@ -36,7 +36,7 @@ const colTitle = {
 
 const footLink = { fontSize: '14.5px', color: 'rgba(243,241,237,.7)' };
 
-export default function SiteFooter({ brand = 'Deliveroo' }) {
+export default function SiteFooter({ brand = 'Send it' }) {
   return (
     <footer id="footer" style={{ background: color.ink, padding: 'clamp(64px,7vw,104px) 0 34px' }}>
       <div style={{ maxWidth: layout.maxWidth, margin: '0 auto', padding: `0 ${layout.gutter}` }}>
@@ -60,20 +60,6 @@ export default function SiteFooter({ brand = 'Deliveroo' }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(32px,4vw,72px)' }}>
           <div style={{ flex: '1 1 240px', maxWidth: '320px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '18px' }}>
-              <span
-                aria-hidden="true"
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '11px',
-                  background: color.orange,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <span style={{ width: '11px', height: '11px', background: color.ink, transform: 'rotate(45deg)', borderRadius: '2px' }} />
-              </span>
               <span style={{ display: 'flex', alignItems: 'flex-start' }}>
                 <Wordmark fontSize="25px" tone={color.paper} shadow={false} />
                 <span style={{ fontFamily: font.display, fontWeight: 700, fontSize: '25px', color: color.orange, lineHeight: 1 }}>.</span>
