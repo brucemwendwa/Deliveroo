@@ -406,7 +406,8 @@ export default function Hero() {
       {/*
         Full-bleed stage. Every slide is a layer of its own at inset 0 so the photos
         crossfade in place — no sliding, nothing to reflow — and the photo itself is a
-        plain object-fit:cover image, drifting under its own keyframes while active.
+        plain object-fit:cover image, drawn untouched: no scrim, no filter, no scale,
+        so it renders exactly as supplied. The copy carries its own text-shadow.
       */}
       {HERO_SLIDES.map((item, position) => {
         const active = position === index;
@@ -435,49 +436,12 @@ export default function Hero() {
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                objectPosition: narrow ? item.focusNarrow : item.focus,
-                filter: 'saturate(1.05) contrast(1.02)',
-                animationName: active ? 'heroDrift' : 'none',
-                animationDuration: `${SLIDE_MS + FADE_MS * 2}ms`,
-                animationTimingFunction: ease.out,
-                animationFillMode: 'both',
-                animationPlayState: paused ? 'paused' : 'running',
-                willChange: 'transform'
+                objectPosition: narrow ? item.focusNarrow : item.focus
               }}
             />
           </div>
         );
       })}
-
-      {/*
-        Two scrims, both deliberately light: one across for the copy on the left, one
-        down the frame for the fixed nav at the top and the controls at the bottom.
-        The photo is meant to stay bright — this is only enough to hold white type.
-      */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 3,
-          background: narrow
-            ? 'linear-gradient(180deg,rgba(10,10,10,.5) 0%,rgba(10,10,10,.14) 26%,rgba(10,10,10,.62) 72%,rgba(10,10,10,.82) 100%)'
-            : `linear-gradient(${alignRight ? 260 : 100}deg,rgba(10,10,10,.78) 0%,rgba(10,10,10,.56) 30%,rgba(10,10,10,.2) 58%,rgba(10,10,10,0) 80%)`,
-          transition: 'background .6s ease'
-        }}
-      />
-      {!narrow && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 3,
-            background:
-              'linear-gradient(180deg,rgba(10,10,10,.42) 0%,rgba(10,10,10,0) 24%,rgba(10,10,10,0) 62%,rgba(10,10,10,.5) 100%)'
-          }}
-        />
-      )}
 
       <div
         style={{
