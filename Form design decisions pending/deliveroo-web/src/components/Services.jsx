@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom';
 import useHover from '../hooks/useHover';
 import useStartBooking, { BOOKING_PATH } from '../hooks/useStartBooking';
+import { TRANSPORT } from '../lib/transport';
 import { color, ease, eyebrow, font, layout, radius } from '../theme';
 import Icon from './Icon';
+import TransportGlyph from './transport/TransportGlyph';
 
-// §4 — four equal photo cards. Each service carries its own image so the grid reads
-// as a catalogue rather than one hero plus a list of runners-up. Photos are the local
-// mode shots, mapped to the service that actually uses that vehicle.
+// §4 — five equal photo cards, one per vehicle we actually run. Each service carries
+// its own image so the grid reads as a catalogue rather than one hero plus a list of
+// runners-up. Photos are the local mode shots, mapped to the service that actually
+// uses that vehicle — which is why drone earns a card here as much as ship does: it
+// is a bookable mode in §25, not a slide.
 const SERVICES = [
   {
     number: '01',
@@ -39,6 +43,16 @@ const SERVICES = [
     copy: 'Priority delivery for time-sensitive packages.',
     photo: '/photos/hero-air-freight.jpeg',
     alt: 'Cargo aircraft being loaded for an air freight run'
+  },
+  {
+    number: '05',
+    // The icon set has no dependable drone ligature, so this card names the mode and
+    // lets TransportGlyph draw the quadcopter rather than printing the word.
+    mode: TRANSPORT.DRONE,
+    title: 'Drone Delivery',
+    copy: 'Small, light parcels flown across the city — straight over the traffic.',
+    photo: '/photos/hero-drone-city.jpeg',
+    alt: 'Delivery drone carrying a parcel above the city'
   }
 ];
 
@@ -101,7 +115,11 @@ function ServiceCard({ service, delay }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-          <Icon name={service.icon} size={20} color={color.ink} />
+          {service.mode ? (
+            <TransportGlyph mode={service.mode} size={20} color={color.ink} />
+          ) : (
+            <Icon name={service.icon} size={20} color={color.ink} />
+          )}
           <span style={numeral}>{service.number}</span>
           <Icon
             name="arrow_outward"
@@ -164,14 +182,7 @@ export default function Services() {
           </p>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))',
-            gap: 'clamp(18px,2.2vw,28px)',
-            alignItems: 'stretch'
-          }}
-        >
+        <div className="services-grid" style={{ alignItems: 'stretch' }}>
           {SERVICES.map((service, index) => (
             <ServiceCard key={service.number} service={service} delay={`${80 + index * 80}ms`} />
           ))}
