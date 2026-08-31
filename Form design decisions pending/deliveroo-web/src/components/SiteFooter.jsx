@@ -59,10 +59,7 @@ export default function SiteFooter({ brand = 'Send it' }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(32px,4vw,72px)' }}>
           <div style={{ flex: '1 1 240px', maxWidth: '320px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '11px', marginBottom: '18px' }}>
-              <span style={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Wordmark fontSize="25px" tone={color.paper} shadow={false} />
-                <span style={{ fontFamily: font.display, fontWeight: 600, fontSize: '25px', color: color.orange, lineHeight: 1 }}>.</span>
-              </span>
+              <Wordmark fontSize="25px" tone={color.paper} shadow={false} dot />
             </div>
             <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.6, color: 'rgba(243,243,241,.55)', textWrap: 'pretty' }}>
               Same-day courier delivery, door to door, tracked every mile.
