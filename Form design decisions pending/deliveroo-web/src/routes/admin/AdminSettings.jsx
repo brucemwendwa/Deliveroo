@@ -29,12 +29,12 @@ function Switch({ on, onChange, label, disabled }) {
         height: '46px',
         padding: '0 18px',
         borderRadius: radius.pill,
-        border: `1.5px solid ${on ? color.ink : 'rgba(17,17,17,.16)'}`,
-        background: on ? color.ink : 'transparent',
+        border: `1px solid ${on ? color.ink : 'rgba(28,32,31,.16)'}`,
+        background: on ? color.green : 'transparent',
         color: on ? color.paper : color.muted,
         fontFamily: font.body,
         fontSize: '14px',
-        fontWeight: 700,
+        fontWeight: 600,
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.5 : 1,
         transition: `background .18s ${ease.out}, color .18s, border-color .18s`
@@ -171,7 +171,7 @@ export default function AdminSettings() {
             ['Cross-tab updates', usingMockBackend ? 'Storage events, instant' : 'Polling every 5s'],
             ['Audit retention', usingMockBackend ? 'Last 300 actions' : 'Server-side']
           ].map(([term, value]) => (
-            <div key={term} style={{ paddingTop: '12px', borderTop: '1px solid rgba(17,17,17,.1)' }}>
+            <div key={term} style={{ paddingTop: '12px', borderTop: `1px solid ${color.border}` }}>
               <dt
                 style={{
                   fontFamily: font.mono,
