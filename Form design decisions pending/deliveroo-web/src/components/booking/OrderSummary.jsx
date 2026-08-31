@@ -21,10 +21,16 @@ export default function OrderSummary({ pickup, destination, parcel, route, quote
   const meta = mode ? modeMeta(mode) : null;
   const chargeable = quote.chargeableWeightKg ?? quote.weightKg;
 
+  const volumetric = chargeable > (parcel?.weightKg || 0) + 0.001;
+
+  // The weight charge carries a note under its label: the weight it was charged on
+  // is the one figure a customer checks, and printing the amount on its own hides it.
+  // Same shape as the price card on the booking screen, so the number does not change
+  // presentation between quoting and confirming.
   const charges = [
     quote.baseFare > 0 && ['Base fare', formatKes(quote.baseFare)],
     ['Distance charge', formatKes(quote.distanceCost)],
-    ['Weight charge', formatKes(quote.weightCost)],
+    ['Weight charge', formatKes(quote.weightCost), `${chargeable} kg${volumetric ? ' volumetric' : ''}`],
     quote.priorityCost > 0 && [`${priorityOption(priority).label} priority`, formatKes(quote.priorityCost)]
   ].filter(Boolean);
 
@@ -93,9 +99,12 @@ export default function OrderSummary({ pickup, destination, parcel, route, quote
           <strong style={value}>{route ? formatDuration(quote.durationSeconds) : '—'}</strong>
         </div>
 
-        {charges.map(([name, amount]) => (
+        {charges.map(([name, amount, note]) => (
           <div key={name} style={line}>
-            <span style={label}>{name}</span>
+            <span style={label}>
+              {name}
+              {note && <span style={{ display: 'block', marginTop: '2px', fontSize: '12px' }}>{note}</span>}
+            </span>
             <strong style={value}>{amount}</strong>
           </div>
         ))}
