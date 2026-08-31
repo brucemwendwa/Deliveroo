@@ -60,7 +60,7 @@ export default function WeighParcel({ order }) {
       setEntry('');
       dispatch(
         showToast({
-          message: `${order.id} weighed at ${result.payload.parcel.verifiedWeightKg} kg — fee ${formatKes(result.payload.pricing.total)}.`,
+          message: `${order.id} weighed at ${result.payload.parcel.verifiedWeightKg} kg, fee ${formatKes(result.payload.pricing.total)}.`,
           tone: 'success'
         })
       );
@@ -118,8 +118,8 @@ export default function WeighParcel({ order }) {
                 color: color.orangeDeep
               }}
             >
-              Under-declared by {formatDelta(discrepancy.deltaKg)}. The fare was re-priced on the measured
-              weight and the customer has been notified.
+              Declared light by {formatDelta(discrepancy.deltaKg)}. The fare was worked out again on
+              the measured weight and the customer has been notified.
             </p>
           )}
           <p style={{ margin: '12px 0 0', fontSize: '12.5px', color: color.muted, fontFamily: font.mono, letterSpacing: '.03em' }}>
