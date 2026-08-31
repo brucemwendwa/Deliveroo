@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { currentPosition, reverseGeocode, searchPlaces } from '../../api/geo';
-import { color, control, ease, font, radius } from '../../theme';
+import { color, control, ease, font, radius, shadow } from '../../theme';
 import Icon from '../Icon';
 
 const DEBOUNCE_MS = 350;
@@ -97,8 +97,9 @@ export default function PlaceSearch({ value, onChange, placeholder = 'Search an 
           gap: '12px',
           padding: '14px 16px',
           borderRadius: radius.field,
-          border: `1.5px solid ${color.ink}`,
-          background: color.white
+          border: `1px solid ${color.ink}`,
+          background: color.card,
+          boxShadow: shadow.card
         }}
       >
         <Icon name="location_on" size={20} color={color.orange} />
@@ -118,7 +119,7 @@ export default function PlaceSearch({ value, onChange, placeholder = 'Search an 
             background: 'transparent',
             fontFamily: font.body,
             fontSize: '13.5px',
-            fontWeight: 700,
+            fontWeight: 600,
             color: color.muted,
             cursor: 'pointer'
           }}
@@ -215,10 +216,10 @@ export default function PlaceSearch({ value, onChange, placeholder = 'Search an 
             margin: 0,
             padding: '6px',
             listStyle: 'none',
-            background: color.white,
-            border: '1px solid rgba(17,17,17,.1)',
-            borderRadius: '18px',
-            boxShadow: '0 28px 54px -28px rgba(17,17,17,.55)',
+            background: color.card,
+            border: `1px solid ${color.border}`,
+            borderRadius: '20px',
+            boxShadow: shadow.raised,
             maxHeight: '280px',
             overflowY: 'auto',
             animation: `riseIn .2s ${ease.out} both`
@@ -242,7 +243,7 @@ export default function PlaceSearch({ value, onChange, placeholder = 'Search an 
                   border: 'none',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  background: index === active ? 'rgba(245,145,30,.16)' : 'transparent',
+                  background: index === active ? 'rgba(248,135,53,.16)' : 'transparent',
                   fontFamily: font.body,
                   fontSize: '14.5px',
                   color: color.ink
