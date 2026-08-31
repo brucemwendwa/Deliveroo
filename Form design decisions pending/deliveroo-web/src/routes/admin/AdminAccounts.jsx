@@ -83,7 +83,7 @@ export default function AdminAccounts() {
           <div style={eyebrow}>What each role can do</div>
           {Object.entries(ROLE_NOTE).map(([role, note]) => (
             <p key={role} style={{ margin: 0, fontSize: '13px', lineHeight: 1.55, color: color.body }}>
-              <strong style={{ color: color.ink }}>{role.charAt(0) + role.slice(1).toLowerCase()}</strong> — {note}
+              <strong style={{ color: color.ink }}>{role.charAt(0) + role.slice(1).toLowerCase()}</strong>: {note}
             </p>
           ))}
         </div>
