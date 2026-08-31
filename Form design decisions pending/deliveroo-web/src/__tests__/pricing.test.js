@@ -11,11 +11,13 @@ import {
 } from '../lib/pricing';
 
 describe('pricing', () => {
-  it('reproduces the specified worked example: 3 kg over 12.4 km costs KES 650', () => {
+  it('reproduces the worked example: 3 kg over 12.4 km costs KES 510', () => {
+    // Road charges KES 2.5 a kilo, so weight is a rounding error next to distance
+    // on a city hop. Distance is what a road fare is really made of.
     const result = quote({ weightKg: 3, distanceKm: 12.4 });
-    expect(result.weightCost).toBe(150);
+    expect(result.weightCost).toBeCloseTo(7.5);
     expect(result.distanceCost).toBeCloseTo(496);
-    expect(result.total).toBe(650);
+    expect(result.total).toBe(510);
   });
 
   it('applies the minimum fare to very short, very light deliveries', () => {
@@ -23,9 +25,9 @@ describe('pricing', () => {
   });
 
   it('rounds up to the nearest ten rather than down', () => {
-    // 1 kg (50) + 1.1 km (44) = 94 → 100, never 90.
-    expect(quote({ weightKg: 1, distanceKm: 1.1 }).subtotal).toBeCloseTo(94);
-    expect(quote({ weightKg: 10, distanceKm: 10 }).total).toBe(900);
+    // 1 kg (2.5) + 1.1 km (44) = 46.5 → 50, never 40.
+    expect(quote({ weightKg: 1, distanceKm: 1.1 }).subtotal).toBeCloseTo(46.5);
+    expect(quote({ weightKg: 10, distanceKm: 10 }).total).toBe(430);
   });
 
   it('treats missing or negative input as zero instead of producing NaN', () => {
@@ -56,9 +58,9 @@ describe('declared vs verified weight', () => {
 
   it('marks the quote as an estimate until an admin has measured it', () => {
     const route = { distanceKm: 12.4 };
-    expect(priceOrder({ parcel: { weightKg: 3 }, route })).toMatchObject({ total: 650, basis: 'estimated' });
+    expect(priceOrder({ parcel: { weightKg: 3 }, route })).toMatchObject({ total: 510, basis: 'estimated' });
     expect(priceOrder({ parcel: { weightKg: 3, verifiedWeightKg: 7.2 }, route })).toMatchObject({
-      total: 860,
+      total: 520,
       basis: 'verified',
       declaredWeightKg: 3
     });
