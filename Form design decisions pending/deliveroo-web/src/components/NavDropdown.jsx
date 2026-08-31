@@ -25,7 +25,17 @@ function MenuItem({ item, onNavigate }) {
     ...(hovered ? hover.drop : null)
   };
 
-  // Items either go somewhere (a link) or do something (sign out).
+  // A phone number or an email address is not a route: it hands off to the dialler
+  // or the mail client, so it stays a plain anchor rather than a router link.
+  if (item.href) {
+    return (
+      <a href={item.href} role="menuitem" onClick={onNavigate} {...bind} style={style}>
+        {item.label}
+      </a>
+    );
+  }
+
+  // The rest either go somewhere (a link) or do something (sign out).
   if (!item.to) {
     return (
       <button
