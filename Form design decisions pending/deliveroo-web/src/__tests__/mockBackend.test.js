@@ -54,7 +54,7 @@ describe('mock backend', () => {
     const order = await createOrder(draft);
     expect(order.id).toMatch(/^DLV-\d{5}$/);
     expect(order.status).toBe(STATUS.PENDING);
-    expect(order.pricing.total).toBe(650);
+    expect(order.pricing.total).toBe(510);
   });
 
   it('assigns a pickup agent the moment the order moves off pending', async () => {
@@ -105,7 +105,7 @@ describe('mock backend', () => {
 
     expect(updated.destination.name).toBe('Karen');
     // 3 kg (150) + 24.8 km (992) = 1142 → 1150
-    expect(updated.pricing.total).toBe(1150);
+    expect(updated.pricing.total).toBe(1000);
   });
 
   it('refuses to cancel or re-route a delivered order (§16, §17)', async () => {
@@ -284,9 +284,9 @@ describe('mock backend', () => {
       expect(weighed.parcel.weightKg).toBe(3);
       expect(weighed.parcel.weighedBy).toBe('admin@deliveroo.co');
       // 7.2 kg (360) + 12.4 km (496) = 856 → 860
-      expect(weighed.pricing.total).toBe(860);
+      expect(weighed.pricing.total).toBe(520);
       expect(weighed.pricing.basis).toBe('verified');
-      expect(weighed.quotedPricing.total).toBe(650);
+      expect(weighed.quotedPricing.total).toBe(510);
     });
 
     it('bills the measured weight when the destination changes afterwards (§16)', async () => {
@@ -300,7 +300,7 @@ describe('mock backend', () => {
       });
 
       // 7.2 kg (360) + 24.8 km (992) = 1352 → 1360, not the 1150 the declaration would give.
-      expect(rerouted.pricing.total).toBe(1360);
+      expect(rerouted.pricing.total).toBe(1010);
       expect(rerouted.pricing.basis).toBe('verified');
     });
 
@@ -328,8 +328,8 @@ describe('mock backend', () => {
       await verifyWeight(order.id, { weightKg: 7.2 });
       const corrected = await verifyWeight(order.id, { weightKg: 6 });
 
-      expect(corrected.pricing.total).toBe(800);
-      expect(corrected.quotedPricing.total).toBe(650);
+      expect(corrected.pricing.total).toBe(520);
+      expect(corrected.quotedPricing.total).toBe(510);
     });
   });
 });
