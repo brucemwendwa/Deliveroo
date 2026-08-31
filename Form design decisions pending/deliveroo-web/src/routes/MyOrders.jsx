@@ -148,7 +148,7 @@ export default function MyOrders() {
                   background: 'transparent',
                   fontFamily: font.body,
                   fontSize: '13.5px',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   color: color.muted,
                   cursor: 'pointer'
                 }}
