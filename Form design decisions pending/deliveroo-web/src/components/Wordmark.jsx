@@ -16,11 +16,11 @@ export default function Wordmark({ fontSize = 'clamp(20px,2vw,27px)', tone = col
         flex: 'none',
         fontFamily: font.brand,
         fontSize,
-        fontWeight: 700,
+        fontWeight: 600,
         letterSpacing: '-.015em',
         color: tone,
         lineHeight: 1,
-        filter: shadow ? 'drop-shadow(0 2px 10px rgba(17,17,17,.5))' : undefined
+        filter: shadow ? 'drop-shadow(0 2px 10px rgba(28,32,31,.5))' : undefined
       }}
     >
       <svg
