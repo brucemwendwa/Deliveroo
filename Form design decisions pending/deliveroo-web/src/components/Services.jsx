@@ -6,22 +6,27 @@ import { color, ease, eyebrow, font, layout, radius, shadow } from '../theme';
 import Icon from './Icon';
 import TransportGlyph from './transport/TransportGlyph';
 
-// §4 — five equal photo cards, one per vehicle we actually run. Each service carries
+// §4. Five equal photo cards, one per vehicle we actually run. Each service carries
 // its own image so the grid reads as a catalogue rather than one hero plus a list of
 // runners-up. Photos are the local mode shots, mapped to the service that actually
-// uses that vehicle — which is why drone earns a card here as much as ship does: it
+// uses that vehicle, which is why drone earns a card here as much as ship does: it
 // is a bookable mode in §25, not a slide.
+//
+// Each card carries an id, because the Services menu in the nav links straight to
+// the one it names.
 const SERVICES = [
   {
     number: '01',
+    id: 'service-same-day',
     icon: 'bolt',
-    title: 'Same-Day Delivery',
-    copy: 'Fast door-to-door delivery for packages that cannot wait.',
+    title: 'Same Day Delivery',
+    copy: 'Fast door to door delivery for packages that cannot wait.',
     photo: '/photos/hero-motorbike-city.jpeg',
     alt: 'Rider on a motorbike carrying a delivery box through city traffic'
   },
   {
     number: '02',
+    id: 'service-business',
     icon: 'storefront',
     title: 'Business Delivery',
     copy: 'Reliable courier solutions for businesses, shops and growing brands.',
@@ -30,6 +35,7 @@ const SERVICES = [
   },
   {
     number: '03',
+    id: 'service-bulk',
     icon: 'inventory_2',
     title: 'Bulk & Package Delivery',
     copy: 'Safe transportation for larger or multiple packages.',
@@ -38,19 +44,21 @@ const SERVICES = [
   },
   {
     number: '04',
+    id: 'service-express',
     icon: 'bolt',
     title: 'Express Courier',
-    copy: 'Priority delivery for time-sensitive packages.',
+    copy: 'Priority delivery for packages that are running against a clock.',
     photo: '/photos/hero-air-freight.jpeg',
     alt: 'Cargo aircraft being loaded for an air freight run'
   },
   {
     number: '05',
+    id: 'service-drone',
     // The icon set has no dependable drone ligature, so this card names the mode and
     // lets TransportGlyph draw the quadcopter rather than printing the word.
     mode: TRANSPORT.DRONE,
     title: 'Drone Delivery',
-    copy: 'Small, light parcels flown across the city — straight over the traffic.',
+    copy: 'Small, light parcels flown across the city, straight over the traffic.',
     photo: '/photos/hero-drone-city.jpeg',
     alt: 'Delivery drone carrying a parcel above the city'
   }
@@ -72,6 +80,7 @@ function ServiceCard({ service, delay }) {
 
   return (
     <Link
+      id={service.id}
       to={BOOKING_PATH}
       onClick={startBooking}
       {...bind}
@@ -82,6 +91,9 @@ function ServiceCard({ service, delay }) {
         flexDirection: 'column',
         borderRadius: radius.card,
         overflow: 'hidden',
+        // The nav is fixed at 80px, so a card jumped to from the Services menu has
+        // to stop clear of it rather than under it.
+        scrollMarginTop: '104px',
         background: color.card,
         boxShadow: shadow.card,
         color: color.ink,
