@@ -87,7 +87,7 @@ export default function ModesBand() {
       <div style={{ maxWidth: layout.maxWidth, margin: '0 auto', padding: `0 ${layout.gutter}` }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(24px,4vw,64px)', alignItems: 'flex-end', marginBottom: 'clamp(32px,4vw,56px)' }}>
           <div style={{ flex: '1 1 420px' }}>
-            <div style={{ ...eyebrow, color: color.orange, marginBottom: '18px' }}>Multi-modal delivery</div>
+            <div style={{ ...eyebrow, color: color.orange, marginBottom: '18px' }}>Every mode we run</div>
             <h2
               data-reveal=""
               style={{
@@ -104,8 +104,8 @@ export default function ModesBand() {
             </h2>
             <p style={{ margin: 0, maxWidth: '46ch', fontSize: 'clamp(15px,1.4vw,17.5px)', lineHeight: 1.6, color: 'rgba(243,243,241,.7)' }}>
               Tell us where to collect it and where it&apos;s going. We work out whether it travels
-              by motorbike, road, air, sea or drone — price and arrival time for each, before you
-              commit.
+              by motorbike, road, air, sea or drone, with a price and an arrival time for each,
+              before you commit.
             </p>
           </div>
 
@@ -138,9 +138,9 @@ export default function ModesBand() {
 
         <p style={{ margin: '22px 0 0', display: 'flex', gap: '9px', fontSize: '13.5px', lineHeight: 1.6, color: 'rgba(243,243,241,.6)' }}>
           <Icon name="info" size={16} color={color.orange} style={{ flex: 'none', marginTop: '2px' }} />
-          Not every mode serves every route — sea freight needs a port, a motorbike and a drone
-          need a short hop. Deliveroo only offers what can actually make the journey, and says
-          why when it can&apos;t.
+          Not every mode serves every route. Sea freight needs a port, and a motorbike or a
+          drone needs a short hop. Deliveroo only offers what can actually make the journey,
+          and says why when it can&apos;t.
         </p>
       </div>
     </section>
