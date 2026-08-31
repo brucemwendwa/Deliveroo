@@ -212,7 +212,7 @@ export default function AdminReports() {
                           fontSize: '13.5px',
                           color: index === 0 ? color.ink : color.body,
                           fontWeight: index === 0 ? 700 : 400,
-                          borderTop: '1px solid rgba(17,17,17,.09)',
+                          borderTop: `1px solid ${color.border}`,
                           whiteSpace: 'nowrap'
                         }}
                       >
