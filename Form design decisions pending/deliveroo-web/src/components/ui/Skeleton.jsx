@@ -16,8 +16,8 @@ export function Skeleton({ width = '100%', height = 16, rounded = '10px', tone =
         height: typeof height === 'number' ? `${height}px` : height,
         borderRadius: rounded,
         background: onDark
-          ? 'linear-gradient(100deg, rgba(243,241,237,.06) 30%, rgba(243,241,237,.13) 50%, rgba(243,241,237,.06) 70%)'
-          : 'linear-gradient(100deg, rgba(17,17,17,.045) 30%, rgba(17,17,17,.09) 50%, rgba(17,17,17,.045) 70%)',
+          ? 'linear-gradient(100deg, rgba(243,243,241,.06) 30%, rgba(243,243,241,.13) 50%, rgba(243,243,241,.06) 70%)'
+          : 'linear-gradient(100deg, rgba(28,32,31,.045) 30%, rgba(28,32,31,.09) 50%, rgba(28,32,31,.045) 70%)',
         backgroundSize: '260% 100%',
         animation: 'shimmer 1.5s linear infinite',
         ...style
@@ -31,10 +31,10 @@ export function TrackingSkeleton({ tone = 'dark' }) {
   const onDark = tone === 'dark';
 
   return (
-    <div role="status" aria-label="Loading delivery" style={{ background: onDark ? color.ink : color.paper }}>
+    <div role="status" aria-label="Loading delivery" style={{ background: onDark ? color.greenDeep : color.paper }}>
       {/* The fixed nav is white text sized for the hero photo, so any screen that
           starts on paper still needs something dark beneath it at scroll zero. */}
-      <div style={{ background: color.ink, height: '80px' }} />
+      <div style={{ background: color.greenDeep, height: '80px' }} />
       <div
         style={{
           maxWidth: layout.maxWidth,
