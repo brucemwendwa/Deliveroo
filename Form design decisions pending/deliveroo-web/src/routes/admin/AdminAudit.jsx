@@ -61,7 +61,7 @@ export default function AdminAudit() {
 
       <Panel
         title={`Actions · ${visible.length}`}
-        note="Newest first, capped at the last 300. A real deployment would keep these server-side and keep them for good."
+        note="Newest first, capped at the last 300. A real deployment would keep these on the server, and keep them for good."
       >
         {visible.length === 0 ? (
           <EmptyState
