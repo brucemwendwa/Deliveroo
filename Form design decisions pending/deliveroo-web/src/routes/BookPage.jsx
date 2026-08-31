@@ -39,7 +39,7 @@ export default function BookPage() {
         provide: the fixed nav is white text sized for the hero photo, and this
         section starts on light paper.
       */}
-      <div style={{ background: color.ink, height: '80px' }} />
+      <div style={{ background: color.greenDeep, height: '80px' }} />
       <BookDelivery />
     </>
   );
