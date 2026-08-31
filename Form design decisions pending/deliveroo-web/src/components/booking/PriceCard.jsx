@@ -1,6 +1,6 @@
 import { formatDuration, formatKes, formatKm } from '../../lib/pricing';
 import { modeMeta, priorityOption } from '../../lib/transport';
-import { color, eyebrow, font, radius } from '../../theme';
+import { color, eyebrow, font, radius, shadow } from '../../theme';
 import Icon from '../Icon';
 import TransportBadge from '../transport/TransportBadge';
 
@@ -40,8 +40,9 @@ export default function PriceCard({ quote, route, parcel, mode, priority }) {
     <div
       style={{
         borderRadius: radius.card,
-        border: '1px solid rgba(17,17,17,.12)',
-        background: color.white,
+        border: `1px solid ${color.border}`,
+        background: color.card,
+        boxShadow: shadow.card,
         padding: 'clamp(20px,2.4vw,28px)'
       }}
     >
@@ -55,7 +56,7 @@ export default function PriceCard({ quote, route, parcel, mode, priority }) {
       </div>
 
       {lines.map(([label, value, note], index) => (
-        <div key={label} style={{ ...row, borderTop: index ? '1px solid rgba(17,17,17,.08)' : 'none' }}>
+        <div key={label} style={{ ...row, borderTop: index ? `1px solid ${color.border}` : 'none' }}>
           <span style={{ color: color.muted }}>
             {label}
             {note && <span style={{ display: 'block', marginTop: '2px', fontSize: '12px' }}>{note}</span>}
@@ -64,7 +65,7 @@ export default function PriceCard({ quote, route, parcel, mode, priority }) {
         </div>
       ))}
 
-      <div style={{ ...row, borderTop: '1px solid rgba(17,17,17,.1)', paddingTop: '14px' }}>
+      <div style={{ ...row, borderTop: `1px solid ${color.border}`, paddingTop: '14px' }}>
         <span style={{ color: color.muted }}>Estimated delivery time</span>
         <strong style={{ color: color.ink }}>{hasRoute ? formatDuration(quote.durationSeconds) : '—'}</strong>
       </div>
@@ -77,7 +78,7 @@ export default function PriceCard({ quote, route, parcel, mode, priority }) {
           aria-live="polite"
           style={{
             fontFamily: font.display,
-            fontWeight: 700,
+            fontWeight: 600,
             fontSize: 'clamp(40px,5.2vw,66px)',
             lineHeight: 0.88,
             letterSpacing: '-.02em',
