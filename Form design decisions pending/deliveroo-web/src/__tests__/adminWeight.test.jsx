@@ -87,7 +87,7 @@ describe('admin scale', () => {
     });
 
     expect(await screen.findByText('Weight · verified')).toBeInTheDocument();
-    expect(screen.getByText('Under-declared by +8.0 kg.', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('Declared light by +8.0 kg.', { exact: false })).toBeInTheDocument();
   });
 
   it('closes the scale once the parcel is in transit, and says why', async () => {
