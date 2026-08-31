@@ -147,7 +147,7 @@ function OptionCard({ option, selected, onSelect }) {
 
           {(busy || option.via) && (
             <span style={{ fontSize: '12.5px', lineHeight: 1.45, color: color.muted }}>
-              {busy ? 'Heavy demand right now — allow extra time for collection.' : `Sails via ${option.via}.`}
+              {busy ? 'Heavy demand right now, so allow extra time for collection.' : `Sails via ${option.via}.`}
             </span>
           )}
 
@@ -275,8 +275,8 @@ export default function TransportOptions({ options, selected, onSelect, priority
 
       <p style={{ margin: '14px 0 0', display: 'flex', gap: '8px', fontSize: '12.5px', lineHeight: 1.55, color: color.muted }}>
         <Icon name="bolt" size={15} color={color.orange} style={{ flex: 'none', marginTop: '1px' }} />
-        Prices are worked out live from this route, the parcel and how soon you need it —
-        they are not a fixed price list. Availability depends on the route: not every mode
+        Prices are worked out live from this route, the parcel and how soon you need it.
+        They are not a fixed price list. Availability depends on the route: not every mode
         can serve every journey.
       </p>
     </div>
