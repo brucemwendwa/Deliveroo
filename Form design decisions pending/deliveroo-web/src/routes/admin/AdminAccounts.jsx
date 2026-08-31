@@ -79,7 +79,7 @@ export default function AdminAccounts() {
           <UserTable users={matches(staff)} orderCounts={orderCounts} />
         )}
 
-        <div style={{ display: 'grid', gap: '8px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(17,17,17,.1)' }}>
+        <div style={{ display: 'grid', gap: '8px', marginTop: '20px', paddingTop: '16px', borderTop: `1px solid ${color.border}` }}>
           <div style={eyebrow}>What each role can do</div>
           {Object.entries(ROLE_NOTE).map(([role, note]) => (
             <p key={role} style={{ margin: 0, fontSize: '13px', lineHeight: 1.55, color: color.body }}>
