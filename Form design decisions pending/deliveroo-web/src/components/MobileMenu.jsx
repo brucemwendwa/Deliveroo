@@ -13,10 +13,10 @@ const outlineControl = {
   justifyContent: 'center',
   height: '56px',
   borderRadius: radius.pill,
-  border: '1.5px solid rgba(17,17,17,.2)',
+  border: `1px solid ${color.border}`,
   fontFamily: font.body,
   fontSize: '16px',
-  fontWeight: 700,
+  fontWeight: 600,
   color: color.ink
 };
 
@@ -66,11 +66,10 @@ export default function MobileMenu() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '15px 0',
-                  borderBottom: index < menu.items.length - 1 ? '1px solid rgba(17,17,17,.09)' : undefined,
+                  borderBottom: index < menu.items.length - 1 ? `1px solid ${color.border}` : undefined,
                   fontFamily: font.display,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: 'clamp(23px,6vw,32px)',
-                  textTransform: 'uppercase',
                   letterSpacing: '.005em',
                   color: color.ink
                 }}
@@ -104,7 +103,7 @@ export default function MobileMenu() {
                 background: color.orange,
                 color: color.ink,
                 fontSize: '16.5px',
-                fontWeight: 700,
+                fontWeight: 600,
                 fontFamily: font.body
               }}
             >
@@ -162,7 +161,7 @@ export default function MobileMenu() {
                 background: color.orange,
                 color: color.ink,
                 fontSize: '16.5px',
-                fontWeight: 700,
+                fontWeight: 600,
                 fontFamily: font.body
               }}
             >
