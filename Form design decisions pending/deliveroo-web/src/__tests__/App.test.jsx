@@ -18,12 +18,12 @@ const renderNav = (store = makeStore()) => withStore(<MemoryRouter><Nav /></Memo
 describe('landing page', () => {
   it('opens on the hero, one photograph deep', () => {
     const { container } = withStore(<App />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The future ofdelivery is here');
-    expect(screen.getByText('Global Delivery Network')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('From your door toanywhere on earth');
     // One photo, no carousel: the hero holds still.
     expect(container.querySelector('#top').querySelectorAll('img')).toHaveLength(1);
-    // "Any Mode" is the nav's, and the hero must not double it up above the fold.
-    expect(screen.getByText('Any Mode')).toBeInTheDocument();
+    // The nav's strapline sits above the fold alongside the hero.
+    expect(screen.getByText('You request.')).toBeInTheDocument();
+    expect(screen.getByText('We move.')).toBeInTheDocument();
   });
 
   it('renders the landing sections, booking now living on its own route', () => {
