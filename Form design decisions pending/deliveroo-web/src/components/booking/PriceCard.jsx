@@ -90,7 +90,7 @@ export default function PriceCard({ quote, route, parcel, mode, priority }) {
         <p style={{ margin: '14px 0 0', display: 'flex', gap: '8px', fontSize: '12.5px', lineHeight: 1.5, color: color.muted }}>
           <Icon name="info" size={15} color={color.muted} style={{ flex: 'none', marginTop: '1px' }} />
           <span>
-            {route?.estimated && 'Route service unavailable — distance and time are approximate. '}
+            {route?.estimated && 'Route service unavailable, so distance and time are approximate. '}
             Calculated live from distance, weight and mode. We weigh your package at pickup and
             confirm the final price from the measured weight.
           </span>
