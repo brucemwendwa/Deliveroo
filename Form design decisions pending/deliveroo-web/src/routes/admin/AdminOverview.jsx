@@ -88,7 +88,7 @@ export default function AdminOverview() {
 
       <Panel
         title={`Needs attention · ${issues.length}`}
-        note="Deliveries that have stopped behaving. One parcel can appear twice — being late and never having been weighed are two different jobs for two different people."
+        note="Deliveries that have stopped behaving. One parcel can appear twice: being late and never having been weighed are two different jobs for two different people."
       >
         {issues.length === 0 ? (
           <p style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '9px', fontSize: '14px', color: color.body }}>
