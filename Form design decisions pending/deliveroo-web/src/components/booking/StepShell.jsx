@@ -13,7 +13,7 @@ export default function StepShell({ index, title, question, active, complete, su
     <section
       aria-current={active ? 'step' : undefined}
       style={{
-        borderTop: '1px solid rgba(17,17,17,.12)',
+        borderTop: `1px solid ${color.border}`,
         padding: 'clamp(20px,2.4vw,28px) 0',
         opacity: reachable ? 1 : 0.42,
         transition: 'opacity .35s ease'
@@ -30,12 +30,12 @@ export default function StepShell({ index, title, question, active, complete, su
             width: '34px',
             height: '34px',
             borderRadius: radius.pill,
-            background: complete ? color.ink : active ? color.orange : 'transparent',
-            border: complete || active ? 'none' : '1.5px solid rgba(17,17,17,.25)',
+            background: complete ? color.green : active ? color.orange : 'transparent',
+            border: complete || active ? 'none' : `1px solid ${color.border}`,
             color: complete ? color.paper : color.ink,
             fontFamily: font.mono,
             fontSize: '12px',
-            fontWeight: 700,
+            fontWeight: 600,
             transition: `background .3s ${ease.out}`
           }}
         >
@@ -47,7 +47,7 @@ export default function StepShell({ index, title, question, active, complete, su
             flex: 1,
             margin: 0,
             fontSize: 'clamp(16px,1.6vw,20px)',
-            fontWeight: 800,
+            fontWeight: 600,
             letterSpacing: '-.025em',
             color: color.ink
           }}
@@ -68,7 +68,7 @@ export default function StepShell({ index, title, question, active, complete, su
               background: 'transparent',
               fontFamily: font.body,
               fontSize: '13.5px',
-              fontWeight: 700,
+              fontWeight: 600,
               color: color.muted,
               cursor: 'pointer'
             }}
