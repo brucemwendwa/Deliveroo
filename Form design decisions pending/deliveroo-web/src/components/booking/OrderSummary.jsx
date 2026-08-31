@@ -1,6 +1,6 @@
 import { formatDuration, formatKes, formatKm } from '../../lib/pricing';
 import { modeMeta, packageTypeLabel, priorityOption } from '../../lib/transport';
-import { color, eyebrow, font, radius } from '../../theme';
+import { color, eyebrow, font, radius, shadow } from '../../theme';
 import TransportBadge from '../transport/TransportBadge';
 
 const line = {
@@ -10,7 +10,7 @@ const line = {
   gap: '16px',
   padding: '11px 0',
   fontSize: '14.5px',
-  borderTop: '1px solid rgba(17,17,17,.1)'
+  borderTop: `1px solid ${color.border}`
 };
 
 const label = { color: color.muted, flex: 'none' };
@@ -32,8 +32,9 @@ export default function OrderSummary({ pickup, destination, parcel, route, quote
     <div
       style={{
         borderRadius: radius.card,
-        border: '1px solid rgba(17,17,17,.12)',
-        background: color.white,
+        border: `1px solid ${color.border}`,
+        background: color.card,
+        boxShadow: shadow.card,
         padding: 'clamp(20px,2.4vw,28px)'
       }}
     >
@@ -42,9 +43,8 @@ export default function OrderSummary({ pickup, destination, parcel, route, quote
           style={{
             margin: 0,
             fontFamily: font.display,
-            fontWeight: 700,
+            fontWeight: 600,
             fontSize: 'clamp(21px,2.2vw,28px)',
-            textTransform: 'uppercase',
             letterSpacing: '.005em',
             color: color.ink
           }}
@@ -60,7 +60,7 @@ export default function OrderSummary({ pickup, destination, parcel, route, quote
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '6px', flex: 'none' }}
         >
           <span style={{ width: '10px', height: '10px', borderRadius: '999px', border: `2px solid ${color.ink}` }} />
-          <span style={{ flex: 1, width: '2px', minHeight: '30px', background: 'rgba(17,17,17,.2)', margin: '4px 0' }} />
+          <span style={{ flex: 1, width: '2px', minHeight: '30px', background: 'rgba(28,32,31,.2)', margin: '4px 0' }} />
           <span style={{ width: '10px', height: '10px', borderRadius: '999px', background: color.orange }} />
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '22px' }}>
@@ -100,9 +100,9 @@ export default function OrderSummary({ pickup, destination, parcel, route, quote
           </div>
         ))}
 
-        <div style={{ ...line, alignItems: 'center', paddingTop: '16px', borderTopWidth: '1.5px', borderTopColor: 'rgba(17,17,17,.2)' }}>
+        <div style={{ ...line, alignItems: 'center', paddingTop: '16px', borderTopWidth: '1.5px', borderTopColor: 'rgba(28,32,31,.2)' }}>
           <span style={{ ...eyebrow, color: color.ink }}>Total</span>
-          <strong style={{ fontFamily: font.display, fontWeight: 700, fontSize: 'clamp(26px,3vw,38px)', lineHeight: 1, color: color.ink }}>
+          <strong style={{ fontFamily: font.display, fontWeight: 600, fontSize: 'clamp(26px,3vw,38px)', lineHeight: 1, color: color.ink }}>
             {formatKes(quote.total)}
           </strong>
         </div>
