@@ -33,12 +33,12 @@ export default function Toast() {
         maxWidth: 'min(92vw,460px)',
         padding: '14px 20px',
         borderRadius: radius.pill,
-        background: color.ink,
+        background: color.greenDeep,
         color: color.paper,
         fontFamily: font.body,
         fontSize: '14.5px',
         fontWeight: 600,
-        boxShadow: '0 26px 50px -24px rgba(10,10,10,.8)',
+        boxShadow: '0 26px 50px -24px rgba(15,26,23,.8)',
         animation: `riseIn .3s ${ease.out} both`
       }}
     >
