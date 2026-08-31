@@ -63,12 +63,13 @@ describe('admin scale', () => {
     await renderAdmin();
     await select(pending);
 
-    // Declared 1 kg over 18.2 km → KES 780. On the scale it is 9 kg.
+    // Declared 1 kg over 18.2 km → KES 740. On the scale it is 9 kg, and at KES 2.5
+    // a kilo the extra eight kilos move the fare by KES 20.
     await userEvent.type(await screen.findByLabelText(/weight from the scale/i), '9');
 
     expect(await screen.findByText('Fee at 9 kg')).toBeInTheDocument();
     expect(screen.getByText('KES 760')).toBeInTheDocument();
-    expect(screen.getByText(/\+KES 400 vs estimate/)).toBeInTheDocument();
+    expect(screen.getByText(/\+KES 20 vs estimate/)).toBeInTheDocument();
   });
 
   it('records the weight and re-prices the order', async () => {
@@ -83,7 +84,7 @@ describe('admin scale', () => {
       const order = store.getState().orders.entities[pending.id];
       expect(order.parcel.verifiedWeightKg).toBe(9);
       expect(order.pricing.total).toBe(760);
-      expect(order.quotedPricing.total).toBe(780);
+      expect(order.quotedPricing.total).toBe(740);
     });
 
     expect(await screen.findByText('Weight · verified')).toBeInTheDocument();
