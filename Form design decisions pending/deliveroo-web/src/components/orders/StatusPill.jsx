@@ -16,7 +16,7 @@ export default function StatusPill({ status, tone = 'light', size = 'md' }) {
         height: small ? '26px' : '30px',
         padding: small ? '0 10px' : '0 12px',
         borderRadius: radius.pill,
-        background: onDark ? 'rgba(243,241,237,.1)' : 'rgba(17,17,17,.05)',
+        background: onDark ? 'rgba(243,243,241,.1)' : 'rgba(28,32,31,.05)',
         fontFamily: font.mono,
         fontSize: small ? '9.5px' : '10.5px',
         letterSpacing: '.12em',
