@@ -4,7 +4,7 @@ import HoverLink from './HoverLink';
 import SocialIcon, { SOCIAL_NETWORKS } from './SocialIcon';
 import Wordmark from './Wordmark';
 
-// §20 — four columns under a closing line, nothing more.
+// §20. Four columns under a closing line, nothing more.
 const COLUMNS = [
   {
     title: 'Company',
@@ -62,7 +62,7 @@ export default function SiteFooter({ brand = 'Send it' }) {
               <Wordmark fontSize="25px" tone={color.paper} shadow={false} dot />
             </div>
             <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.6, color: 'rgba(243,243,241,.55)', textWrap: 'pretty' }}>
-              Same-day courier delivery, door to door, tracked every mile.
+              Same day courier delivery, door to door, tracked every mile.
             </p>
           </div>
 
