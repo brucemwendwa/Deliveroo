@@ -3,7 +3,7 @@ import useNow from '../../hooks/useNow';
 import { currentLocationLabel, isTerminal, remainingSeconds } from '../../lib/orderStatus';
 import { etaClock, formatKes, isWeightVerified } from '../../lib/pricing';
 import { modeMeta, transportOf } from '../../lib/transport';
-import { color, ease, font, radius } from '../../theme';
+import { color, ease, font, radius, shadow } from '../../theme';
 import TransportGlyph from '../transport/TransportGlyph';
 import StatusPill from '../orders/StatusPill';
 
@@ -25,7 +25,7 @@ const cell = {
   fontSize: '13.5px',
   color: color.ink,
   verticalAlign: 'middle',
-  borderTop: '1px solid rgba(17,17,17,.09)'
+  borderTop: `1px solid ${color.border}`
 };
 
 const quiet = { ...cell, color: color.body };
@@ -81,8 +81,9 @@ export default function DeliveryTable({ orders, selectedId, onSelect }) {
                 textAlign: 'left',
                 padding: '14px',
                 borderRadius: radius.card,
-                border: `1.5px solid ${active ? color.ink : 'rgba(17,17,17,.1)'}`,
-                background: color.white,
+                border: `1px solid ${active ? color.ink : 'rgba(28,32,31,.1)'}`,
+                background: color.card,
+                boxShadow: shadow.card,
                 cursor: 'pointer',
                 fontFamily: font.body
               }}
@@ -92,18 +93,18 @@ export default function DeliveryTable({ orders, selectedId, onSelect }) {
                   {order.id}
                 </span>
                 <StatusPill status={order.status} size="sm" />
-                <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 700, color: color.ink }}>
+                <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 600, color: color.ink }}>
                   <TransportGlyph mode={mode} size={16} color={color.orangeDeep} />
                   {modeMeta(mode).label}
                 </span>
               </span>
-              <span style={{ fontSize: '14.5px', fontWeight: 700, letterSpacing: '-.02em', color: color.ink }}>
+              <span style={{ fontSize: '14.5px', fontWeight: 600, letterSpacing: '-.02em', color: color.ink }}>
                 {order.pickup.name} → {order.destination.name}
               </span>
               <span style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 14px', fontSize: '12.5px', color: color.body }}>
                 <span>{currentLocationLabel(order)}</span>
                 <span>ETA {eta(order, now)}</span>
-                <span style={{ marginLeft: 'auto', fontWeight: 700, color: color.ink }}>{priceCell(order)}</span>
+                <span style={{ marginLeft: 'auto', fontWeight: 600, color: color.ink }}>{priceCell(order)}</span>
               </span>
             </button>
           );
@@ -113,7 +114,7 @@ export default function DeliveryTable({ orders, selectedId, onSelect }) {
   }
 
   return (
-    <div style={{ overflowX: 'auto', borderRadius: radius.card, border: '1px solid rgba(17,17,17,.12)', background: color.white }}>
+    <div style={{ overflowX: 'auto', borderRadius: radius.card, border: `1px solid ${color.border}`, background: color.card, boxShadow: shadow.card }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '860px' }}>
         <thead>
           <tr>
@@ -146,7 +147,7 @@ export default function DeliveryTable({ orders, selectedId, onSelect }) {
                 key={order.id}
                 onClick={() => onSelect(order.id)}
                 style={{
-                  background: active ? 'rgba(245,145,30,.1)' : 'transparent',
+                  background: active ? 'rgba(248,135,53,.1)' : 'transparent',
                   cursor: 'pointer',
                   transition: `background .18s ${ease.out}`
                 }}
@@ -189,7 +190,7 @@ export default function DeliveryTable({ orders, selectedId, onSelect }) {
                   <StatusPill status={order.status} size="sm" />
                 </td>
                 <td style={{ ...quiet, whiteSpace: 'nowrap' }}>{eta(order, now)}</td>
-                <td style={{ ...cell, fontWeight: 700, whiteSpace: 'nowrap' }}>{priceCell(order)}</td>
+                <td style={{ ...cell, fontWeight: 600, whiteSpace: 'nowrap' }}>{priceCell(order)}</td>
                 <td style={cell}>
                   <span
                     style={{
@@ -199,10 +200,10 @@ export default function DeliveryTable({ orders, selectedId, onSelect }) {
                       height: '32px',
                       padding: '0 12px',
                       borderRadius: radius.pill,
-                      border: `1px solid ${active ? color.ink : 'rgba(17,17,17,.16)'}`,
-                      background: active ? color.ink : 'transparent',
+                      border: `1px solid ${active ? color.ink : 'rgba(28,32,31,.16)'}`,
+                      background: active ? color.green : 'transparent',
                       fontSize: '12.5px',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       whiteSpace: 'nowrap',
                       color: active ? color.paper : color.ink
                     }}
@@ -216,7 +217,7 @@ export default function DeliveryTable({ orders, selectedId, onSelect }) {
         </tbody>
       </table>
       {orders.length > 0 && (
-        <p style={{ margin: 0, padding: '10px 12px', fontSize: '12px', color: color.muted, borderTop: '1px solid rgba(17,17,17,.09)' }}>
+        <p style={{ margin: 0, padding: '10px 12px', fontSize: '12px', color: color.muted, borderTop: `1px solid ${color.border}` }}>
           {orders.length} {orders.length === 1 ? 'delivery' : 'deliveries'} · select one to manage it.
         </p>
       )}
