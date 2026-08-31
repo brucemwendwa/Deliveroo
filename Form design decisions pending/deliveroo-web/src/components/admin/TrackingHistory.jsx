@@ -35,7 +35,7 @@ export default function TrackingHistory({ order }) {
                 width: '7px',
                 height: '7px',
                 borderRadius: '99px',
-                background: index === 0 ? color.orange : 'rgba(17,17,17,.24)',
+                background: index === 0 ? color.orange : 'rgba(28,32,31,.24)',
                 flex: 'none'
               }}
             />
