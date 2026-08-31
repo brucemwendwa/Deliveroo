@@ -67,7 +67,7 @@ export default function FleetPanel() {
     >
       <div style={{ ...eyebrow, marginBottom: '6px' }}>Transport availability</div>
       <p style={{ margin: '0 0 18px', fontSize: '13px', lineHeight: 1.55, color: color.muted, maxWidth: '58ch' }}>
-        Capacity Deliveroo can book into right now, across its carrier partners — riders,
+        Capacity Deliveroo can book into right now, across its carrier partners: riders,
         drivers, freight and airline space. Taking a mode offline withdraws it from customer
         quotes immediately.
       </p>
