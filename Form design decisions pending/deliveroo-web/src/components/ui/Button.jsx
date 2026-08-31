@@ -6,18 +6,18 @@ import Icon from '../Icon';
 // action everywhere, `dark` is its inverse on light surfaces, `ghost` is secondary.
 const VARIANTS = {
   primary: { base: { background: color.orange, color: color.ink }, hover: hoverStyles.yellow },
-  dark: { base: { background: color.ink, color: color.paper }, hover: hoverStyles.dark },
+  dark: { base: { background: color.greenDeep, color: color.paper }, hover: hoverStyles.dark },
   ghost: {
-    base: { background: 'transparent', color: color.ink, border: '1.5px solid rgba(17,17,17,.2)' },
+    base: { background: 'transparent', color: color.ink, border: `1px solid ${color.border}` },
     hover: hoverStyles.ghost
   },
   ghostLight: {
-    base: { background: 'transparent', color: color.paper, border: '1.5px solid rgba(243,241,237,.28)' },
-    hover: { background: 'rgba(243,241,237,.08)', borderColor: 'rgba(243,241,237,.5)' }
+    base: { background: 'transparent', color: color.paper, border: '1px solid rgba(243,243,241,.28)' },
+    hover: { background: 'rgba(243,243,241,.08)', borderColor: 'rgba(243,243,241,.5)' }
   },
   danger: {
-    base: { background: 'transparent', color: color.orangeDeep, border: `1.5px solid ${color.orangeDeep}` },
-    hover: { background: 'rgba(196,112,15,.08)' }
+    base: { background: 'transparent', color: color.orangeDeep, border: `1px solid ${color.orangeDeep}` },
+    hover: { background: 'rgba(173,84,21,.08)' }
   }
 };
 
@@ -54,7 +54,7 @@ export default function Button({
     border: 'none',
     fontFamily: font.body,
     fontSize: size === 'lg' ? 'clamp(15px,1.3vw,17px)' : '15.5px',
-    fontWeight: 700,
+    fontWeight: 600,
     letterSpacing: '-.01em',
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.45 : 1,
