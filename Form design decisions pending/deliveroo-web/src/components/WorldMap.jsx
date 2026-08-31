@@ -62,7 +62,7 @@ export default function WorldMap() {
               cx={col * 8 + 4}
               cy={row * 8 + 4}
               r={2.1}
-              fill="rgba(10,10,10,.95)"
+              fill="rgba(15,26,23,.95)"
               stroke="rgba(255,255,255,.85)"
               strokeWidth={1.2}
               paintOrder="stroke"
@@ -89,14 +89,14 @@ export default function WorldMap() {
             key={route.d}
             d={route.d}
             fill="none"
-            stroke="#F5911E"
+            stroke="#F88735"
             strokeWidth={2}
             strokeDasharray="6 7"
             style={{ animation: `dashmove ${route.dur} linear infinite` }}
           />
         ))}
         {NODES.map(([cx, cy]) => (
-          <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={3.4} fill="#F5911E" />
+          <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={3.4} fill="#F88735" />
         ))}
       </svg>
     </>
