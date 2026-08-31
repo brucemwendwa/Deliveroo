@@ -15,8 +15,8 @@ export default function EmptyState({ icon = 'inbox', title, body, action, tone =
         gap: '14px',
         padding: 'clamp(36px,6vw,64px) clamp(20px,4vw,40px)',
         borderRadius: radius.card,
-        border: `1.5px dashed ${onDark ? 'rgba(243,241,237,.18)' : 'rgba(17,17,17,.14)'}`,
-        background: onDark ? 'rgba(243,241,237,.04)' : 'rgba(255,255,255,.6)'
+        border: `1px dashed ${onDark ? 'rgba(243,243,241,.18)' : color.border}`,
+        background: onDark ? 'rgba(243,243,241,.04)' : 'rgba(255,255,255,.6)'
       }}
     >
       <span
@@ -28,7 +28,7 @@ export default function EmptyState({ icon = 'inbox', title, body, action, tone =
           width: '56px',
           height: '56px',
           borderRadius: '999px',
-          background: 'rgba(245,145,30,.16)'
+          background: 'rgba(248,135,53,.16)'
         }}
       >
         <Icon name={icon} size={26} color={color.orangeDeep} />
@@ -37,7 +37,7 @@ export default function EmptyState({ icon = 'inbox', title, body, action, tone =
         style={{
           margin: 0,
           fontFamily: font.display,
-          fontWeight: 700,
+          fontWeight: 600,
           fontSize: 'clamp(20px,2.4vw,26px)',
           letterSpacing: '-.02em',
           color: onDark ? color.paper : color.ink
@@ -46,7 +46,7 @@ export default function EmptyState({ icon = 'inbox', title, body, action, tone =
         {title}
       </h3>
       {body && (
-        <p style={{ margin: 0, maxWidth: '40ch', fontSize: '14.5px', lineHeight: 1.6, color: onDark ? 'rgba(243,241,237,.7)' : color.body }}>
+        <p style={{ margin: 0, maxWidth: '40ch', fontSize: '14.5px', lineHeight: 1.6, color: onDark ? 'rgba(243,243,241,.7)' : color.body }}>
           {body}
         </p>
       )}
