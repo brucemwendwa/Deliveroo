@@ -41,9 +41,22 @@ export function quote({ weightKg = 0, distanceKm = 0, mode = DEFAULT_MODE, prior
   return quoteTransport({ mode, priority, weightKg, distanceKm, durationSeconds });
 }
 
-/** "KES 650" — grouped, no decimals, which is how the fare is always shown. */
-export const formatKes = (amount) =>
-  `KES ${Math.round(Number(amount) || 0).toLocaleString('en-KE')}`;
+/**
+ * "KES 650", grouped, and with a decimal tail only when the figure actually has one.
+ *
+ * Totals are rounded up to a whole ten, so they always print clean. The lines of a
+ * breakdown do not: at KES 2.5 a kilo, rounding the weight charge to a whole
+ * shilling would print a number the customer cannot reconcile with the weight
+ * shown next to it.
+ */
+export function formatKes(amount) {
+  const value = Math.round((Number(amount) || 0) * 100) / 100;
+  const decimals = Number.isInteger(value) ? 0 : Number.isInteger(value * 10) ? 1 : 2;
+  return `KES ${value.toLocaleString('en-KE', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  })}`;
+}
 
 /** "12.4 km" */
 export const formatKm = (km) => `${(Number(km) || 0).toFixed(1)} km`;
