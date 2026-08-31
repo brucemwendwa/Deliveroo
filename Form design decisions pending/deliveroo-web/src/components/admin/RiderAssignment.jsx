@@ -118,14 +118,14 @@ export default function RiderAssignment({ order }) {
             width: '40px',
             height: '40px',
             borderRadius: '13px',
-            background: 'rgba(245,145,30,.14)',
+            background: 'rgba(248,135,53,.14)',
             flex: 'none'
           }}
         >
           <TransportGlyph mode={courier?.vehicleMode || mode} size={21} color={color.orangeDeep} />
         </span>
         <span style={{ minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: '15px', fontWeight: 700, letterSpacing: '-.02em', color: color.ink }}>
+          <span style={{ display: 'block', fontSize: '15px', fontWeight: 600, letterSpacing: '-.02em', color: color.ink }}>
             {courier ? `${courier.name} · ${courier.vehicle}` : `No ${noun.toLowerCase()} on this delivery yet`}
           </span>
           <span style={{ display: 'block', marginTop: '3px', fontSize: '12.5px', color: color.muted }}>
@@ -138,7 +138,7 @@ export default function RiderAssignment({ order }) {
 
       <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))' }}>
         {rows.map(([label, value]) => (
-          <div key={label} style={{ paddingTop: '12px', borderTop: '1px solid rgba(17,17,17,.1)' }}>
+          <div key={label} style={{ paddingTop: '12px', borderTop: `1px solid ${color.border}` }}>
             <div style={{ ...eyebrow, fontSize: '9.5px', marginBottom: '6px' }}>{label}</div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: color.ink }}>{value}</div>
           </div>
