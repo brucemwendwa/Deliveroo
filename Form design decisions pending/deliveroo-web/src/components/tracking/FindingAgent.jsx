@@ -17,7 +17,7 @@ import TransportGlyph from '../transport/TransportGlyph';
 export default function FindingAgent({ pickupLabel, mode = DEFAULT_MODE, tone = 'dark' }) {
   const onDark = tone === 'dark';
   const strong = onDark ? color.paper : color.ink;
-  const quiet = onDark ? 'rgba(243,241,237,.66)' : color.muted;
+  const quiet = onDark ? 'rgba(243,243,241,.66)' : color.muted;
   const noun = agentNoun(mode);
   // On a motorbike delivery the rider *is* the vehicle, so the bike is the honest
   // mark to search with. On the others we are looking for whoever collects the parcel
@@ -34,8 +34,8 @@ export default function FindingAgent({ pickupLabel, mode = DEFAULT_MODE, tone = 
         gap: '18px',
         padding: '20px',
         borderRadius: radius.card,
-        background: onDark ? 'rgba(243,241,237,.06)' : color.white,
-        border: `1px solid ${onDark ? 'rgba(243,241,237,.1)' : 'rgba(17,17,17,.12)'}`
+        background: onDark ? 'rgba(243,243,241,.06)' : color.card,
+        border: `1px solid ${onDark ? 'rgba(243,243,241,.1)' : 'rgba(28,32,31,.12)'}`
       }}
     >
       <span
@@ -81,7 +81,7 @@ export default function FindingAgent({ pickupLabel, mode = DEFAULT_MODE, tone = 
 
       <div style={{ minWidth: 0 }}>
         <div style={{ ...eyebrow, color: color.orange, marginBottom: '6px' }}>Dispatching</div>
-        <div style={{ fontFamily: font.body, fontSize: '16.5px', fontWeight: 800, letterSpacing: '-.02em', color: strong }}>
+        <div style={{ fontFamily: font.body, fontSize: '16.5px', fontWeight: 600, letterSpacing: '-.02em', color: strong }}>
           Finding a {noun} near you…
         </div>
         {pickupLabel && (
