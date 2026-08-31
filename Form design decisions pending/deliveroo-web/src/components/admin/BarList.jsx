@@ -41,7 +41,7 @@ export default function BarList({ rows = [], format = (value) => value, tone = c
                 fontFamily: font.mono,
                 fontSize: '12px',
                 letterSpacing: '.03em',
-                fontWeight: 700,
+                fontWeight: 600,
                 color: row.value ? color.ink : color.muted,
                 whiteSpace: 'nowrap'
               }}
@@ -50,7 +50,7 @@ export default function BarList({ rows = [], format = (value) => value, tone = c
               {row.hint && <span style={{ marginLeft: '8px', fontWeight: 400, color: color.muted }}>{row.hint}</span>}
             </span>
           </div>
-          <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(17,17,17,.07)', overflow: 'hidden' }}>
+          <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(28,32,31,.07)', overflow: 'hidden' }}>
             <div
               style={{
                 width: `${Math.max(row.value ? 2 : 0, (row.value / peak) * 100)}%`,
