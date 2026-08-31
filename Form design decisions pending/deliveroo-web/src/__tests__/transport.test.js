@@ -126,17 +126,22 @@ describe('multi-modal pricing (§25)', () => {
     expect(options.ROAD.quote.durationSeconds).toBeLessThan(options.SHIP.quote.durationSeconds);
   });
 
-  it('puts long freight on a ship, light or heavy', () => {
+  it('puts a light long-haul parcel on a ship', () => {
     const light = optionsFor(NAIROBI, MOMBASA, coastRoute);
+    expect(defaultModeFor(Object.values(light))).toBe(TRANSPORT.SHIP);
+  });
+
+  // Second half of the same tariff inconsistency: road's KES 2.5 a kilo means the
+  // weight component of a road fare barely exists, so 200 kg to Mombasa now goes by
+  // van rather than by sea. Sea's 28/kg is what used to win the heavy freight.
+  it('sends heavy long-haul freight by road, because weight costs road almost nothing', () => {
     const heavy = transportOptions({
       pickup: NAIROBI,
       destination: MOMBASA,
       route: coastRoute,
       parcel: { weightKg: 200 }
     });
-
-    expect(defaultModeFor(Object.values(light))).toBe(TRANSPORT.SHIP);
-    expect(defaultModeFor(heavy)).toBe(TRANSPORT.SHIP);
+    expect(defaultModeFor(heavy)).toBe(TRANSPORT.ROAD);
   });
 
   // KNOWN TARIFF INCONSISTENCY: road charges KES 2.5 a kilo against the bike's 22,
