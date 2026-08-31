@@ -160,7 +160,7 @@ export default function AdminPortal() {
               <div style={{ ...eyebrow, marginBottom: '10px' }}>Not your section</div>
               <p style={{ margin: 0, maxWidth: '46ch', fontSize: '14.5px', lineHeight: 1.6, color: color.body }}>
                 {section.title} is restricted to administrators. Your account signs in as a{' '}
-                {ROLE_LABEL[roleOf(user)].toLowerCase()} — ask an administrator if you need it.
+                {ROLE_LABEL[roleOf(user)].toLowerCase()}. Ask an administrator if you need it.
               </p>
             </div>
           )}
