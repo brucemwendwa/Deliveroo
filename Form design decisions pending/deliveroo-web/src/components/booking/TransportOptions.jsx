@@ -17,7 +17,7 @@ function OptionCard({ option, selected, onSelect }) {
   const [hovered, bind] = useHover();
   const { meta, quote, available, reason, badge, busy } = option;
 
-  const border = selected ? color.ink : available && hovered ? 'rgba(17,17,17,.34)' : 'rgba(17,17,17,.12)';
+  const border = selected ? color.ink : available && hovered ? 'rgba(28,32,31,.34)' : 'rgba(28,32,31,.12)';
 
   return (
     <button
@@ -42,13 +42,13 @@ function OptionCard({ option, selected, onSelect }) {
         padding: 'clamp(16px,2vw,20px)',
         borderRadius: radius.card,
         border: `${selected ? 2 : 1.5}px solid ${border}`,
-        background: available ? color.white : 'rgba(17,17,17,.03)',
+        background: available ? color.card : 'rgba(28,32,31,.03)',
         cursor: available ? 'pointer' : 'not-allowed',
         fontFamily: font.body,
         boxShadow: selected
-          ? '0 26px 46px -30px rgba(17,17,17,.55)'
+          ? '0 26px 46px -30px rgba(28,32,31,.55)'
           : available && hovered
-            ? '0 20px 38px -30px rgba(17,17,17,.45)'
+            ? '0 20px 38px -30px rgba(28,32,31,.45)'
             : 'none',
         transform: selected || (available && hovered) ? 'translateY(-3px)' : 'none',
         transition: `transform .25s ${ease.out}, box-shadow .25s ${ease.out}, border-color .2s, background .2s`,
@@ -66,7 +66,7 @@ function OptionCard({ option, selected, onSelect }) {
             width: '44px',
             height: '44px',
             borderRadius: '14px',
-            background: selected ? color.ink : available ? 'rgba(245,145,30,.14)' : 'rgba(17,17,17,.06)',
+            background: selected ? color.green : available ? 'rgba(248,135,53,.14)' : 'rgba(28,32,31,.06)',
             transition: `background .25s ${ease.out}`
           }}
         >
@@ -75,7 +75,7 @@ function OptionCard({ option, selected, onSelect }) {
 
         <span style={{ flex: 1, minWidth: 0 }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '16.5px', fontWeight: 800, letterSpacing: '-.02em', color: color.ink }}>
+            <span style={{ fontSize: '16.5px', fontWeight: 600, letterSpacing: '-.02em', color: color.ink }}>
               {meta.label}
             </span>
             {badge && available && (
@@ -130,7 +130,7 @@ function OptionCard({ option, selected, onSelect }) {
             <span
               style={{
                 fontFamily: font.display,
-                fontWeight: 700,
+                fontWeight: 600,
                 fontSize: 'clamp(24px,2.6vw,30px)',
                 lineHeight: 1,
                 letterSpacing: '-.02em',
@@ -159,10 +159,10 @@ function OptionCard({ option, selected, onSelect }) {
               gap: '7px',
               height: '44px',
               borderRadius: radius.pill,
-              background: selected ? color.ink : 'transparent',
-              border: selected ? 'none' : '1.5px solid rgba(17,17,17,.16)',
+              background: selected ? color.green : 'transparent',
+              border: selected ? 'none' : `1px solid ${color.border}`,
               fontSize: '14.5px',
-              fontWeight: 700,
+              fontWeight: 600,
               color: selected ? color.paper : color.ink,
               transition: 'background .2s, color .2s, border-color .2s'
             }}
@@ -191,8 +191,8 @@ function LoadingCards() {
           style={{
             height: '186px',
             borderRadius: radius.card,
-            border: '1.5px solid rgba(17,17,17,.08)',
-            background: `linear-gradient(100deg, rgba(17,17,17,.035) 30%, rgba(17,17,17,.07) 50%, rgba(17,17,17,.035) 70%)`,
+            border: `1px solid ${color.border}`,
+            background: `linear-gradient(100deg, rgba(28,32,31,.035) 30%, rgba(28,32,31,.07) 50%, rgba(28,32,31,.035) 70%)`,
             backgroundSize: '260% 100%',
             animation: `shimmer 1.5s ${index * 0.12}s linear infinite`
           }}
@@ -216,8 +216,8 @@ export default function TransportOptions({ options, selected, onSelect, priority
             display: 'inline-flex',
             padding: '4px',
             borderRadius: radius.pill,
-            background: 'rgba(17,17,17,.05)',
-            border: '1px solid rgba(17,17,17,.08)'
+            background: 'rgba(28,32,31,.05)',
+            border: `1px solid ${color.border}`
           }}
         >
           {PRIORITY_OPTIONS.map((tier) => {
@@ -235,11 +235,11 @@ export default function TransportOptions({ options, selected, onSelect, priority
                   padding: '0 20px',
                   borderRadius: radius.pill,
                   border: 'none',
-                  background: active ? color.white : 'transparent',
-                  boxShadow: active ? '0 6px 16px -10px rgba(17,17,17,.6)' : 'none',
+                  background: active ? color.card : 'transparent',
+                  boxShadow: active ? '0 6px 16px -10px rgba(28,32,31,.6)' : 'none',
                   fontFamily: font.body,
                   fontSize: '14.5px',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   color: active ? color.ink : color.muted,
                   cursor: 'pointer',
                   transition: `background .2s ${ease.out}, color .2s`
