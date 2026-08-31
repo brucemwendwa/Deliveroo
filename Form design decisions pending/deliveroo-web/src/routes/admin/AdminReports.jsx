@@ -228,7 +228,7 @@ export default function AdminReports() {
       </Panel>
 
       <p style={{ margin: 0, maxWidth: '62ch', fontSize: '12.5px', lineHeight: 1.6, color: color.muted }}>
-        Revenue counts every delivery that was not cancelled, at the fare currently on the order — the
+        Revenue counts every delivery that was not cancelled, at the fare currently on the order: the
         measured one where the parcel has been weighed, the estimate where it has not. On time compares
         the delivery against the duration it was quoted, counted from collection.
       </p>
