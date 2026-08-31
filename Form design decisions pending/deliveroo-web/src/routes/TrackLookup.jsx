@@ -19,7 +19,7 @@ export default function TrackLookup() {
     <PageShell eyebrow="Track" title="Where is my package?">
       <div style={{ maxWidth: '460px' }}>
         <p style={{ margin: '0 0 22px', fontSize: '16px', lineHeight: 1.6, color: color.body }}>
-          Enter the order number from your confirmation — it looks like DLV-10482.
+          Enter the order number from your confirmation. It looks like DLV-10482.
         </p>
         <Field
           label="Order number"
