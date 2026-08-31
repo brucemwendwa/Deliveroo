@@ -24,7 +24,7 @@ export default function EtaPanel({
         alignItems: 'flex-end',
         gap: '18px',
         paddingBottom: '26px',
-        borderBottom: '1px solid rgba(243,241,237,.16)',
+        borderBottom: '1px solid rgba(243,243,241,.16)',
         marginBottom: '26px'
       }}
     >
@@ -34,8 +34,7 @@ export default function EtaPanel({
             fontFamily: font.mono,
             fontSize: '10.5px',
             letterSpacing: '.14em',
-            textTransform: 'uppercase',
-            color: 'rgba(243,241,237,.5)',
+            color: 'rgba(243,243,241,.5)',
             marginBottom: '8px'
           }}
         >
@@ -45,7 +44,7 @@ export default function EtaPanel({
           aria-live="polite"
           style={{
             fontFamily: font.display,
-            fontWeight: 700,
+            fontWeight: 600,
             fontSize: 'clamp(40px,4.6vw,70px)',
             lineHeight: 0.86,
             color: color.orange,
@@ -64,7 +63,7 @@ export default function EtaPanel({
           )}
         </div>
         {arrivalAt && (
-          <div style={{ marginTop: '10px', fontSize: '13.5px', color: 'rgba(243,241,237,.7)' }}>
+          <div style={{ marginTop: '10px', fontSize: '13.5px', color: 'rgba(243,243,241,.7)' }}>
             Expected by <strong style={{ color: color.paper }}>{arrivalAt}</strong>
           </div>
         )}
@@ -78,7 +77,7 @@ export default function EtaPanel({
             fontSize: '10.5px',
             letterSpacing: '.1em',
             textTransform: 'uppercase',
-            color: 'rgba(243,241,237,.5)'
+            color: 'rgba(243,243,241,.5)'
           }}
         >
           <span>{fromLabel}</span>
@@ -90,14 +89,14 @@ export default function EtaPanel({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="Delivery progress"
-          style={{ height: '6px', borderRadius: '99px', background: 'rgba(243,241,237,.14)', overflow: 'hidden' }}
+          style={{ height: '6px', borderRadius: '99px', background: 'rgba(243,243,241,.14)', overflow: 'hidden' }}
         >
           <div
             style={{
               width: `${Math.max(0, Math.min(100, progress))}%`,
               height: '100%',
               borderRadius: '99px',
-              background: 'linear-gradient(90deg,#FFB067,#F5911E)',
+              background: 'linear-gradient(90deg,#FFA45C,#F88735)',
               transition: 'width .6s ease'
             }}
           />
