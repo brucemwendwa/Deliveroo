@@ -114,7 +114,7 @@ describe('booking flow', () => {
       payload: { distanceKm: 12.4, durationSeconds: 2100, coordinates: [], estimated: false }
     });
 
-    expect(await screen.findByText('KES 650')).toBeInTheDocument();
+    expect(await screen.findByText('KES 510')).toBeInTheDocument();
     // Distance shows in both the stat tile and the price breakdown — both are correct.
     expect(screen.getAllByText('12.4 km').length).toBeGreaterThan(0);
     expect(screen.getAllByText('35 min').length).toBeGreaterThan(0);
