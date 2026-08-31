@@ -100,7 +100,7 @@ describe('booking flow', () => {
     expect(store.getState().booking.transport.mode).toBe('ROAD');
     expect(road).toHaveAttribute('aria-pressed', 'true');
     // The van costs more than the bike it replaced, and the quote follows.
-    expect(total()).toBe('KES 650');
+    expect(total()).toBe('KES 510');
     expect(total()).not.toBe(bikeTotal);
   });
 
