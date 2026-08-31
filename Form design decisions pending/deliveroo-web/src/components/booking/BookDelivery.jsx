@@ -30,7 +30,7 @@ import { openAuthModal, showToast } from '../../store/uiSlice';
 import { reverseGeocode } from '../../api/geo';
 import { formatDuration, formatKes, formatKm } from '../../lib/pricing';
 import { PACKAGE_TYPES, modeMeta, volumetricWeightKg } from '../../lib/transport';
-import { color, eyebrow, font, layout } from '../../theme';
+import { color, eyebrow, font, layout, shadow } from '../../theme';
 import Button from '../ui/Button';
 import Chip from '../ui/Chip';
 import Field from '../ui/Field';
@@ -157,11 +157,10 @@ export default function BookDelivery() {
             style={{
               margin: '0 0 18px',
               fontFamily: font.display,
-              fontWeight: 700,
+              fontWeight: 600,
               fontSize: 'clamp(38px,6.6vw,104px)',
-              lineHeight: 0.9,
-              letterSpacing: '-.015em',
-              textTransform: 'uppercase',
+              lineHeight: 1.04,
+              letterSpacing: '-.025em',
               color: color.ink
             }}
           >
@@ -184,8 +183,8 @@ export default function BookDelivery() {
                 margin: '22px 0 0',
                 padding: '14px 18px',
                 borderRadius: '16px',
-                border: `1.5px solid ${color.orangeDeep}`,
-                background: 'rgba(196,112,15,.1)',
+                border: `1px solid ${color.orangeDeep}`,
+                background: 'rgba(173,84,21,.1)',
                 fontSize: '14.5px',
                 lineHeight: 1.55,
                 color: color.ink
@@ -293,8 +292,9 @@ export default function BookDelivery() {
                       height: '46px',
                       padding: '0 14px',
                       borderRadius: '999px',
-                      border: `1.5px solid ${customWeight ? color.ink : 'rgba(17,17,17,.14)'}`,
-                      background: color.white,
+                      border: `1px solid ${customWeight ? color.ink : 'rgba(28,32,31,.14)'}`,
+                      background: color.card,
+                      boxShadow: shadow.card,
                       fontFamily: font.body,
                       fontSize: '15px',
                       fontWeight: 600,
@@ -351,7 +351,7 @@ export default function BookDelivery() {
                     background: 'transparent',
                     fontFamily: font.body,
                     fontSize: '14px',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     color: color.ink,
                     cursor: 'pointer'
                   }}
@@ -554,12 +554,13 @@ export default function BookDelivery() {
                       flex: 1,
                       padding: '16px 18px',
                       borderRadius: '18px',
-                      background: color.white,
-                      border: '1px solid rgba(17,17,17,.1)'
+                      background: color.card,
+                      boxShadow: shadow.card,
+                      border: `1px solid ${color.border}`
                     }}
                   >
                     <div style={{ ...eyebrow, fontSize: '10px', marginBottom: '8px' }}>{stat.label}</div>
-                    <div style={{ fontFamily: font.display, fontWeight: 700, fontSize: 'clamp(22px,2.4vw,30px)', lineHeight: 1, color: color.ink }}>
+                    <div style={{ fontFamily: font.display, fontWeight: 600, fontSize: 'clamp(22px,2.4vw,30px)', lineHeight: 1, color: color.ink }}>
                       {stat.value}
                     </div>
                   </div>
@@ -592,17 +593,17 @@ export default function BookDelivery() {
             alignItems: 'center',
             gap: '14px',
             padding: `12px ${layout.gutter} calc(12px + env(safe-area-inset-bottom,0px))`,
-            background: 'rgba(17,17,17,.94)',
+            background: 'rgba(28,32,31,.94)',
             backdropFilter: 'blur(14px)',
             WebkitBackdropFilter: 'blur(14px)',
-            borderTop: '1px solid rgba(243,241,237,.14)'
+            borderTop: '1px solid rgba(243,243,241,.14)'
           }}
         >
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ ...eyebrow, fontSize: '9.5px', color: 'rgba(243,241,237,.55)', marginBottom: '3px' }}>
+            <div style={{ ...eyebrow, fontSize: '9.5px', color: 'rgba(243,243,241,.55)', marginBottom: '3px' }}>
               {selectedMeta ? `${selectedMeta.label} · ${formatDuration(quote.durationSeconds)}` : 'Estimated'}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: font.display, fontWeight: 700, fontSize: '24px', lineHeight: 1, color: color.paper }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: font.display, fontWeight: 600, fontSize: '24px', lineHeight: 1, color: color.paper }}>
               {selectedMeta && <TransportGlyph mode={selectedMeta.id} size={19} color={color.orange} />}
               {formatKes(quote.total)}
             </div>
