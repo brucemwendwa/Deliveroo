@@ -50,7 +50,7 @@ export default function ActiveDelivery({ order }) {
       aria-label="Active delivery"
       style={{
         borderRadius: 'clamp(22px,2.6vw,30px)',
-        background: color.ink,
+        background: color.greenDeep,
         color: color.paper,
         padding: 'clamp(20px,3vw,34px)',
         overflow: 'hidden'
@@ -60,7 +60,7 @@ export default function ActiveDelivery({ order }) {
         <span style={{ ...eyebrow, color: color.orange }}>Active delivery</span>
         <StatusPill status={order.status} tone="dark" size="sm" />
         <TransportBadge mode={mode} priority={priorityOf(order)} tone="dark" size="sm" />
-        <span style={{ marginLeft: 'auto', fontFamily: font.mono, fontSize: '12px', letterSpacing: '.06em', color: 'rgba(243,241,237,.55)' }}>
+        <span style={{ marginLeft: 'auto', fontFamily: font.mono, fontSize: '12px', letterSpacing: '.06em', color: 'rgba(243,243,241,.55)' }}>
           {order.id}
         </span>
       </div>
@@ -71,17 +71,16 @@ export default function ActiveDelivery({ order }) {
             style={{
               margin: '0 0 6px',
               fontFamily: font.display,
-              fontWeight: 700,
+              fontWeight: 600,
               fontSize: 'clamp(26px,3.4vw,44px)',
               lineHeight: 1,
               letterSpacing: '-.02em',
-              textTransform: 'uppercase',
               color: color.paper
             }}
           >
             {order.pickup.name} → {order.destination.name}
           </h2>
-          <p style={{ margin: 0, fontSize: '14.5px', color: 'rgba(243,241,237,.66)' }}>
+          <p style={{ margin: 0, fontSize: '14.5px', color: 'rgba(243,243,241,.66)' }}>
             {searching
               ? `Finding a ${noun} near you…`
               : order.status === STATUS.ASSIGNED && order.courier
@@ -93,13 +92,13 @@ export default function ActiveDelivery({ order }) {
         </div>
 
         <div style={{ flex: 'none' }}>
-          <div style={{ ...eyebrow, fontSize: '9.5px', color: 'rgba(243,241,237,.5)', marginBottom: '6px' }}>Arriving in</div>
+          <div style={{ ...eyebrow, fontSize: '9.5px', color: 'rgba(243,243,241,.5)', marginBottom: '6px' }}>Arriving in</div>
           <div
             style={{
               fontFamily: font.display,
-              fontWeight: 700,
+              fontWeight: 600,
               fontSize: 'clamp(34px,4vw,54px)',
-              lineHeight: 0.9,
+              lineHeight: 1.04,
               color: color.orange,
               whiteSpace: 'nowrap'
             }}
@@ -122,14 +121,14 @@ export default function ActiveDelivery({ order }) {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Delivery progress"
-        style={{ height: '6px', borderRadius: '99px', background: 'rgba(243,241,237,.14)', overflow: 'hidden', margin: '22px 0 18px' }}
+        style={{ height: '6px', borderRadius: '99px', background: 'rgba(243,243,241,.14)', overflow: 'hidden', margin: '22px 0 18px' }}
       >
         <div
           style={{
             width: `${Math.max(2, Math.min(100, progress))}%`,
             height: '100%',
             borderRadius: '99px',
-            background: 'linear-gradient(90deg,#FFB067,#F5911E)',
+            background: 'linear-gradient(90deg,#FFA45C,#F88735)',
             transition: `width .6s ${ease.out}`
           }}
         />
@@ -138,13 +137,13 @@ export default function ActiveDelivery({ order }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 28px' }}>
         {facts.map(([label, value]) => (
           <div key={label} style={{ flex: '1 1 130px', minWidth: 0 }}>
-            <div style={{ ...eyebrow, fontSize: '9px', color: 'rgba(243,241,237,.45)', marginBottom: '5px' }}>{label}</div>
-            <div style={{ fontSize: '14.5px', fontWeight: 700, letterSpacing: '-.01em', color: color.paper }}>{value}</div>
+            <div style={{ ...eyebrow, fontSize: '9px', color: 'rgba(243,243,241,.45)', marginBottom: '5px' }}>{label}</div>
+            <div style={{ fontSize: '14.5px', fontWeight: 600, letterSpacing: '-.01em', color: color.paper }}>{value}</div>
           </div>
         ))}
         <div style={{ flex: '1 1 130px', minWidth: 0 }}>
-          <div style={{ ...eyebrow, fontSize: '9px', color: 'rgba(243,241,237,.45)', marginBottom: '5px' }}>Transport</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '14.5px', fontWeight: 700, color: color.paper }}>
+          <div style={{ ...eyebrow, fontSize: '9px', color: 'rgba(243,243,241,.45)', marginBottom: '5px' }}>Transport</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '14.5px', fontWeight: 600, color: color.paper }}>
             <TransportGlyph mode={mode} size={17} color={color.orange} />
             {meta.label}
           </div>
