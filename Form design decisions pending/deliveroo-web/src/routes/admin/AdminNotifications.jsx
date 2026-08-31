@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectNotifications } from '../../store/adminSlice';
-import { color, control, font, radius } from '../../theme';
+import { color, control, font, radius, shadow } from '../../theme';
 import Panel from '../../components/admin/Panel';
 import EmptyState from '../../components/ui/EmptyState';
 import Icon from '../../components/Icon';
@@ -72,8 +72,9 @@ export default function AdminNotifications() {
                   gap: '6px',
                   padding: '14px 16px',
                   borderRadius: radius.card,
-                  border: '1px solid rgba(17,17,17,.1)',
-                  background: color.white
+                  border: `1px solid ${color.border}`,
+                  background: color.card,
+                  boxShadow: shadow.card
                 }}
               >
                 <span style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', alignItems: 'baseline' }}>
