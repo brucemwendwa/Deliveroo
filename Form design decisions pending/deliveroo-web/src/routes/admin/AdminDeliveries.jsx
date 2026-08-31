@@ -215,7 +215,7 @@ export default function AdminDeliveries() {
             />
             {selected.courier && mayDispatch && (
               <p style={{ margin: 0, fontSize: '12.5px', lineHeight: 1.5, color: color.muted }}>
-                Drag the vehicle marker to update {selected.courier.name}&apos;s position — the customer&apos;s
+                Drag the vehicle marker to update {selected.courier.name}&apos;s position. The customer&apos;s
                 tracking screen follows immediately.
               </p>
             )}
@@ -243,7 +243,7 @@ export default function AdminDeliveries() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
                 {allowedTransitions(selected.status).length === 0 ? (
                   <span style={{ fontSize: '14px', color: color.muted }}>
-                    {STATUS_LABEL[selected.status]} is final — no further changes.
+                    {STATUS_LABEL[selected.status]} is final, so nothing further changes.
                   </span>
                 ) : (
                   allowedTransitions(selected.status).map((status) => (
