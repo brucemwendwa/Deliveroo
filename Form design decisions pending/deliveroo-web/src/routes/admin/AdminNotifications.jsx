@@ -50,7 +50,7 @@ export default function AdminNotifications() {
 
       <Panel
         title={`Outbox · ${notifications.length}`}
-        note="Held locally, newest first. Pointing this at a mail service is a one-function change; until then, this is where a message can be read back to a customer."
+        note="Held locally, newest first. Pointing this at a mail service is a change to a single function; until then, this is where a message can be read back to a customer."
       >
         {visible.length === 0 ? (
           <EmptyState
@@ -59,7 +59,7 @@ export default function AdminNotifications() {
             body={
               notifications.length
                 ? 'Clear the search to see the rest of the outbox.'
-                : 'A message is written whenever a delivery is assigned, weighed, re-routed or completed.'
+                : 'A message is written whenever a delivery is assigned, weighed, rerouted or completed.'
             }
           />
         ) : (
