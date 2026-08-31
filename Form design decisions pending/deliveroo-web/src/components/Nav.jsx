@@ -1,37 +1,46 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { showToast, toggleMobileMenu } from '../store/uiSlice';
 import { selectIsSignedIn, selectUser, signOut } from '../store/authSlice';
-import useStartBooking, { BOOKING_PATH } from '../hooks/useStartBooking';
+import useStartBooking, { BOOKING_PATH, showsBookingCta } from '../hooks/useStartBooking';
 import { color, ease, hover, layout, radius } from '../theme';
 import HoverLink from './HoverLink';
 import NavDropdown from './NavDropdown';
 import Wordmark from './Wordmark';
 import Icon from './Icon';
 
-// Three grouped menus. Section links carry the leading "/" so they work from the
-// tracking and admin routes too; ScrollToHash does the scrolling. "Talk to sales",
-// "About us" and "Help centre" have no pages of their own yet, so they point at the
-// footer (which carries the phone, email and address) and the services section.
+// Three grouped menus, each one listing what the site actually has.
+//
+// Services names the five services on the landing page and jumps to the card for
+// that one, so the menu is the catalogue rather than a paraphrase of it. Track
+// Delivery covers both ways in: a lookup by order number, and the list of your own
+// deliveries. Contact carries the real phone, email and address from the footer,
+// which is the only contact detail we publish, so the menu dials and mails directly
+// instead of pretending there is a sales desk or a help centre behind it.
 export const NAV_MENUS = [
   {
     label: 'Services',
     items: [
-      { label: 'Same-day courier', to: '/#services' },
-      { label: 'Package delivery', to: '/#services' },
-      { label: 'Business logistics', to: '/#services' }
+      { label: 'Same Day Delivery', to: '/#service-same-day' },
+      { label: 'Business Delivery', to: '/#service-business' },
+      { label: 'Bulk & Package Delivery', to: '/#service-bulk' },
+      { label: 'Express Courier', to: '/#service-express' },
+      { label: 'Drone Delivery', to: '/#service-drone' }
     ]
   },
   {
     label: 'Track Delivery',
-    items: [{ label: 'Track a parcel', to: '/track' }]
+    items: [
+      { label: 'Track by order number', to: '/track' },
+      { label: 'My deliveries', to: '/orders' }
+    ]
   },
   {
     label: 'Contact',
     items: [
-      { label: 'Talk to sales', to: '/#footer' },
-      { label: 'About us', to: '/#services' },
-      { label: 'Help centre', to: '/#footer' }
+      { label: 'Call +254 700 000 000', href: 'tel:+254700000000' },
+      { label: 'Email hello@deliveroo.co', href: 'mailto:hello@deliveroo.co' },
+      { label: 'Where to find us', to: '/#footer' }
     ]
   }
 ];
@@ -124,6 +133,10 @@ export default function Nav() {
   const signedIn = useSelector(selectIsSignedIn);
   const user = useSelector(selectUser);
   const startBooking = useStartBooking();
+  const { pathname } = useLocation();
+  // The booking shortcut is hidden where it would point at the page you are already
+  // on, or at a flow you have just finished.
+  const showBookingCta = showsBookingCta(pathname);
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 900, height: '80px' }}>
@@ -154,7 +167,7 @@ export default function Nav() {
         }}
       >
         <div style={{ flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '3px' }}>
-          <Link to="/" aria-label="Send it — home" style={{ display: 'flex' }}>
+          <Link to="/" aria-label="Send it, home" style={{ display: 'flex' }}>
             <Wordmark dot />
           </Link>
           <div
@@ -197,29 +210,32 @@ export default function Nav() {
             {signedIn ? (
               <>
                 {/* Signed in, the CTA changes job: not "get started" but the action
-                    the account exists for. */}
-                <HoverLink
-                  as={Link}
-                  to={BOOKING_PATH}
-                  onClick={startBooking}
-                  hoverStyle={hover.yellow}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    height: '44px',
-                    padding: '0 20px',
-                    borderRadius: radius.pill,
-                    background: color.orange,
-                    color: color.ink,
-                    fontSize: '14.5px',
-                    fontWeight: 600,
-                    transition: `transform .2s ${ease.out}, box-shadow .2s`
-                  }}
-                >
-                  <Icon name="add" size={17} />
-                  Request delivery
-                </HoverLink>
+                    the account exists for. It is dropped on the routes where that
+                    action is the page itself. */}
+                {showBookingCta && (
+                  <HoverLink
+                    as={Link}
+                    to={BOOKING_PATH}
+                    onClick={startBooking}
+                    hoverStyle={hover.yellow}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      height: '44px',
+                      padding: '0 20px',
+                      borderRadius: radius.pill,
+                      background: color.orange,
+                      color: color.ink,
+                      fontSize: '14.5px',
+                      fontWeight: 600,
+                      transition: `transform .2s ${ease.out}, box-shadow .2s`
+                    }}
+                  >
+                    <Icon name="add" size={17} />
+                    Request delivery
+                  </HoverLink>
+                )}
                 <ProfileMenu user={user} />
               </>
             ) : (
