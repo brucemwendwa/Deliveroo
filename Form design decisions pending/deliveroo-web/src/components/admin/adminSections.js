@@ -44,7 +44,7 @@ export const SECTIONS = [
     label: 'Capacity',
     icon: 'conversion_path',
     title: 'Transport capacity',
-    blurb: 'Which modes dispatch can book into today — and what customers are offered.',
+    blurb: 'Which modes dispatch can book into today, and what customers are offered.',
     permission: PERMISSION.SET_CAPACITY
   },
   {
@@ -64,7 +64,7 @@ export const SECTIONS = [
     label: 'Reports',
     icon: 'monitoring',
     title: 'Reports',
-    blurb: 'Volume, revenue and reliability — and the board as a spreadsheet.',
+    blurb: 'Volume, revenue and reliability, plus the board as a spreadsheet.',
     permission: PERMISSION.VIEW_REPORTS
   },
   {
