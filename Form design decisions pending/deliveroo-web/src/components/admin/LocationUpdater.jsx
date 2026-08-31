@@ -43,7 +43,7 @@ export default function LocationUpdater({ order }) {
 
       {locked ? (
         <p style={{ margin: 0, fontSize: '13.5px', color: color.muted }}>
-          This delivery is closed — its location no longer changes.
+          This delivery is closed, so its location no longer changes.
         </p>
       ) : (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
