@@ -47,10 +47,9 @@ export default function AuthModal() {
         style={{
           margin: '0 0 10px',
           fontFamily: font.display,
-          fontWeight: 700,
+          fontWeight: 600,
           fontSize: 'clamp(28px,4vw,40px)',
-          lineHeight: 0.95,
-          textTransform: 'uppercase',
+          lineHeight: 1.04,
           color: color.ink
         }}
       >
@@ -73,7 +72,7 @@ export default function AuthModal() {
               padding: '5px',
               marginBottom: '20px',
               borderRadius: radius.pill,
-              background: 'rgba(17,17,17,.06)'
+              background: 'rgba(28,32,31,.06)'
             }}
           >
             {[
@@ -94,10 +93,10 @@ export default function AuthModal() {
                   cursor: 'pointer',
                   fontFamily: font.body,
                   fontSize: '13.5px',
-                  fontWeight: 700,
-                  background: channel === tab.id ? color.white : 'transparent',
+                  fontWeight: 600,
+                  background: channel === tab.id ? color.card : 'transparent',
                   color: channel === tab.id ? color.ink : color.muted,
-                  boxShadow: channel === tab.id ? '0 6px 14px -8px rgba(17,17,17,.5)' : 'none'
+                  boxShadow: channel === tab.id ? '0 6px 14px -8px rgba(28,32,31,.5)' : 'none'
                 }}
               >
                 {tab.label.replace('Continue with ', '')}
