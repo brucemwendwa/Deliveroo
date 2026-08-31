@@ -65,7 +65,7 @@ export default function AuthModal() {
         <>
           <div
             role="tablist"
-            aria-label="Sign-in method"
+            aria-label="Sign in method"
             style={{
               display: 'flex',
               gap: '6px',
