@@ -87,7 +87,7 @@ export default function Modal({
         position: 'fixed',
         inset: 0,
         zIndex: 1000,
-        background: 'rgba(10,10,10,.55)',
+        background: 'rgba(15,26,23,.55)',
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
         display: 'flex',
@@ -114,7 +114,7 @@ export default function Modal({
           padding: sheet
             ? `26px ${layout.gutter} calc(26px + env(safe-area-inset-bottom,0px))`
             : 'clamp(24px,3.5vw,38px)',
-          boxShadow: '0 50px 90px -40px rgba(10,10,10,.75)',
+          boxShadow: '0 50px 90px -40px rgba(15,26,23,.75)',
           animation: sheet ? `sheetUp .32s ${ease.out} both` : `riseIn .3s ${ease.out} both`
         }}
       >
