@@ -6,6 +6,21 @@ import { openAuthModal } from '../store/uiSlice';
 export const BOOKING_PATH = '/book';
 
 /**
+ * Whether the "Request delivery" shortcut belongs in the nav on this route.
+ *
+ * On the booking form it points at the page you are already filling in, and on the
+ * confirmation screen it invites you to start again the moment you finished. The
+ * admin portal is a staff console, not a place to send a parcel from. Everywhere
+ * else the shortcut is the fastest way back to booking, so it stays.
+ */
+export function showsBookingCta(pathname = '') {
+  if (pathname === BOOKING_PATH) return false;
+  if (/^\/orders\/[^/]+\/confirmation$/.test(pathname)) return false;
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return false;
+  return true;
+}
+
+/**
  * Every "send a package" CTA runs through here so the gate is identical wherever it
  * is pressed: signed in goes straight to the booking page, signed out opens the auth
  * modal first, which lands on /book once the code checks out.
