@@ -29,10 +29,11 @@ export const HERO_PHOTO = {
 
 /**
  * The words over it. The photograph already shows every mode at once, so the eyebrow
- * says so in the nav's own language rather than naming one of them.
+ * speaks to the whole network rather than naming one of them. It deliberately avoids
+ * the nav's "Any Mode", which would otherwise appear twice above the fold.
  */
 export const HERO_COPY = {
-  eyebrow: 'Any Mode',
+  eyebrow: 'Global Delivery Network',
   headline: ['The future of', 'delivery is here'],
   body: 'Fast, intelligent delivery for a connected world.'
 };
@@ -178,7 +179,11 @@ export default function Hero() {
       id="top"
       style={{
         position: 'relative',
-        minHeight: 'clamp(560px,82vh,750px)',
+        // Full viewport height: the photograph is the fold, so the band underneath it
+        // never shows as a strip of green below the picture. dvh rather than vh so a
+        // phone measures the visible viewport instead of running under the browser
+        // chrome; the floor keeps the copy from crushing on a short landscape screen.
+        minHeight: 'max(100dvh,560px)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -196,7 +201,7 @@ export default function Hero() {
         // Above the fold, and the only thing behind the headline: never lazy.
         loading="eager"
         decoding="async"
-        fetchPriority="high"
+        fetchpriority="high"
         style={{
           position: 'absolute',
           inset: 0,
