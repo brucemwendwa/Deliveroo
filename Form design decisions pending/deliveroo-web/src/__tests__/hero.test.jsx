@@ -20,22 +20,24 @@ const headline = () => screen.getByRole('heading', { level: 1 }).textContent;
 
 // §2 — the hero is a single full-bleed photograph with one set of words over it.
 describe('hero', () => {
-  it('shows the eyebrow, the headline, the copy and both CTAs', () => {
+  it('shows the headline, the tagline and both CTAs — and no eyebrow', () => {
     renderHero();
 
-    expect(screen.getByText(HERO_COPY.eyebrow)).toBeInTheDocument();
-    expect(headline()).toBe('The future ofdelivery is here');
+    expect(headline()).toBe('From your door toanywhere on earth');
+    expect(screen.queryByText('Moving Goods Worldwide')).not.toBeInTheDocument();
     expect(screen.getByText(HERO_COPY.body)).toBeInTheDocument();
     expect(screen.getByText('Request a Delivery')).toBeInTheDocument();
-    expect(screen.getByText('Explore Delivery Options')).toBeInTheDocument();
+    // One CTA only: the explore pill is gone.
+    expect(screen.queryByText('Explore Delivery Options')).not.toBeInTheDocument();
   });
 
   it('sends the primary CTA into the existing booking flow', () => {
     const { container } = renderHero();
 
     expect(container.querySelector('a[href="/book"]')).not.toBeNull();
-    // The secondary one goes to the modes band, which is the list of options.
-    expect(container.querySelector('a[href="/#modes"]')).not.toBeNull();
+    // It is the hero's only link — the modes-band pill was removed.
+    expect(container.querySelector('a[href="/#modes"]')).toBeNull();
+    expect(container.querySelectorAll('a')).toHaveLength(1);
   });
 
   it('carries exactly one photograph, as a described cover image', () => {
@@ -59,14 +61,26 @@ describe('hero', () => {
     expect(screen.queryByText('/ 05')).not.toBeInTheDocument();
   });
 
-  it('re-anchors the crop and stacks the CTAs on a phone', () => {
+  it('parks the CTA at the bottom left, below the copy', () => {
+    const { container } = renderHero();
+    const ctaRow = container.querySelector('a[href="/book"]').parentElement;
+
+    expect(ctaRow.style.justifyContent).toBe('flex-start');
+    // Last row of the content column, so it sits on the bottom padding edge.
+    expect(ctaRow.parentElement.lastElementChild).toBe(ctaRow);
+    // ...and below the copy, which is no longer its ancestor.
+    expect(ctaRow.contains(container.querySelector('h1'))).toBe(false);
+  });
+
+  it('re-anchors the crop and keeps the CTA bottom left on a phone', () => {
     const store = makeStore();
     store.dispatch(setNarrow(true));
     const { container } = renderHero(store);
 
     expect(container.querySelector('img').style.objectPosition).toBe(HERO_PHOTO.focusNarrow);
     const ctaRow = container.querySelector('a[href="/book"]').parentElement;
-    expect(ctaRow.style.flexDirection).toBe('column');
+    expect(ctaRow.style.justifyContent).toBe('flex-start');
+    expect(ctaRow.parentElement.lastElementChild).toBe(ctaRow);
   });
 });
 
@@ -80,9 +94,9 @@ describe('hero content', () => {
     expect(HERO_PHOTO.focusNarrow).toBeTruthy();
   });
 
-  it('gives the hero an eyebrow, a headline and copy', () => {
-    expect(HERO_COPY.eyebrow).toBeTruthy();
+  it('gives the hero a headline and a tagline, and no eyebrow', () => {
     expect(HERO_COPY.headline.length).toBeGreaterThan(0);
     expect(HERO_COPY.body).toBeTruthy();
+    expect(HERO_COPY.eyebrow).toBeUndefined();
   });
 });
