@@ -3,7 +3,7 @@ import { selectFleet, setFleetStatus } from '../../store/fleetSlice';
 import { selectModeLoad } from '../../store/ordersSlice';
 import { showToast } from '../../store/uiSlice';
 import { FLEET_STATUS, FLEET_STATUS_LABEL, TRANSPORT_MODES } from '../../lib/transport';
-import { color, eyebrow, font, radius } from '../../theme';
+import { color, eyebrow, font, radius, shadow } from '../../theme';
 import TransportGlyph from '../transport/TransportGlyph';
 
 const TONE = {
@@ -59,8 +59,9 @@ export default function FleetPanel() {
     <div
       style={{
         borderRadius: radius.card,
-        border: '1px solid rgba(17,17,17,.12)',
-        background: color.white,
+        border: `1px solid ${color.border}`,
+        background: color.card,
+        boxShadow: shadow.card,
         padding: 'clamp(18px,2.2vw,26px)'
       }}
     >
@@ -87,8 +88,8 @@ export default function FleetPanel() {
                 gap: '12px',
                 padding: '12px 14px',
                 borderRadius: '16px',
-                border: '1px solid rgba(17,17,17,.1)',
-                background: status === FLEET_STATUS.OFFLINE ? 'rgba(17,17,17,.035)' : color.white
+                border: `1px solid ${color.border}`,
+                background: status === FLEET_STATUS.OFFLINE ? 'rgba(28,32,31,.035)' : color.card
               }}
             >
               <span
@@ -100,7 +101,7 @@ export default function FleetPanel() {
                   width: '38px',
                   height: '38px',
                   borderRadius: '12px',
-                  background: 'rgba(245,145,30,.14)',
+                  background: 'rgba(248,135,53,.14)',
                   flex: 'none'
                 }}
               >
@@ -108,7 +109,7 @@ export default function FleetPanel() {
               </span>
 
               <span style={{ flex: '1 1 130px', minWidth: 0 }}>
-                <span style={{ display: 'block', fontSize: '15px', fontWeight: 700, letterSpacing: '-.02em', color: color.ink }}>
+                <span style={{ display: 'block', fontSize: '15px', fontWeight: 600, letterSpacing: '-.02em', color: color.ink }}>
                   {meta.label} fleet
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '7px', marginTop: '3px', fontFamily: font.mono, fontSize: '10.5px', letterSpacing: '.1em', textTransform: 'uppercase', color: TONE[status] }}>
@@ -128,7 +129,7 @@ export default function FleetPanel() {
                       style={{
                         display: 'block',
                         fontFamily: font.display,
-                        fontWeight: 700,
+                        fontWeight: 600,
                         fontSize: '19px',
                         lineHeight: 1,
                         letterSpacing: '-.02em',
@@ -157,7 +158,7 @@ export default function FleetPanel() {
               <span
                 role="radiogroup"
                 aria-label={`${meta.label} availability`}
-                style={{ display: 'flex', gap: '4px', padding: '4px', borderRadius: radius.pill, background: 'rgba(17,17,17,.05)' }}
+                style={{ display: 'flex', gap: '4px', padding: '4px', borderRadius: radius.pill, background: 'rgba(28,32,31,.05)' }}
               >
                 {Object.values(FLEET_STATUS).map((option) => {
                   const on = option === status;
@@ -173,10 +174,10 @@ export default function FleetPanel() {
                         padding: '0 13px',
                         borderRadius: radius.pill,
                         border: 'none',
-                        background: on ? color.ink : 'transparent',
+                        background: on ? color.green : 'transparent',
                         fontFamily: font.body,
                         fontSize: '12.5px',
-                        fontWeight: 700,
+                        fontWeight: 600,
                         color: on ? color.paper : color.muted,
                         cursor: 'pointer',
                         transition: 'background .18s, color .18s'
