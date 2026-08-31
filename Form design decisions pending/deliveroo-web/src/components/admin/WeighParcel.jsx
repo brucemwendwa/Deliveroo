@@ -11,7 +11,7 @@ import {
   priceOrder,
   weightDiscrepancy
 } from '../../lib/pricing';
-import { color, control, eyebrow, font, radius } from '../../theme';
+import { color, control, eyebrow, font, radius, shadow } from '../../theme';
 import Button from '../ui/Button';
 
 const row = {
@@ -71,8 +71,9 @@ export default function WeighParcel({ order }) {
     <div
       style={{
         borderRadius: radius.card,
-        border: '1px solid rgba(17,17,17,.12)',
-        background: color.white,
+        border: `1px solid ${color.border}`,
+        background: color.card,
+        boxShadow: shadow.card,
         padding: 'clamp(18px,2.2vw,26px)'
       }}
     >
@@ -111,7 +112,7 @@ export default function WeighParcel({ order }) {
                 margin: '10px 0 0',
                 padding: '12px 14px',
                 borderRadius: '14px',
-                background: 'rgba(196,112,15,.09)',
+                background: 'rgba(173,84,21,.09)',
                 fontSize: '13px',
                 lineHeight: 1.5,
                 color: color.orangeDeep
@@ -133,7 +134,7 @@ export default function WeighParcel({ order }) {
       )}
 
       {mayWeigh ? (
-        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(17,17,17,.1)' }}>
+        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: `1px solid ${color.border}` }}>
           <label htmlFor={`weight-${order.id}`} style={control.label}>
             {verified ? 'Correct the measured weight' : 'Weight from the scale'}
           </label>
@@ -160,7 +161,7 @@ export default function WeighParcel({ order }) {
                 style={{
                   ...control.field,
                   padding: '0 42px 0 16px',
-                  border: `1.5px solid ${focused ? color.orange : 'rgba(17,17,17,.14)'}`,
+                  border: `1px solid ${focused ? color.orange : 'rgba(28,32,31,.14)'}`,
                   boxShadow: focused ? control.fieldFocus.boxShadow : 'none'
                 }}
               />
@@ -191,13 +192,13 @@ export default function WeighParcel({ order }) {
                 marginTop: '14px',
                 padding: '14px 16px',
                 borderRadius: '14px',
-                background: 'rgba(17,17,17,.04)',
-                border: '1px solid rgba(17,17,17,.1)'
+                background: 'rgba(28,32,31,.04)',
+                border: `1px solid ${color.border}`
               }}
             >
               <div style={{ ...eyebrow, fontSize: '9.5px', marginBottom: '8px' }}>Fee at {typed} kg</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ fontFamily: font.display, fontWeight: 700, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 1, color: color.ink }}>
+                <span style={{ fontFamily: font.display, fontWeight: 600, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 1, color: color.ink }}>
                   {formatKes(preview.total)}
                 </span>
                 {previewDelta !== 0 && (
@@ -217,7 +218,7 @@ export default function WeighParcel({ order }) {
           )}
         </div>
       ) : (
-        <p style={{ margin: '16px 0 0', paddingTop: '16px', borderTop: '1px solid rgba(17,17,17,.1)', fontSize: '13.5px', lineHeight: 1.5, color: color.muted }}>
+        <p style={{ margin: '16px 0 0', paddingTop: '16px', borderTop: `1px solid ${color.border}`, fontSize: '13.5px', lineHeight: 1.5, color: color.muted }}>
           {locked}
         </p>
       )}
