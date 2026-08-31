@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import useHover from '../hooks/useHover';
 import useStartBooking, { BOOKING_PATH } from '../hooks/useStartBooking';
 import { TRANSPORT } from '../lib/transport';
-import { color, ease, eyebrow, font, layout, radius } from '../theme';
+import { color, ease, eyebrow, font, layout, radius, shadow } from '../theme';
 import Icon from './Icon';
 import TransportGlyph from './transport/TransportGlyph';
 
@@ -63,8 +63,8 @@ const numeral = {
   color: color.muted
 };
 
-const restShadow = '0 1px 2px rgba(17,17,17,.05), 0 14px 28px -22px rgba(17,17,17,.4)';
-const liftShadow = '0 2px 4px rgba(17,17,17,.05), 0 30px 50px -30px rgba(17,17,17,.45)';
+const restShadow = '0 1px 2px rgba(28,32,31,.05), 0 14px 28px -22px rgba(28,32,31,.4)';
+const liftShadow = '0 2px 4px rgba(28,32,31,.05), 0 30px 50px -30px rgba(28,32,31,.45)';
 
 function ServiceCard({ service, delay }) {
   const [hovered, bind] = useHover();
@@ -82,7 +82,8 @@ function ServiceCard({ service, delay }) {
         flexDirection: 'column',
         borderRadius: radius.card,
         overflow: 'hidden',
-        background: color.white,
+        background: color.card,
+        boxShadow: shadow.card,
         color: color.ink,
         boxShadow: hovered ? liftShadow : restShadow,
         transform: hovered ? 'translateY(-6px)' : 'none',
@@ -124,7 +125,7 @@ function ServiceCard({ service, delay }) {
           <Icon
             name="arrow_outward"
             size={18}
-            color={hovered ? color.orange : 'rgba(17,17,17,.22)'}
+            color={hovered ? color.orange : 'rgba(28,32,31,.22)'}
             style={{
               marginLeft: 'auto',
               transform: hovered ? 'translate(3px,-3px)' : 'none',
@@ -136,7 +137,7 @@ function ServiceCard({ service, delay }) {
           style={{
             margin: '0 0 8px',
             fontSize: 'clamp(19px,1.7vw,23px)',
-            fontWeight: 800,
+            fontWeight: 600,
             letterSpacing: '-.028em',
             lineHeight: 1.15,
             color: color.ink
@@ -163,11 +164,10 @@ export default function Services() {
             style={{
               margin: '0 0 20px',
               fontFamily: font.display,
-              fontWeight: 700,
+              fontWeight: 600,
               fontSize: 'clamp(38px,6.6vw,104px)',
-              lineHeight: 0.9,
-              letterSpacing: '-.015em',
-              textTransform: 'uppercase',
+              lineHeight: 1.04,
+              letterSpacing: '-.025em',
               color: color.ink
             }}
           >
