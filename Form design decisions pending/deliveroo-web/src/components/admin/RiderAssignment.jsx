@@ -130,7 +130,7 @@ export default function RiderAssignment({ order }) {
           </span>
           <span style={{ display: 'block', marginTop: '3px', fontSize: '12.5px', color: color.muted }}>
             {mode === TRANSPORT.MOTORBIKE
-              ? 'The rider carries this parcel the whole way — collection and delivery are the same leg.'
+              ? 'The rider carries this parcel the whole way, so collection and delivery are the same leg.'
               : `${meta.freightLabel}. The agent collects the parcel and hands it to the carrier.`}
           </span>
         </span>
