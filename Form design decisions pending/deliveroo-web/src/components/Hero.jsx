@@ -152,9 +152,9 @@ export default function Hero() {
       }}
     >
       {/*
-        Full-bleed stage. One photograph, drawn untouched behind everything: no scrim,
+        Full bleed stage. One photograph, drawn untouched behind everything: no scrim,
         no filter, no scale, so it renders exactly as supplied. The copy carries its
-        own text-shadow.
+        own shadow.
       */}
       <img
         src={HERO_PHOTO.src}
@@ -230,15 +230,24 @@ export default function Hero() {
               ))}
             </h1>
 
+            {/*
+              The tagline sits on the bright part of the sunset, where a 88% white at
+              body weight washed out. It is now solid white, a size and a weight up,
+              and carries a tight dark halo under the wider glow so the letterforms
+              keep an edge whatever the photograph does behind them.
+            */}
             <p
               style={{
                 margin: 0,
                 maxWidth: '38ch',
-                fontSize: 'clamp(16px,1.45vw,20px)',
-                lineHeight: 1.55,
-                color: 'rgba(255,255,255,.88)',
+                fontSize: 'clamp(17px,1.6vw,22px)',
+                fontWeight: 600,
+                letterSpacing: '-.008em',
+                lineHeight: 1.5,
+                color: color.white,
                 textWrap: 'pretty',
-                textShadow: '0 2px 16px rgba(15,26,23,.7)'
+                textShadow:
+                  '0 1px 2px rgba(15,26,23,.85), 0 2px 10px rgba(15,26,23,.75), 0 4px 30px rgba(15,26,23,.6)'
               }}
             >
               {HERO_COPY.body}
