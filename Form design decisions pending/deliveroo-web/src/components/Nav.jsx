@@ -155,7 +155,7 @@ export default function Nav() {
       >
         <div style={{ flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '3px' }}>
           <Link to="/" aria-label="Send it — home" style={{ display: 'flex' }}>
-            <Wordmark />
+            <Wordmark dot />
           </Link>
           <div
             style={{
