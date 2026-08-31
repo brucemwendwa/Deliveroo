@@ -41,7 +41,7 @@ export default function BottomNav() {
     background: 'transparent',
     fontFamily: font.body,
     fontSize: '10.5px',
-    fontWeight: 700,
+    fontWeight: 600,
     letterSpacing: '.01em',
     color: active ? color.ink : color.muted,
     cursor: 'pointer'
@@ -61,10 +61,10 @@ export default function BottomNav() {
         height: `calc(${BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom,0px))`,
         paddingBottom: 'env(safe-area-inset-bottom,0px)',
         paddingInline: `max(8px, calc(${layout.gutter} - 16px))`,
-        background: 'rgba(243,241,237,.96)',
+        background: 'rgba(243,243,241,.96)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        borderTop: '1px solid rgba(17,17,17,.1)'
+        borderTop: `1px solid ${color.border}`
       }}
     >
       {ITEMS.slice(0, 2).map((item) => (
@@ -93,7 +93,7 @@ export default function BottomNav() {
           borderRadius: radius.pill,
           background: color.orange,
           color: color.ink,
-          boxShadow: '0 14px 26px -12px rgba(17,17,17,.6)',
+          boxShadow: '0 14px 26px -12px rgba(28,32,31,.6)',
           transition: `transform .2s ${ease.spring}`
         }}
       >
