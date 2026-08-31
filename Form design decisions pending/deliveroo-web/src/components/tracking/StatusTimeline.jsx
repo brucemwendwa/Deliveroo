@@ -13,9 +13,9 @@ import Icon from '../Icon';
  */
 export default function StatusTimeline({ status, order, tone = 'light' }) {
   const onDark = tone === 'dark';
-  const dim = onDark ? 'rgba(243,241,237,.45)' : color.muted;
+  const dim = onDark ? 'rgba(243,243,241,.45)' : color.muted;
   const strong = onDark ? color.paper : color.ink;
-  const rail = onDark ? 'rgba(243,241,237,.2)' : 'rgba(17,17,17,.16)';
+  const rail = onDark ? 'rgba(243,243,241,.2)' : 'rgba(28,32,31,.16)';
 
   const subject = order || { status };
 
@@ -23,7 +23,7 @@ export default function StatusTimeline({ status, order, tone = 'light' }) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: strong }}>
         <Icon name="cancel" size={22} color={color.orangeDeep} />
-        <span style={{ fontSize: '16px', fontWeight: 700 }}>This delivery was cancelled.</span>
+        <span style={{ fontSize: '16px', fontWeight: 600 }}>This delivery was cancelled.</span>
       </div>
     );
   }
@@ -69,7 +69,7 @@ export default function StatusTimeline({ status, order, tone = 'light' }) {
                     }}
                   />
                 )}
-                {done ? <Icon name="check" size={15} /> : current ? <span style={{ width: '8px', height: '8px', borderRadius: '99px', background: color.ink }} /> : null}
+                {done ? <Icon name="check" size={15} /> : current ? <span style={{ width: '8px', height: '8px', borderRadius: '99px', background: color.greenDeep }} /> : null}
               </span>
               {!last && (
                 <span
