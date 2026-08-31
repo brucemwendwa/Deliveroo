@@ -176,7 +176,7 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
 
         {status === STATUS.ASSIGNED && arrived && (
           <span style={{ fontSize: '13.5px', color: quiet }}>
-            Waiting at <strong style={{ color: strong }}>pickup</strong> — hand the parcel over when you&apos;re ready.
+            Waiting at <strong style={{ color: strong }}>pickup</strong>. Hand the parcel over when you&apos;re ready.
           </span>
         )}
       </div>
