@@ -36,11 +36,11 @@ function Identity({ user }) {
           height: '38px',
           padding: '0 16px',
           borderRadius: radius.pill,
-          background: 'rgba(243,241,237,.1)',
-          border: '1px solid rgba(243,241,237,.2)',
+          background: 'rgba(243,243,241,.1)',
+          border: '1px solid rgba(243,243,241,.2)',
           color: color.paper,
           fontSize: '13.5px',
-          fontWeight: 700
+          fontWeight: 600
         }}
       >
         <Icon name="badge" size={17} color={color.orange} />
@@ -52,7 +52,7 @@ function Identity({ user }) {
           fontSize: '10.5px',
           letterSpacing: '.12em',
           textTransform: 'uppercase',
-          color: 'rgba(243,241,237,.55)'
+          color: 'rgba(243,243,241,.55)'
         }}
       >
         {usingMockBackend ? 'Local demo data' : 'Live API'}
@@ -124,8 +124,8 @@ export default function AdminPortal() {
             marginBottom: '22px',
             padding: '14px 18px',
             borderRadius: '16px',
-            border: `1.5px solid ${color.orange}`,
-            background: 'rgba(245,145,30,.12)',
+            border: `1px solid ${color.orange}`,
+            background: 'rgba(248,135,53,.12)',
             fontSize: '14px',
             lineHeight: 1.5,
             color: color.ink
@@ -156,7 +156,7 @@ export default function AdminPortal() {
           {permitted ? (
             <Outlet />
           ) : (
-            <div style={{ padding: '28px', borderRadius: radius.card, border: '1.5px dashed rgba(17,17,17,.16)' }}>
+            <div style={{ padding: '28px', borderRadius: radius.card, border: `1px dashed ${color.border}` }}>
               <div style={{ ...eyebrow, marginBottom: '10px' }}>Not your section</div>
               <p style={{ margin: 0, maxWidth: '46ch', fontSize: '14.5px', lineHeight: 1.6, color: color.body }}>
                 {section.title} is restricted to administrators. Your account signs in as a{' '}
