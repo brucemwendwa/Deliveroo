@@ -2,14 +2,10 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCtaHover } from '../store/uiSlice';
 import useStartBooking, { BOOKING_PATH } from '../hooks/useStartBooking';
-import useHover from '../hooks/useHover';
-import { color, ease, eyebrow, font, layout, radius } from '../theme';
+import { color, ease, font, layout } from '../theme';
 import Icon from './Icon';
 
 const KNOB = 'clamp(50px,5.4vw,62px)';
-
-/** "Explore delivery options" goes to the multi-modal band, which is that list. */
-const MODES_PATH = '/#modes';
 
 /**
  * The hero photograph: one composite frame carrying every mode we run — air, drone,
@@ -28,14 +24,13 @@ export const HERO_PHOTO = {
 };
 
 /**
- * The words over it. The photograph already shows every mode at once, so the eyebrow
- * speaks to the whole network rather than naming one of them. It deliberately avoids
- * the nav's "Any Mode", which would otherwise appear twice above the fold.
+ * The words over it: the headline and, under it, a tagline rather than a paragraph —
+ * two short clauses that fit on one line above the CTAs. There is no eyebrow, so the
+ * headline is the first thing read over the photograph.
  */
 export const HERO_COPY = {
-  eyebrow: 'Global Delivery Network',
-  headline: ['The future of', 'delivery is here'],
-  body: 'Fast, intelligent delivery for a connected world.'
+  headline: ['From your door to', 'anywhere on earth'],
+  body: 'One network. Every mode.'
 };
 
 /**
@@ -137,40 +132,6 @@ function RequestCta() {
   );
 }
 
-/** Glass outline against the photo — the quiet half of the pair. */
-function ExploreCta() {
-  const [hovered, bind] = useHover();
-
-  return (
-    <Link
-      to={MODES_PATH}
-      {...bind}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        height: KNOB,
-        padding: '0 clamp(22px,2.6vw,34px)',
-        borderRadius: radius.pill,
-        border: `1px solid ${hovered ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.42)'}`,
-        background: hovered ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.09)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        color: color.white,
-        fontSize: 'clamp(14px,1.15vw,16.5px)',
-        fontWeight: 600,
-        letterSpacing: '-.01em',
-        whiteSpace: 'nowrap',
-        transition: 'background .25s, border-color .25s'
-      }}
-    >
-      Explore Delivery Options
-      <Icon name="arrow_downward" size="clamp(17px,1.5vw,20px)" />
-    </Link>
-  );
-}
-
 export default function Hero() {
   const narrow = useSelector((state) => state.ui.narrow);
 
@@ -223,86 +184,80 @@ export default function Hero() {
           margin: '0 auto',
           padding: `calc(80px + clamp(18px,4vh,40px)) ${layout.gutter} clamp(28px,5vh,56px)`,
           display: 'flex',
-          flexDirection: 'column',
-          // On a phone the subjects sit across the middle of the crop, so the copy
-          // drops to the bottom edge rather than landing on top of them.
-          justifyContent: narrow ? 'flex-end' : 'center'
+          flexDirection: 'column'
         }}
       >
+        {/*
+          The copy takes every row the CTA leaves, which parks the CTA on the bottom
+          padding edge without the words having to move with it. On a phone the
+          subjects sit across the middle of the crop, so the copy drops to the foot of
+          that space rather than landing on top of them.
+        */}
         <div
           style={{
-            width: '100%',
-            maxWidth: '600px',
+            flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: 'clamp(16px,2.1vw,26px)',
-            animation: `riseIn .8s ${ease.out} both`
+            justifyContent: narrow ? 'flex-end' : 'center'
           }}
         >
           <div
             style={{
-              ...eyebrow,
+              width: '100%',
+              maxWidth: '600px',
               display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              letterSpacing: '.2em',
-              color: 'rgba(255,255,255,.88)'
+              flexDirection: 'column',
+              gap: 'clamp(16px,2.1vw,26px)',
+              animation: `riseIn .8s ${ease.out} both`
             }}
           >
-            <span
-              aria-hidden="true"
-              style={{ width: 'clamp(22px,3vw,38px)', height: '2px', borderRadius: '2px', background: color.orange }}
-            />
-            {HERO_COPY.eyebrow}
+            <h1
+              style={{
+                margin: 0,
+                fontFamily: font.display,
+                fontWeight: 600,
+                fontSize: 'clamp(33px,5.1vw,66px)',
+                lineHeight: 1.04,
+                letterSpacing: '-.022em',
+                color: color.white,
+                textShadow: '0 2px 26px rgba(15,26,23,.6),0 1px 3px rgba(15,26,23,.5)'
+              }}
+            >
+              {HERO_COPY.headline.map((line) => (
+                <span key={line} style={{ display: 'block' }}>
+                  {line}
+                </span>
+              ))}
+            </h1>
+
+            <p
+              style={{
+                margin: 0,
+                maxWidth: '38ch',
+                fontSize: 'clamp(16px,1.45vw,20px)',
+                lineHeight: 1.55,
+                color: 'rgba(255,255,255,.88)',
+                textWrap: 'pretty',
+                textShadow: '0 2px 16px rgba(15,26,23,.7)'
+              }}
+            >
+              {HERO_COPY.body}
+            </p>
           </div>
+        </div>
 
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: font.display,
-              fontWeight: 600,
-              fontSize: 'clamp(33px,5.1vw,66px)',
-              lineHeight: 1.04,
-              letterSpacing: '-.022em',
-              color: color.white,
-              textShadow: '0 2px 26px rgba(15,26,23,.6),0 1px 3px rgba(15,26,23,.5)'
-            }}
-          >
-            {HERO_COPY.headline.map((line) => (
-              <span key={line} style={{ display: 'block' }}>
-                {line}
-              </span>
-            ))}
-          </h1>
-
-          <p
-            style={{
-              margin: 0,
-              maxWidth: '38ch',
-              fontSize: 'clamp(16px,1.45vw,20px)',
-              lineHeight: 1.55,
-              color: 'rgba(255,255,255,.88)',
-              textWrap: 'pretty',
-              textShadow: '0 2px 16px rgba(15,26,23,.7)'
-            }}
-          >
-            {HERO_COPY.body}
-          </p>
-
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: narrow ? 'column' : 'row',
-              // Stacked, not stretched: the goo pill is drawn around its own width and
-              // pulls into a dumbbell if it is forced to fill the column.
-              alignItems: 'flex-start',
-              gap: 'clamp(12px,1.4vw,18px)',
-              marginTop: 'clamp(2px,1vw,10px)'
-            }}
-          >
-            <RequestCta />
-            <ExploreCta />
-          </div>
+        <div
+          style={{
+            display: 'flex',
+            // Bottom left of the fold. Never stretched: the goo pill is drawn around
+            // its own width and pulls into a dumbbell if forced to fill the row.
+            justifyContent: 'flex-start',
+            alignItems: 'flex-start',
+            marginTop: 'clamp(20px,3vh,38px)',
+            animation: `riseIn .8s ${ease.out} both`
+          }}
+        >
+          <RequestCta />
         </div>
       </div>
     </div>
