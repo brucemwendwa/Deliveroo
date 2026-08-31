@@ -68,7 +68,7 @@ export default function ColumnChart({ data = [], height = 132, format = (value) 
                   // column of nothing reads as missing data rather than as none.
                   height: `${Math.max(2, share * (height - 26))}px`,
                   borderRadius: '4px 4px 0 0',
-                  background: row.value === 0 ? 'rgba(17,17,17,.12)' : on ? color.orangeDeep : color.orange,
+                  background: row.value === 0 ? 'rgba(28,32,31,.12)' : on ? color.orangeDeep : color.orange,
                   transition: `background .18s ${ease.out}`
                 }}
               />
@@ -78,7 +78,7 @@ export default function ColumnChart({ data = [], height = 132, format = (value) 
       </div>
       <div
         aria-hidden="true"
-        style={{ height: '1px', background: 'rgba(17,17,17,.14)', margin: '0 0 7px' }}
+        style={{ height: '1px', background: 'rgba(28,32,31,.14)', margin: '0 0 7px' }}
       />
       <figcaption
         style={{
