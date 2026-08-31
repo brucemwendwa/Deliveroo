@@ -24,13 +24,13 @@ const dot = (fill, ring, glyph) =>
       display:flex;align-items:center;justify-content:center;
       width:26px;height:26px;border-radius:999px;
       background:${fill};border:3px solid ${ring};
-      box-shadow:0 6px 14px -4px rgba(17,17,17,.6);
-      font:700 11px/1 'JetBrains Mono',monospace;color:${ring};
+      box-shadow:0 6px 14px -4px rgba(28,32,31,.6);
+      font:600 11px/1 'Inter',system-ui,sans-serif;color:${ring};
     ">${glyph || ''}</span>`
   });
 
-const PICKUP_ICON = dot(color.white, color.ink, 'A');
-const DESTINATION_ICON = dot(color.ink, color.orange, 'B');
+const PICKUP_ICON = dot(color.white, color.green, 'A');
+const DESTINATION_ICON = dot(color.greenDeep, color.orange, 'B');
 
 /**
  * The vehicle. Material Symbols is loaded document-wide, so a ligature span works
@@ -51,7 +51,7 @@ const vehicleIcon = (mode, moving) =>
       <span style="
         position:relative;display:flex;align-items:center;justify-content:center;
         width:34px;height:34px;border-radius:999px;background:${color.orange};
-        border:3px solid ${color.white};box-shadow:0 8px 18px -6px rgba(17,17,17,.7);
+        border:3px solid ${color.white};box-shadow:0 8px 18px -6px rgba(28,32,31,.7);
         font-family:'Material Symbols Rounded';font-size:19px;line-height:1;color:${color.ink};
       ">${mode === TRANSPORT.DRONE ? DRONE_SVG : modeMeta(mode).icon}</span>
     </span>`
@@ -61,7 +61,7 @@ const HERE_ICON = L.divIcon({
   className: '',
   iconSize: [18, 18],
   iconAnchor: [9, 9],
-  html: `<span style="display:block;width:18px;height:18px;border-radius:999px;background:${color.white};border:4px solid ${color.inkSoft};box-shadow:0 4px 10px -3px rgba(17,17,17,.6);"></span>`
+  html: `<span style="display:block;width:18px;height:18px;border-radius:999px;background:${color.white};border:4px solid ${color.inkSoft};box-shadow:0 4px 10px -3px rgba(28,32,31,.6);"></span>`
 });
 
 /** Keeps every marker and the whole route in frame as they change. */
@@ -141,7 +141,7 @@ export default function RouteMap({
         height,
         borderRadius: radius.card,
         overflow: 'hidden',
-        border: '1px solid rgba(17,17,17,.1)',
+        border: `1px solid ${color.border}`,
         background: color.paperWarm
       }}
     >
