@@ -1,4 +1,4 @@
-import { color, eyebrow, font, radius } from '../../theme';
+import { color, eyebrow, font, radius, shadow } from '../../theme';
 import Icon from '../Icon';
 
 /**
@@ -22,22 +22,23 @@ export default function StatTile({ label, value, icon, hint, tone = 'light', acc
         borderRadius: radius.card,
         textAlign: 'left',
         fontFamily: font.body,
-        background: onDark ? 'rgba(243,241,237,.06)' : color.white,
-        border: `1.5px solid ${
-          active ? color.ink : onDark ? 'rgba(243,241,237,.1)' : 'rgba(17,17,17,.1)'
+        background: onDark ? 'rgba(243,243,241,.06)' : color.card,
+        border: `1px solid ${
+          active ? color.green : onDark ? 'rgba(243,243,241,.1)' : color.border
         }`,
+        boxShadow: onDark ? 'none' : shadow.card,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'border-color .2s, background .2s'
+        transition: 'border-color .2s ease, background .2s ease, box-shadow .2s ease'
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {icon && <Icon name={icon} size={16} color={accent || color.orange} />}
-        <span style={{ ...eyebrow, fontSize: '9.5px', color: onDark ? 'rgba(243,241,237,.5)' : color.muted }}>{label}</span>
+        <span style={{ ...eyebrow, fontSize: '9.5px', color: onDark ? 'rgba(243,243,241,.5)' : color.muted }}>{label}</span>
       </div>
       <span
         style={{
           fontFamily: font.display,
-          fontWeight: 700,
+          fontWeight: 600,
           fontSize: 'clamp(24px,2.8vw,34px)',
           lineHeight: 1,
           letterSpacing: '-.02em',
@@ -47,7 +48,7 @@ export default function StatTile({ label, value, icon, hint, tone = 'light', acc
         {value}
       </span>
       {hint && (
-        <span style={{ fontSize: '12.5px', lineHeight: 1.4, color: onDark ? 'rgba(243,241,237,.6)' : color.muted }}>
+        <span style={{ fontSize: '12.5px', lineHeight: 1.4, color: onDark ? 'rgba(243,243,241,.6)' : color.muted }}>
           {hint}
         </span>
       )}
