@@ -66,7 +66,7 @@ describe('landing page', () => {
     await userEvent.hover(screen.getByRole('button', { name: /^Services/ }));
 
     expect(await screen.findByRole('menu', { name: 'Services' })).toBeInTheDocument();
-    for (const label of ['Same-day courier', 'Package delivery', 'Business logistics']) {
+    for (const label of ['Same Day Delivery', 'Business Delivery', 'Drone Delivery']) {
       expect(screen.getByRole('menuitem', { name: label })).toBeInTheDocument();
     }
   });
@@ -74,7 +74,7 @@ describe('landing page', () => {
   it('keeps the menu open while the pointer moves onto its items', async () => {
     renderNav();
     await userEvent.hover(screen.getByRole('button', { name: /^Contact/ }));
-    const item = await screen.findByRole('menuitem', { name: 'Talk to sales' });
+    const item = await screen.findByRole('menuitem', { name: 'Where to find us' });
 
     // The gap between trigger and panel is padding inside the hover area, so
     // travelling to an item must not close the menu.
