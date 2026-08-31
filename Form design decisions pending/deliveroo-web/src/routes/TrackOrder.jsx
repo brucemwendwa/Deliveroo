@@ -72,7 +72,7 @@ export default function TrackOrder() {
     return (
       <PageShell eyebrow="Tracking" title="We can't find that order.">
         <p style={{ margin: '0 0 24px', fontSize: '16px', color: color.body }}>
-          Check the order number and try again — it looks like DLV-10482.
+          Check the order number and try again. It looks like DLV-10482.
         </p>
         <Button as={Link} to="/track" icon="arrow_forward">
           Try another number
