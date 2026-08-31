@@ -18,7 +18,7 @@ import {
 import { STATUS_LABEL } from '../../lib/orderStatus';
 import { formatKes } from '../../lib/pricing';
 import { FLEET_STATUS, FLEET_STATUS_LABEL, modeMeta } from '../../lib/transport';
-import { color, ease, font, statusTone } from '../../theme';
+import { color, ease, font, shadow, statusTone } from '../../theme';
 import Panel from '../../components/admin/Panel';
 import ColumnChart from '../../components/admin/ColumnChart';
 import BarList from '../../components/admin/BarList';
@@ -111,8 +111,9 @@ export default function AdminOverview() {
                     padding: '10px 14px',
                     textAlign: 'left',
                     borderRadius: '14px',
-                    border: '1px solid rgba(17,17,17,.1)',
-                    background: color.white,
+                    border: `1px solid ${color.border}`,
+                    background: color.card,
+                    boxShadow: shadow.card,
                     fontFamily: font.body,
                     cursor: 'pointer',
                     transition: `border-color .18s ${ease.out}`
@@ -129,7 +130,7 @@ export default function AdminOverview() {
                     }}
                   />
                   <span style={{ minWidth: 0 }}>
-                    <span style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: color.ink }}>
+                    <span style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: color.ink }}>
                       {ISSUE_LABEL[issue]} · {order.pickup.name} → {order.destination.name}
                     </span>
                     <span style={{ display: 'block', marginTop: '2px', fontSize: '12.5px', color: color.muted }}>
@@ -211,7 +212,7 @@ export default function AdminOverview() {
                 key={entry.id}
                 style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px', alignItems: 'baseline', fontSize: '13.5px' }}
               >
-                <span style={{ fontWeight: 700, color: color.ink }}>{entry.actor}</span>
+                <span style={{ fontWeight: 600, color: color.ink }}>{entry.actor}</span>
                 <span style={{ color: color.body }}>
                   {entry.action.toLowerCase().replace(/_/g, ' ')}
                   {entry.target ? ` · ${entry.target}` : ''}
