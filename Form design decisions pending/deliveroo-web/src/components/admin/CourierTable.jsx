@@ -5,7 +5,7 @@ import { showToast } from '../../store/uiSlice';
 import { PERMISSION, can } from '../../lib/roles';
 import { formatKes } from '../../lib/pricing';
 import { modeMeta } from '../../lib/transport';
-import { color, ease, font, radius } from '../../theme';
+import { color, ease, font, radius, shadow } from '../../theme';
 import TransportGlyph from '../transport/TransportGlyph';
 import Icon from '../Icon';
 
@@ -16,7 +16,7 @@ const cell = {
   fontSize: '13.5px',
   color: color.ink,
   verticalAlign: 'middle',
-  borderTop: '1px solid rgba(17,17,17,.09)'
+  borderTop: `1px solid ${color.border}`
 };
 
 const quiet = { ...cell, color: color.body };
@@ -55,12 +55,12 @@ function ShiftToggle({ courier, disabled }) {
         height: '38px',
         padding: '0 14px',
         borderRadius: radius.pill,
-        border: `1.5px solid ${courier.onShift ? color.ink : 'rgba(17,17,17,.16)'}`,
-        background: courier.onShift ? color.ink : 'transparent',
+        border: `1px solid ${courier.onShift ? color.ink : 'rgba(28,32,31,.16)'}`,
+        background: courier.onShift ? color.green : 'transparent',
         color: courier.onShift ? color.paper : color.muted,
         fontFamily: font.body,
         fontSize: '12.5px',
-        fontWeight: 700,
+        fontWeight: 600,
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.5 : 1,
         whiteSpace: 'nowrap',
@@ -91,13 +91,14 @@ export default function CourierTable({ couriers = [], performance = {} }) {
               gap: '10px',
               padding: '14px',
               borderRadius: radius.card,
-              border: '1.5px solid rgba(17,17,17,.1)',
-              background: color.white
+              border: `1px solid ${color.border}`,
+              background: color.card,
+              boxShadow: shadow.card
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '9px', flexWrap: 'wrap' }}>
               <TransportGlyph mode={courier.vehicleMode} size={17} color={color.orangeDeep} />
-              <span style={{ fontSize: '15px', fontWeight: 700, letterSpacing: '-.02em', color: color.ink }}>
+              <span style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-.02em', color: color.ink }}>
                 {courier.name}
               </span>
               <span style={{ fontFamily: font.mono, fontSize: '11.5px', letterSpacing: '.05em', color: color.muted }}>
@@ -145,8 +146,8 @@ export default function CourierTable({ couriers = [], performance = {} }) {
         </thead>
         <tbody>
           {couriers.map((courier) => (
-            <tr key={courier.id} style={{ background: courier.onShift ? 'transparent' : 'rgba(17,17,17,.025)' }}>
-              <td style={{ ...cell, fontWeight: 700 }}>{courier.name}</td>
+            <tr key={courier.id} style={{ background: courier.onShift ? 'transparent' : 'rgba(28,32,31,.025)' }}>
+              <td style={{ ...cell, fontWeight: 600 }}>{courier.name}</td>
               <td style={quiet}>
                 {courier.vehicle}
                 <span style={{ display: 'block', fontFamily: font.mono, fontSize: '11px', color: color.muted }}>
@@ -160,7 +161,7 @@ export default function CourierTable({ couriers = [], performance = {} }) {
                 </span>
               </td>
               <td style={quiet}>★ {courier.rating}</td>
-              <td style={{ ...cell, fontWeight: 700 }}>{courier.activeJobs}</td>
+              <td style={{ ...cell, fontWeight: 600 }}>{courier.activeJobs}</td>
               <td style={quiet}>{courier.completedJobs}</td>
               <td style={{ ...quiet, whiteSpace: 'nowrap' }}>{formatKes(figures(courier).revenue)}</td>
               <td style={cell}>
