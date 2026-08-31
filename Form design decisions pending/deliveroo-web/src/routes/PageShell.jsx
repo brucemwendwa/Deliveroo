@@ -8,7 +8,7 @@ import { color, eyebrow, font, layout } from '../theme';
 export default function PageShell({ eyebrow: label, title, children, aside }) {
   return (
     <>
-      <div style={{ background: color.ink, padding: 'calc(80px + clamp(36px,6vw,80px)) 0 clamp(36px,5vw,72px)' }}>
+      <div style={{ background: color.greenDeep, padding: 'calc(80px + clamp(36px,6vw,80px)) 0 clamp(36px,5vw,72px)' }}>
         <div
           style={{
             maxWidth: layout.maxWidth,
@@ -27,11 +27,10 @@ export default function PageShell({ eyebrow: label, title, children, aside }) {
               style={{
                 margin: 0,
                 fontFamily: font.display,
-                fontWeight: 700,
+                fontWeight: 600,
                 fontSize: 'clamp(34px,5.6vw,84px)',
-                lineHeight: 0.92,
-                letterSpacing: '-.015em',
-                textTransform: 'uppercase',
+                lineHeight: 1.04,
+                letterSpacing: '-.025em',
                 color: color.paper,
                 maxWidth: '18ch'
               }}
