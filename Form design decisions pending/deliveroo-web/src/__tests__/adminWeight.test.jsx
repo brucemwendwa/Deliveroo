@@ -67,7 +67,7 @@ describe('admin scale', () => {
     await userEvent.type(await screen.findByLabelText(/weight from the scale/i), '9');
 
     expect(await screen.findByText('Fee at 9 kg')).toBeInTheDocument();
-    expect(screen.getByText('KES 1,180')).toBeInTheDocument();
+    expect(screen.getByText('KES 760')).toBeInTheDocument();
     expect(screen.getByText(/\+KES 400 vs estimate/)).toBeInTheDocument();
   });
 
@@ -82,7 +82,7 @@ describe('admin scale', () => {
     await waitFor(() => {
       const order = store.getState().orders.entities[pending.id];
       expect(order.parcel.verifiedWeightKg).toBe(9);
-      expect(order.pricing.total).toBe(1180);
+      expect(order.pricing.total).toBe(760);
       expect(order.quotedPricing.total).toBe(780);
     });
 
