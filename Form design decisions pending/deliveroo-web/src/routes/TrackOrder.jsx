@@ -34,18 +34,18 @@ function LiveStat({ label, value, icon, mode }) {
         flex: '1 1 140px',
         padding: '15px 17px',
         borderRadius: '18px',
-        background: 'rgba(243,241,237,.06)',
-        border: '1px solid rgba(243,241,237,.1)'
+        background: 'rgba(243,243,241,.06)',
+        border: '1px solid rgba(243,243,241,.1)'
       }}
     >
-      <div style={{ ...eyebrow, fontSize: '9.5px', color: 'rgba(243,241,237,.5)', marginBottom: '8px' }}>{label}</div>
+      <div style={{ ...eyebrow, fontSize: '9.5px', color: 'rgba(243,243,241,.5)', marginBottom: '8px' }}>{label}</div>
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
           fontFamily: font.display,
-          fontWeight: 700,
+          fontWeight: 600,
           fontSize: 'clamp(17px,1.9vw,23px)',
           lineHeight: 1.1,
           letterSpacing: '-.02em',
@@ -109,7 +109,7 @@ export default function TrackOrder() {
               : `On the way by ${meta.label.toLowerCase()}.`;
 
   return (
-    <div style={{ background: color.ink, paddingTop: '80px' }}>
+    <div style={{ background: color.greenDeep, paddingTop: '80px' }}>
       <div
         style={{
           maxWidth: layout.maxWidth,
@@ -132,7 +132,7 @@ export default function TrackOrder() {
                 height: '26px',
                 padding: '0 11px',
                 borderRadius: radius.pill,
-                background: 'rgba(243,241,237,.1)',
+                background: 'rgba(243,243,241,.1)',
                 fontFamily: font.mono,
                 fontSize: '10.5px',
                 letterSpacing: '.12em',
@@ -159,11 +159,10 @@ export default function TrackOrder() {
             style={{
               margin: '0 0 26px',
               fontFamily: font.display,
-              fontWeight: 700,
+              fontWeight: 600,
               fontSize: 'clamp(32px,4.6vw,62px)',
-              lineHeight: 0.94,
-              letterSpacing: '-.015em',
-              textTransform: 'uppercase',
+              lineHeight: 1.04,
+              letterSpacing: '-.025em',
               color: color.paper
             }}
           >
@@ -189,10 +188,10 @@ export default function TrackOrder() {
               style={{
                 padding: '16px',
                 borderRadius: radius.card,
-                background: 'rgba(243,241,237,.06)',
-                border: '1px solid rgba(243,241,237,.1)',
+                background: 'rgba(243,243,241,.06)',
+                border: '1px solid rgba(243,243,241,.1)',
                 fontSize: '14.5px',
-                color: 'rgba(243,241,237,.7)'
+                color: 'rgba(243,243,241,.7)'
               }}
             >
               {order.status === STATUS.CANCELLED
@@ -201,8 +200,8 @@ export default function TrackOrder() {
             </div>
           )}
 
-          <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid rgba(243,241,237,.16)' }}>
-            <div style={{ ...eyebrow, color: 'rgba(243,241,237,.5)', marginBottom: '20px' }}>
+          <div style={{ marginTop: '30px', paddingTop: '26px', borderTop: '1px solid rgba(243,243,241,.16)' }}>
+            <div style={{ ...eyebrow, color: 'rgba(243,243,241,.5)', marginBottom: '20px' }}>
               Status · {statusLabelFor(order, now)}
             </div>
             <StatusTimeline order={order} tone="dark" />
@@ -253,10 +252,10 @@ export default function TrackOrder() {
               gap: '10px 20px',
               padding: '14px 17px',
               borderRadius: '18px',
-              background: 'rgba(243,241,237,.04)',
-              border: '1px solid rgba(243,241,237,.08)',
+              background: 'rgba(243,243,241,.04)',
+              border: '1px solid rgba(243,243,241,.08)',
               fontSize: '13.5px',
-              color: 'rgba(243,241,237,.7)'
+              color: 'rgba(243,243,241,.7)'
             }}
           >
             <span>
