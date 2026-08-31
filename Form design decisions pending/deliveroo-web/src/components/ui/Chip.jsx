@@ -13,7 +13,7 @@ export default function Chip({ active = false, onClick, children, style, ...rest
       {...rest}
       style={{
         ...control.chip,
-        ...(hovered && !active ? { borderColor: 'rgba(17,17,17,.4)' } : null),
+        ...(hovered && !active ? { borderColor: 'rgba(28,32,31,.4)' } : null),
         ...(active ? control.chipActive : null),
         ...style
       }}
