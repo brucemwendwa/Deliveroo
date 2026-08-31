@@ -93,7 +93,7 @@ export default function AdminSettings() {
     <div style={{ display: 'grid', gap: 'clamp(16px,2vw,22px)' }}>
       <Panel
         title="Taking bookings"
-        note="Off refuses every new delivery request across the site, immediately and in every open tab. Deliveries already on the board are untouched — they still need finishing."
+        note="Off refuses every new delivery request across the site, immediately and in every open tab. Deliveries already on the board are untouched, and they still need finishing."
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
           <Switch
@@ -125,7 +125,7 @@ export default function AdminSettings() {
             aria-label="Notice to staff"
             rows={2}
             maxLength={240}
-            placeholder="e.g. Drone capacity is grounded until 14:00 — route small local parcels to bikes."
+            placeholder="e.g. Drone capacity is grounded until 14:00, so route small local parcels to bikes."
             style={{ ...control.field, height: 'auto', padding: '14px 16px', resize: 'vertical', lineHeight: 1.55 }}
           />
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -167,9 +167,9 @@ export default function AdminSettings() {
         <dl style={{ margin: 0, display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))' }}>
           {[
             ['Backend', usingMockBackend ? 'Local demo (browser storage)' : 'Flask API'],
-            ['Sign-in', `One-time code${usingMockBackend ? ` · always ${MOCK_OTP}` : ''}`],
-            ['Cross-tab updates', usingMockBackend ? 'Storage events, instant' : 'Polling every 5s'],
-            ['Audit retention', usingMockBackend ? 'Last 300 actions' : 'Server-side']
+            ['Sign in', `One time code${usingMockBackend ? ` · always ${MOCK_OTP}` : ''}`],
+            ['Updates across tabs', usingMockBackend ? 'Storage events, instant' : 'Polling every 5s'],
+            ['Audit retention', usingMockBackend ? 'Last 300 actions' : 'Kept on the server']
           ].map(([term, value]) => (
             <div key={term} style={{ paddingTop: '12px', borderTop: `1px solid ${color.border}` }}>
               <dt
