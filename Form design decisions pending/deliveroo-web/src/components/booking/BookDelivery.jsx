@@ -168,7 +168,7 @@ export default function BookDelivery() {
           </h2>
           <p style={{ margin: 0, maxWidth: '48ch', fontSize: 'clamp(15.5px,1.4vw,18px)', lineHeight: 1.6, color: color.body }}>
             Tell us where to pick it up, where to take it, and how fast you need it there.
-            We&apos;ll come and collect it — you don&apos;t need to work out the logistics.
+            We&apos;ll come and collect it, so you don&apos;t need to work out the logistics.
           </p>
 
           {/* §27 — staff can pause bookings platform-wide. The backend refuses the
@@ -192,8 +192,8 @@ export default function BookDelivery() {
             >
               <Icon name="pause_circle" size={19} color={color.orangeDeep} style={{ flex: 'none', marginTop: '1px' }} />
               <span>
-                We have paused new pickups for the moment. You can still work out a price here — the
-                request itself will be turned away until we are taking bookings again.
+                We have paused new pickups for the moment. You can still work out a price here,
+                but the request itself will be turned away until we are taking bookings again.
               </span>
             </p>
           )}
@@ -258,7 +258,7 @@ export default function BookDelivery() {
                 {/* §9 — this figure only buys an estimate; the fare is settled on our
                     scale at pickup, so an optimistic guess here changes nothing. */}
                 <p style={{ margin: '0 0 14px', fontSize: '13.5px', lineHeight: 1.5, color: color.muted }}>
-                  A rough figure is fine — we weigh the package at pickup and the final price is
+                  A rough figure is fine. We weigh the package at pickup and the final price is
                   worked out from that.
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
@@ -377,7 +377,7 @@ export default function BookDelivery() {
                     </div>
                     <p style={{ margin: '10px 0 0', fontSize: '12.5px', lineHeight: 1.5, color: color.muted }}>
                       {volumetric > 0
-                        ? `A parcel this size prices as ${volumetric} kg volumetric — we charge the higher of that and its real weight, the way every carrier does.`
+                        ? `A parcel this size prices as ${volumetric} kg volumetric. We charge the higher of that and its real weight, the way every carrier does.`
                         : 'Large, light parcels take up space that heavier ones would. Dimensions let us price that honestly, and tell us whether a drone can take it.'}
                     </p>
                   </>
@@ -500,7 +500,7 @@ export default function BookDelivery() {
                   onClick={confirm}
                   disabled={!canSubmit || submitStatus === 'loading'}
                 >
-                  {submitStatus === 'loading' ? 'Requesting…' : `Request Pickup — ${formatKes(quote.total)}`}
+                  {submitStatus === 'loading' ? 'Requesting…' : `Request Pickup · ${formatKes(quote.total)}`}
                 </Button>
               </div>
               <p style={{ margin: '12px 0 0', fontSize: '12.5px', color: color.muted }}>
