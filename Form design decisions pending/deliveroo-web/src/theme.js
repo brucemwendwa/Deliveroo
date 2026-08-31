@@ -21,9 +21,13 @@ export const color = {
   border: '#D9DEDA',
   borderSoft: 'rgba(217,222,218,.8)',
 
-  // Greens carry every dark surface — bands, footer, filled buttons, toasts.
+  // `greenDeep` is the dark ground under every full-width dark surface — the modes
+  // band, the footer, the page shells, the toast. It is a neutral charcoal rather
+  // than a green: the green ground fought the photograph above it. `green` stays
+  // green because it is not a ground — it fills the small selected chips and
+  // markers that sit on light surfaces, where it still has to read as the brand.
   green: '#244B42',
-  greenDeep: '#163D36',
+  greenDeep: '#1A1C1F',
   sage: '#AAB5AA',
   lime: '#B4C66A',
 
@@ -75,7 +79,7 @@ export const shadow = {
 export const hover = {
   link: { color: color.orange },
   yellow: { transform: 'translateY(-2px)', boxShadow: '0 14px 35px rgba(248,135,53,.28)' },
-  dark: { transform: 'translateY(-2px)', boxShadow: '0 14px 35px rgba(22,61,54,.28)' },
+  dark: { transform: 'translateY(-2px)', boxShadow: '0 14px 35px rgba(26,28,31,.28)' },
   ghost: { borderColor: color.sage, background: 'rgba(36,75,66,.05)' },
   yellowGhost: { borderColor: color.green, background: 'rgba(36,75,66,.07)' },
   card: {
