@@ -78,7 +78,7 @@ export const TRANSPORT_MODES = [
     freightLabel: 'Road delivery',
     tagline: 'Affordable & reliable',
     blurb: 'Vans and motorcycles on the road network. Available almost everywhere.',
-    tariff: { base: 0, perKm: 40, perKg: 50, minimum: 200, cityKm: 50, lineHaulPerKm: 6 },
+    tariff: { base: 0, perKm: 40, perKg: 2.5, minimum: 200, cityKm: 50, lineHaulPerKm: 6 },
     speedKmh: 45,
     handlingSeconds: 15 * 60,
     // Drives the road network, so it uses the router's own driving time (§25) and
@@ -148,8 +148,8 @@ export const TRANSPORT_MODES = [
     glyph: '🚁',
     icon: 'drone',
     freightLabel: 'Drone delivery',
-    tagline: 'Ultra-fast local delivery',
-    blurb: 'Small, light, short hops — straight over the traffic.',
+    tagline: 'The quickest way across town',
+    blurb: 'Small, light, short hops, straight over the traffic.',
     tariff: { base: 350, perKm: 60, perKg: 110, minimum: 700 },
     speedKmh: 48,
     handlingSeconds: 8 * 60,
@@ -313,7 +313,7 @@ export function modeAvailability({
   const { limits } = meta;
 
   if (fleetStatus === FLEET_STATUS.OFFLINE) {
-    return { available: false, reason: `${meta.freightLabel} is offline right now — no capacity on this route.` };
+    return { available: false, reason: `${meta.freightLabel} is offline right now. There is no capacity on this route.` };
   }
 
   if (!distanceKm) {
@@ -323,28 +323,28 @@ export function modeAvailability({
   if (limits.maxDistanceKm && distanceKm > limits.maxDistanceKm) {
     return {
       available: false,
-      reason: `${meta.freightLabel} covers routes up to ${km(limits.maxDistanceKm)} — this one is ${km(distanceKm)}.`
+      reason: `${meta.freightLabel} covers routes up to ${km(limits.maxDistanceKm)}, and this one is ${km(distanceKm)}.`
     };
   }
 
   if (limits.minDistanceKm && distanceKm < limits.minDistanceKm) {
     return {
       available: false,
-      reason: `${meta.freightLabel} starts at ${km(limits.minDistanceKm)} — road covers this ${km(distanceKm)} hop faster.`
+      reason: `${meta.freightLabel} starts at ${km(limits.minDistanceKm)}, and road covers this ${km(distanceKm)} hop faster.`
     };
   }
 
   if (limits.maxWeightKg && weightKg > limits.maxWeightKg) {
     return {
       available: false,
-      reason: `${meta.freightLabel} carries up to ${limits.maxWeightKg} kg — this parcel prices at ${Math.round(weightKg * 10) / 10} kg.`
+      reason: `${meta.freightLabel} carries up to ${limits.maxWeightKg} kg, and this parcel prices at ${Math.round(weightKg * 10) / 10} kg.`
     };
   }
 
   if (limits.maxLongestSideCm && longest > limits.maxLongestSideCm) {
     return {
       available: false,
-      reason: `${meta.freightLabel} takes parcels up to ${limits.maxLongestSideCm} cm on the longest side — this one is ${Math.round(longest)} cm.`
+      reason: `${meta.freightLabel} takes parcels up to ${limits.maxLongestSideCm} cm on the longest side, and this one is ${Math.round(longest)} cm.`
     };
   }
 
@@ -353,7 +353,7 @@ export function modeAvailability({
     if (!port) {
       return {
         available: false,
-        reason: 'Sea freight runs between ports — neither end of this route reaches one.'
+        reason: 'Sea freight runs between ports, and neither end of this route reaches one.'
       };
     }
     return { available: true, reason: null, via: port.name, busy: fleetStatus === FLEET_STATUS.BUSY };
