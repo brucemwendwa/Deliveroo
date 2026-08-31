@@ -99,7 +99,7 @@ export function weightLockedReason(order) {
   if (canVerifyWeight(order)) return null;
   if (order.status === STATUS.CANCELLED) return 'This delivery was cancelled.';
   if (order.status === STATUS.DELIVERED) return 'This delivery has already been completed.';
-  return 'The parcel is already in transit — the fare is settled and can no longer be re-priced.';
+  return 'The parcel is already in transit. The fare is settled and cannot be worked out again.';
 }
 
 // ---------------------------------------------------------------------------
