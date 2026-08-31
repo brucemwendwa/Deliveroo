@@ -28,10 +28,10 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
       : STATUS_LABEL[status] || status;
 
   const surface = onDark
-    ? { background: 'rgba(243,241,237,.06)', border: '1px solid rgba(243,241,237,.1)' }
-    : { background: color.white, border: '1px solid rgba(17,17,17,.12)' };
+    ? { background: 'rgba(243,243,241,.06)', border: '1px solid rgba(243,243,241,.1)' }
+    : { background: color.card, border: `1px solid ${color.border}` };
   const strong = onDark ? color.paper : color.ink;
-  const quiet = onDark ? 'rgba(243,241,237,.66)' : color.muted;
+  const quiet = onDark ? 'rgba(243,243,241,.66)' : color.muted;
 
   return (
     <div style={{ padding: '16px', borderRadius: radius.card, ...surface }}>
@@ -45,7 +45,7 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
               background: color.orange,
               color: color.ink,
               fontFamily: font.display,
-              fontWeight: 700,
+              fontWeight: 600,
               fontSize: '20px',
               display: 'flex',
               alignItems: 'center',
@@ -66,8 +66,8 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
                 width: '25px',
                 height: '25px',
                 borderRadius: radius.pill,
-                background: onDark ? color.ink : color.white,
-                border: `1.5px solid ${onDark ? 'rgba(243,241,237,.24)' : 'rgba(17,17,17,.14)'}`
+                background: onDark ? color.greenDeep : color.card,
+                border: `1px solid ${onDark ? 'rgba(243,243,241,.24)' : 'rgba(28,32,31,.14)'}`
               }}
             >
               <TransportGlyph mode={vehicleMode} size={15} color={color.orange} />
@@ -77,7 +77,7 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '16px', fontWeight: 800, letterSpacing: '-.02em', color: strong }}>
+            <span style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '-.02em', color: strong }}>
               {courier.name}
             </span>
             {courier.rating && (
@@ -95,7 +95,7 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
                   marginLeft: '8px',
                   padding: '2px 7px',
                   borderRadius: '6px',
-                  background: onDark ? 'rgba(243,241,237,.12)' : 'rgba(17,17,17,.07)',
+                  background: onDark ? 'rgba(243,243,241,.12)' : 'rgba(28,32,31,.07)',
                   fontFamily: font.mono,
                   fontSize: '11.5px',
                   letterSpacing: '.06em',
@@ -120,7 +120,7 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
               width: '44px',
               height: '44px',
               borderRadius: radius.pill,
-              border: `1px solid ${onDark ? 'rgba(243,241,237,.2)' : 'rgba(17,17,17,.14)'}`,
+              border: `1px solid ${onDark ? 'rgba(243,243,241,.2)' : 'rgba(28,32,31,.14)'}`,
               background: 'transparent',
               display: 'flex',
               alignItems: 'center',
@@ -142,7 +142,7 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
           gap: '10px 18px',
           marginTop: '14px',
           paddingTop: '13px',
-          borderTop: `1px solid ${onDark ? 'rgba(243,241,237,.12)' : 'rgba(17,17,17,.08)'}`
+          borderTop: `1px solid ${onDark ? 'rgba(243,243,241,.12)' : 'rgba(28,32,31,.08)'}`
         }}
       >
         <span
@@ -154,7 +154,7 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
             fontSize: '11px',
             letterSpacing: '.1em',
             textTransform: 'uppercase',
-            color: accent === color.inkSoft && onDark ? 'rgba(243,241,237,.7)' : accent
+            color: accent === color.inkSoft && onDark ? 'rgba(243,243,241,.7)' : accent
           }}
         >
           <span aria-hidden="true" style={{ width: '6px', height: '6px', borderRadius: '99px', background: accent }} />
