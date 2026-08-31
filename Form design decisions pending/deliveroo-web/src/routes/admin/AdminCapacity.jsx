@@ -60,7 +60,7 @@ export default function AdminCapacity() {
 
       <Panel
         title="Tariffs and eligibility"
-        note="Read-only. These rates and limits live in one module that prices every quote, so this table is the tariff rather than a description of it."
+        note="Read only. These rates and limits live in one module that prices every quote, so this table is the tariff rather than a description of it."
       >
         <div style={{ display: 'grid', gap: '10px' }}>
           {TRANSPORT_MODES.map((meta) => (
