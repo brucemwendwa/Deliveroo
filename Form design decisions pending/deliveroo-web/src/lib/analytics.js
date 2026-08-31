@@ -236,7 +236,7 @@ export const ISSUE_LABEL = {
 export const ISSUE_NOTE = {
   [ISSUE.UNASSIGNED]: 'Requested a while ago and nobody has been matched to it yet.',
   [ISSUE.OVERDUE]: 'The quoted arrival time has passed and it has not been delivered.',
-  [ISSUE.UNWEIGHED]: 'Collected without a measured weight — the fare is still the estimate.',
+  [ISSUE.UNWEIGHED]: 'Collected without a measured weight, so the fare is still the estimate.',
   [ISSUE.STALLED]: 'The status has not changed in hours while the parcel is still live.'
 };
 
