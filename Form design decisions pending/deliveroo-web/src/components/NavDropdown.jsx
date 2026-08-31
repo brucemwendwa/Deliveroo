@@ -170,8 +170,8 @@ export default function NavDropdown({ label, items, triggerStyle, triggerContent
               padding: '8px',
               borderRadius: radius.field,
               background: color.paper,
-              border: '1px solid rgba(17,17,17,.1)',
-              boxShadow: '0 26px 46px -22px rgba(17,17,17,.6)',
+              border: `1px solid ${color.border}`,
+              boxShadow: '0 26px 46px -22px rgba(28,32,31,.6)',
               animation: `riseIn .2s ${ease.out} both`
             }}
           >
