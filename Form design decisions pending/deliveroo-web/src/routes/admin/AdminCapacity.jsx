@@ -71,7 +71,7 @@ export default function AdminCapacity() {
                 gap: '12px',
                 alignItems: 'flex-start',
                 padding: '12px 0 0',
-                borderTop: '1px solid rgba(17,17,17,.1)'
+                borderTop: `1px solid ${color.border}`
               }}
             >
               <span
@@ -83,14 +83,14 @@ export default function AdminCapacity() {
                   width: '34px',
                   height: '34px',
                   borderRadius: '11px',
-                  background: 'rgba(245,145,30,.14)',
+                  background: 'rgba(248,135,53,.14)',
                   flex: 'none'
                 }}
               >
                 <TransportGlyph mode={meta.id} size={18} color={color.orangeDeep} />
               </span>
               <span style={{ minWidth: 0 }}>
-                <span style={{ display: 'block', fontSize: '14.5px', fontWeight: 700, color: color.ink }}>
+                <span style={{ display: 'block', fontSize: '14.5px', fontWeight: 600, color: color.ink }}>
                   {meta.label}
                 </span>
                 <span
