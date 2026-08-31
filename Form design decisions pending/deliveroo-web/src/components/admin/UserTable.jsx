@@ -3,7 +3,7 @@ import { setUserRole, setUserSuspended } from '../../store/adminSlice';
 import { selectUser } from '../../store/authSlice';
 import { showToast } from '../../store/uiSlice';
 import { PERMISSION, ROLE, ROLE_LABEL, can, roleOf } from '../../lib/roles';
-import { color, control, font, radius } from '../../theme';
+import { color, control, font, radius, shadow } from '../../theme';
 
 const HEADINGS = ['Person', 'Role', 'Deliveries', 'Joined', 'Last seen', 'Account'];
 
@@ -12,7 +12,7 @@ const cell = {
   fontSize: '13.5px',
   color: color.ink,
   verticalAlign: 'middle',
-  borderTop: '1px solid rgba(17,17,17,.09)'
+  borderTop: `1px solid ${color.border}`
 };
 
 const quiet = { ...cell, color: color.body };
@@ -73,7 +73,7 @@ function AccountControl({ user, self, mayManage, onToggle }) {
         minHeight: '40px',
         fontSize: '13px',
         padding: '0 14px',
-        borderColor: user.suspended ? color.orangeDeep : 'rgba(17,17,17,.14)',
+        borderColor: user.suspended ? color.orangeDeep : 'rgba(28,32,31,.14)',
         color: user.suspended ? color.orangeDeep : color.ink
       }}
     >
@@ -126,12 +126,13 @@ export default function UserTable({ users = [], orderCounts = {} }) {
               gap: '10px',
               padding: '14px',
               borderRadius: radius.card,
-              border: '1.5px solid rgba(17,17,17,.1)',
-              background: color.white
+              border: `1px solid ${color.border}`,
+              background: color.card,
+              boxShadow: shadow.card
             }}
           >
             <span>
-              <span style={{ display: 'block', fontSize: '15px', fontWeight: 700, color: color.ink }}>{user.name}</span>
+              <span style={{ display: 'block', fontSize: '15px', fontWeight: 600, color: color.ink }}>{user.name}</span>
               <span style={{ display: 'block', marginTop: '2px', fontSize: '12.5px', color: color.muted }}>
                 {contact(user)}
               </span>
@@ -182,9 +183,9 @@ export default function UserTable({ users = [], orderCounts = {} }) {
         </thead>
         <tbody>
           {users.map((user) => (
-            <tr key={user.id} style={{ background: user.suspended ? 'rgba(17,17,17,.03)' : 'transparent' }}>
+            <tr key={user.id} style={{ background: user.suspended ? 'rgba(28,32,31,.03)' : 'transparent' }}>
               <td style={cell}>
-                <span style={{ fontWeight: 700 }}>{user.name}</span>
+                <span style={{ fontWeight: 600 }}>{user.name}</span>
                 <span style={{ display: 'block', fontSize: '12px', color: color.muted }}>{contact(user)}</span>
               </td>
               <td style={cell}>
