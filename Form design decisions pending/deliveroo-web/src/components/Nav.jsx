@@ -40,10 +40,10 @@ const topLink = {
   display: 'inline-flex',
   alignItems: 'center',
   fontSize: '16.5px',
-  fontWeight: 700,
+  fontWeight: 600,
   color: color.white,
   letterSpacing: '-.012em',
-  textShadow: '0 1px 12px rgba(17,17,17,.45)'
+  textShadow: '0 1px 12px rgba(28,32,31,.45)'
 };
 
 const initialOf = (name) => (name || '').trim().charAt(0).toUpperCase() || '?';
@@ -88,7 +88,7 @@ function ProfileMenu({ user }) {
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '14px',
-              fontWeight: 800,
+              fontWeight: 600,
               letterSpacing: 0
             }}
           >
@@ -111,7 +111,7 @@ function ProfileMenu({ user }) {
         border: '1px solid rgba(255,255,255,.3)',
         color: color.white,
         fontSize: '14.5px',
-        fontWeight: 700,
+        fontWeight: 600,
         letterSpacing: '-.012em'
       }}
     />
@@ -135,7 +135,7 @@ export default function Nav() {
           pointerEvents: 'none',
           opacity: scrolled ? 1 : 0,
           transition: 'opacity .35s ease',
-          background: 'rgba(17,17,17,.88)',
+          background: 'rgba(28,32,31,.88)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(255,255,255,.14)'
@@ -165,19 +165,21 @@ export default function Nav() {
               marginTop: '-2px',
               paddingLeft: '.1em',
               fontSize: 'clamp(9.5px,.78vw,11.5px)',
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: '.19em',
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',
               color: color.white,
-              textShadow: '0 1px 10px rgba(17,17,17,.6)'
+              textShadow: '0 1px 10px rgba(28,32,31,.6)'
             }}
           >
-            <span>Door To Door</span>
-            <span aria-hidden="true" style={{ width: '3px', height: '3px', borderRadius: '999px', background: 'rgba(255,255,255,.5)' }} />
-            <span style={{ color: color.orange }}>Any Mode</span>
-            <span aria-hidden="true" style={{ width: '3px', height: '3px', borderRadius: '999px', background: 'rgba(255,255,255,.5)' }} />
-            <span>Tracked Live</span>
+            {/*
+              Two clauses, so the dot separators the three-part strapline needed are
+              gone: the sentences punctuate themselves. Rendered uppercase by the
+              textTransform above.
+            */}
+            <span>You request.</span>
+            <span style={{ color: color.orange }}>We move.</span>
           </div>
         </div>
 
@@ -211,7 +213,7 @@ export default function Nav() {
                     background: color.orange,
                     color: color.ink,
                     fontSize: '14.5px',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     transition: `transform .2s ${ease.out}, box-shadow .2s`
                   }}
                 >
@@ -236,7 +238,7 @@ export default function Nav() {
                   background: color.orange,
                   color: color.ink,
                   fontSize: '14.5px',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   transition: `transform .2s ${ease.out}, box-shadow .2s`
                 }}
               >
@@ -259,7 +261,7 @@ export default function Nav() {
               height: '46px',
               borderRadius: '14px',
               border: '1px solid rgba(255,255,255,.34)',
-              background: 'rgba(17,17,17,.32)',
+              background: 'rgba(28,32,31,.32)',
               backdropFilter: 'blur(8px)',
               display: 'flex',
               alignItems: 'center',
