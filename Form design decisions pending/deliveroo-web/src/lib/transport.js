@@ -84,7 +84,7 @@ export const TRANSPORT_MODES = [
     // Drives the road network, so it uses the router's own driving time (§25) and
     // draws the real polyline rather than a schematic arc.
     roadNetwork: true,
-    agentNoun: 'pickup agent',
+    agentNoun: 'driver',
     capacity: { units: 38, offline: 5 },
     limits: { maxDistanceKm: 1500, maxWeightKg: 2000 }
   },
@@ -173,10 +173,11 @@ export const modeLabel = (mode) => modeMeta(mode).label;
 export const usesRoadNetwork = (mode) => Boolean(modeMeta(mode).roadNetwork);
 
 /**
- * What we call the person coming to collect the parcel. A motorbike delivery sends a
- * rider — that is the word the customer is expecting from every other on-demand app —
- * while everything else sends a pickup agent. Defined here so "Finding a rider near
- * you…", the timeline and the notifications cannot drift apart.
+ * What we call the person coming to collect the parcel — and the word follows what
+ * they are actually turning up in. Someone on a bike is a rider, someone in a van or
+ * a car is a driver; only where the collecting vehicle is genuinely unknown does it
+ * fall back to the neutral "pickup agent". Defined here so "Finding a rider near
+ * you…", the card, the timeline and the notifications cannot drift apart.
  */
 export const agentNoun = (mode) => modeMeta(mode).agentNoun || 'pickup agent';
 
@@ -185,6 +186,17 @@ export const agentNounTitle = (mode) => {
   const noun = agentNoun(mode);
   return noun.charAt(0).toUpperCase() + noun.slice(1);
 };
+
+/**
+ * The vehicle that is actually coming to the pickup, which is not always the mode the
+ * parcel travels on: air and sea freight are collected by a road courier who hands the
+ * parcel on at the depot, so the agent assigned carries their own `vehicleMode`. Read
+ * this — not transportOf — wherever the wording is about the person at the door.
+ */
+export const collectingMode = (order) => order?.courier?.vehicleMode || transportOf(order);
+
+/** The noun for whoever is collecting this particular order. */
+export const agentNounFor = (order) => agentNoun(collectingMode(order));
 
 /** Mode of an order, defaulting to road — orders placed before §25 have no mode. */
 export const transportOf = (order) => order?.transport?.mode || DEFAULT_MODE;
