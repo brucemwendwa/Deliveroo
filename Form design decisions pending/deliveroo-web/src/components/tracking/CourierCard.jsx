@@ -10,9 +10,11 @@ import TransportGlyph from '../transport/TransportGlyph';
  * parcel. Same facts either way; the ETA line simply stops being relevant once they
  * have it.
  *
- * On a motorbike delivery this is the rider, and the card says so: the bike's mark on
- * the avatar, "Rider heading to pickup" on the status line. `arrived` splits ASSIGNED
- * into on-the-way and waiting-at-the-door — see agentHasArrived in orderStatus.
+ * The card names them by the vehicle turning up: the bike's mark on the avatar and
+ * "Rider heading to pickup" when a bike is coming, "Driver heading to pickup" when a
+ * van is — including on an air or sea booking, where a road courier does the collecting
+ * whatever the parcel travels on afterwards. `arrived` splits ASSIGNED into on-the-way
+ * and waiting-at-the-door — see agentHasArrived in orderStatus.
  */
 export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arrived = false, tone = 'dark' }) {
   if (!courier) return null;
@@ -22,9 +24,11 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
   // What they are actually riding or driving, which is the bike itself on a motorbike
   // delivery and the collecting vehicle on every other mode.
   const vehicleMode = courier.vehicleMode || (mode === TRANSPORT.MOTORBIKE ? TRANSPORT.MOTORBIKE : null);
+  // The status line names them by what is pulling up outside — a rider on the bike,
+  // a driver in the van — rather than by the mode the parcel flies or sails on later.
   const statusLine =
     status === STATUS.ASSIGNED
-      ? `${agentNounTitle(mode)} ${arrived ? 'arrived at pickup' : 'heading to pickup'}`
+      ? `${agentNounTitle(vehicleMode || mode)} ${arrived ? 'arrived at pickup' : 'heading to pickup'}`
       : STATUS_LABEL[status] || status;
 
   const surface = onDark
