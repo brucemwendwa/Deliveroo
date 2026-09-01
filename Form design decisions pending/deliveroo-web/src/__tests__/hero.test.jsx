@@ -23,7 +23,7 @@ describe('hero', () => {
   it('shows the headline, the tagline and both CTAs — and no eyebrow', () => {
     renderHero();
 
-    expect(headline()).toBe('From your door toanywhere on earth');
+    expect(headline()).toBe('From anywhere toyour door');
     expect(screen.queryByText('Moving Goods Worldwide')).not.toBeInTheDocument();
     expect(screen.getByText(HERO_COPY.body)).toBeInTheDocument();
     expect(screen.getByText('Request a Delivery')).toBeInTheDocument();
