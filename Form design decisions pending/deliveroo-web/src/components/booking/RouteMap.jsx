@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { MapContainer, Marker, Polyline, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import useJourneyClock from '../../hooks/useJourneyClock';
+import { arcBetween, measurePath, pointAlong, vehicleLeg } from '../../lib/journey';
 import { color, radius } from '../../theme';
 import { CITY_CENTER } from '../../api/geo';
 import { TRANSPORT, modeMeta, usesRoadNetwork } from '../../lib/transport';
@@ -41,9 +43,11 @@ const DRONE_SVG = `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" s
   <path d="M7.4 7.4 16.6 16.6M16.6 7.4 7.4 16.6"/><path d="M3.4 7.4h6M3.4 16.6h6M14.6 7.4h6M14.6 16.6h6"/>
   <rect x="9.4" y="9.4" width="5.2" height="5.2" rx="1.6" fill="${color.ink}" stroke="none"/></svg>`;
 
-const vehicleIcon = (mode, moving) =>
+const vehicleIcon = (mode, moving, gliding = false) =>
   L.divIcon({
-    className: '',
+    // The className rides on the element Leaflet writes the position transform to, so
+    // the CSS transition that smooths the journey between frames hangs off it.
+    className: gliding ? 'vehicle-marker' : '',
     iconSize: [38, 38],
     iconAnchor: [19, 19],
     html: `<span style="position:relative;display:flex;align-items:center;justify-content:center;width:38px;height:38px;">
@@ -88,29 +92,6 @@ function ClickToDrop({ onPick }) {
   return null;
 }
 
-/**
- * A flight or a sailing does not follow the road network, so drawing the driving
- * polyline for those modes would be a lie on the one screen that has to be true.
- * They get an arc between the endpoints instead — schematic, and honestly so.
- */
-function arcBetween(from, to, curvature = 0.16, samples = 48) {
-  const midLat = (from.lat + to.lat) / 2;
-  const midLng = (from.lng + to.lng) / 2;
-  const control = {
-    lat: midLat + (to.lng - from.lng) * curvature,
-    lng: midLng - (to.lat - from.lat) * curvature
-  };
-
-  return Array.from({ length: samples + 1 }, (_, index) => {
-    const t = index / samples;
-    const inverse = 1 - t;
-    return [
-      inverse * inverse * from.lat + 2 * inverse * t * control.lat + t * t * to.lat,
-      inverse * inverse * from.lng + 2 * inverse * t * control.lng + t * t * to.lng
-    ];
-  });
-}
-
 export default function RouteMap({
   pickup,
   destination,
@@ -122,10 +103,9 @@ export default function RouteMap({
   height = 'clamp(240px,34vw,380px)',
   draggableCourier = false,
   onCourierDrag,
-  moving = false
+  moving = false,
+  journey = null
 }) {
-  const points = [pickup, destination, courier, presentLocation].filter(Boolean).map((p) => [p.lat, p.lng]);
-  const center = points[0] || [CITY_CENTER.lat, CITY_CENTER.lng];
   // Road and motorbike both drive the road network, so they get the router's real
   // polyline; a flight, a sailing and a drone hop get an honest schematic arc.
   const flies = Boolean(mode) && !usesRoadNetwork(mode);
@@ -134,6 +114,51 @@ export default function RouteMap({
     if (flies && pickup && destination) return arcBetween(pickup, destination);
     return route?.coordinates?.length > 1 ? route.coordinates : null;
   }, [flies, pickup, destination, route]);
+
+  // §25 — the vehicle walks the journey rather than sitting where the API last saw it.
+  // The admin console drags this marker by hand, so there it stays put.
+  const animated = Boolean(journey) && !draggableCourier;
+  // Whether to burn animation frames at all, decided before the clock is asked for so
+  // the hook is never called conditionally. It settles to false of its own accord when
+  // the agent reaches the pickup or the parcel lands, and the clock drops to a crawl.
+  const live = animated && vehicleLeg(journey).moving;
+  const clock = useJourneyClock(live);
+  const leg = animated ? vehicleLeg(journey, clock) : null;
+
+  // The approach is a straight run at the pickup: we have the agent's position and
+  // their ETA, not a route for them, and inventing one would be fiction on a map.
+  const approach = useMemo(
+    () => (courier && pickup ? [[courier.lat, courier.lng], [pickup.lat, pickup.lng]] : null),
+    [courier, pickup]
+  );
+  const measuredRoute = useMemo(() => measurePath(path), [path]);
+  const measuredApproach = useMemo(() => measurePath(approach), [approach]);
+
+  const travelled = leg?.leg === 'approach' ? pointAlong(measuredApproach, leg.fraction) : null;
+  const carried = leg?.leg === 'route' ? pointAlong(measuredRoute, leg.fraction) : null;
+  const vehicleAt = travelled || carried || (courier ? [courier.lat, courier.lng] : null);
+  const vehicleMoving = leg ? leg.moving : moving;
+  // Rebuilt only when the vehicle or its state changes. Built inline it would be a new
+  // icon every frame, and Leaflet would replace the marker's DOM — throwing away both
+  // the CSS glide and the pulse ring on every single tick.
+  const icon = useMemo(
+    () => vehicleIcon(mode || TRANSPORT.ROAD, vehicleMoving, animated),
+    [mode, vehicleMoving, animated]
+  );
+
+  // Anchors only — never the animated marker. Frame refits whenever this changes, and
+  // a map that re-fits eight times a second to chase its own vehicle is unusable.
+  const points = useMemo(
+    () => [pickup, destination, courier, presentLocation].filter(Boolean).map((p) => [p.lat, p.lng]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      pickup?.lat, pickup?.lng,
+      destination?.lat, destination?.lng,
+      courier?.lat, courier?.lng,
+      presentLocation?.lat, presentLocation?.lng
+    ]
+  );
+  const center = points[0] || [CITY_CENTER.lat, CITY_CENTER.lng];
 
   return (
     <div
@@ -191,10 +216,19 @@ export default function RouteMap({
             <Tooltip direction="top" offset={[0, -10]}>{presentLocation.label}</Tooltip>
           </Marker>
         )}
-        {courier && (
+        {/* Where the agent is coming from, while they are still coming. Dashed and pale:
+            it is the direction of travel, not a route we claim they will drive. */}
+        {leg?.leg === 'approach' && approach && (
+          <Polyline
+            positions={approach}
+            pathOptions={{ color: color.inkSoft, weight: 2, opacity: 0.5, dashArray: '3 8', lineCap: 'round' }}
+          />
+        )}
+
+        {vehicleAt && (
           <Marker
-            position={[courier.lat, courier.lng]}
-            icon={vehicleIcon(mode || TRANSPORT.ROAD, moving)}
+            position={vehicleAt}
+            icon={icon}
             draggable={draggableCourier}
             eventHandlers={
               draggableCourier
@@ -208,8 +242,8 @@ export default function RouteMap({
             }
           >
             <Tooltip direction="top" offset={[0, -18]}>
-              {courier.name}
-              {courier.plate ? ` · ${courier.plate}` : ''}
+              {courier?.name || modeMeta(mode || TRANSPORT.ROAD).label}
+              {courier?.plate ? ` · ${courier.plate}` : ''}
             </Tooltip>
           </Marker>
         )}
