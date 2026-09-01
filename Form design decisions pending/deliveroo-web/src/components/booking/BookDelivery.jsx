@@ -43,6 +43,12 @@ import OrderSummary from './OrderSummary';
 import TransportOptions from './TransportOptions';
 import StepShell from './StepShell';
 
+/** The fixed nav sits over the top of the page, so an auto-scrolled step has to clear it. */
+const SCROLL_OFFSET = 108;
+
+/** Every control Enter should be able to walk through, in document order. */
+const FOCUSABLE = 'input:not([type="hidden"]):not([disabled]), textarea, select';
+
 const WEIGHTS = [0.5, 1, 2, 5, 10];
 const DIMENSIONS = [
   { field: 'lengthCm', label: 'Length' },
@@ -76,6 +82,52 @@ export default function BookDelivery() {
   const [showDimensions, setShowDimensions] = useState(false);
   /** Set when the customer hit Confirm while signed out (§12). */
   const awaitingAuth = useRef(false);
+  /** One entry per StepShell, so the wizard can bring the open step to the customer. */
+  const stepRefs = useRef([]);
+  const lastStep = useRef(step);
+
+  // The wizard is taller than the viewport, so answering one question used to leave
+  // the next one somewhere below the fold. Opening a step now walks the page down to
+  // it and puts the cursor in the field it asks for, so the question and the typing
+  // are in the same place. The initial render is skipped on purpose: landing on /book
+  // should show the heading, not a page already scrolled past it with a keyboard up.
+  useEffect(() => {
+    if (lastStep.current === step) return;
+    lastStep.current = step;
+
+    const node = stepRefs.current[step];
+    if (!node) return;
+
+    const top = node.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: Math.max(top, 0), behavior: still ? 'auto' : 'smooth' });
+
+    // The step's controls mount with it, so wait a frame before reaching for one, and
+    // only take a field that asked for the cursor — steps that open on a row of chips
+    // have nothing worth typing into. preventScroll keeps the browser's own
+    // scroll-into-view from fighting the smooth scroll above.
+    const frame = requestAnimationFrame(() => {
+      node.querySelector('[data-autofocus] input, [data-autofocus] textarea')?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [step]);
+
+  // Enter moves down the step rather than doing nothing: to the next field, or from the
+  // last one to the same Continue button a mouse would press — which reopens the effect
+  // above on the next step. Nothing here is inside a <form>, so no submit to suppress.
+  const onFieldEnter = (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    const container = event.currentTarget.closest('[data-step]');
+    if (!container) return;
+    const fields = Array.from(container.querySelectorAll(FOCUSABLE));
+    const next = fields[fields.indexOf(event.currentTarget) + 1];
+    if (next) {
+      next.focus();
+      return;
+    }
+    container.querySelector('[data-continue]:not(:disabled)')?.click();
+  };
 
   // §6 — the route redraws itself whenever either endpoint changes.
   useEffect(() => {
@@ -203,6 +255,7 @@ export default function BookDelivery() {
           {/* Steps */}
           <div style={{ flex: '1 1 440px', minWidth: 'min(100%,300px)' }}>
             <StepShell
+              containerRef={(node) => { stepRefs.current[0] = node; }}
               index={0}
               title="Pickup"
               question="Where should we pick it up?"
@@ -211,10 +264,12 @@ export default function BookDelivery() {
               summary={pickup?.label}
               onOpen={() => open(0)}
             >
-              <PlaceSearch value={pickup} onChange={(place) => dispatch(setPickup(place))} placeholder="Enter pickup location" />
+              <div data-autofocus="">
+                <PlaceSearch value={pickup} onChange={(place) => dispatch(setPickup(place))} placeholder="Enter pickup location" />
+              </div>
               {pickup && (
                 <div style={{ marginTop: '18px' }}>
-                  <Button onClick={advance} icon="arrow_forward">
+                  <Button onClick={advance} icon="arrow_forward" data-continue="">
                     Continue
                   </Button>
                 </div>
@@ -222,6 +277,7 @@ export default function BookDelivery() {
             </StepShell>
 
             <StepShell
+              containerRef={(node) => { stepRefs.current[1] = node; }}
               index={1}
               title="Destination"
               question="Where should we deliver it?"
@@ -230,14 +286,16 @@ export default function BookDelivery() {
               summary={destination?.label}
               onOpen={() => open(1)}
             >
-              <PlaceSearch
-                value={destination}
-                onChange={(place) => dispatch(setDestination(place))}
-                placeholder="Enter destination"
-              />
+              <div data-autofocus="">
+                <PlaceSearch
+                  value={destination}
+                  onChange={(place) => dispatch(setDestination(place))}
+                  placeholder="Enter destination"
+                />
+              </div>
               {destination && (
                 <div style={{ marginTop: '18px' }}>
-                  <Button onClick={advance} icon="arrow_forward" disabled={routeStatus === 'loading'}>
+                  <Button onClick={advance} icon="arrow_forward" disabled={routeStatus === 'loading'} data-continue="">
                     {routeStatus === 'loading' ? 'Working out the route…' : 'Continue'}
                   </Button>
                 </div>
@@ -245,6 +303,7 @@ export default function BookDelivery() {
             </StepShell>
 
             <StepShell
+              containerRef={(node) => { stepRefs.current[2] = node; }}
               index={2}
               title="Package"
               question="What are you sending?"
@@ -281,6 +340,7 @@ export default function BookDelivery() {
                     value={customWeight}
                     placeholder="Custom"
                     aria-label="Custom weight in kilograms"
+                    onKeyDown={onFieldEnter}
                     onChange={(event) => {
                       const next = event.target.value;
                       setCustomWeight(next);
@@ -333,6 +393,7 @@ export default function BookDelivery() {
                 label="Description · optional"
                 value={parcel.description}
                 placeholder="Two laptops, handle with care"
+                onKeyDown={onFieldEnter}
                 onChange={(value) => dispatch(setDescription(value))}
               />
 
@@ -371,6 +432,7 @@ export default function BookDelivery() {
                           inputMode="decimal"
                           value={parcel[field]}
                           placeholder="0"
+                          onKeyDown={onFieldEnter}
                           onChange={(value) => dispatch(setDimension({ field, value }))}
                         />
                       ))}
@@ -385,13 +447,14 @@ export default function BookDelivery() {
               </div>
 
               <div style={{ marginTop: '22px' }}>
-                <Button onClick={advance} icon="arrow_forward" disabled={!complete.parcel}>
+                <Button onClick={advance} icon="arrow_forward" disabled={!complete.parcel} data-continue="">
                   Continue
                 </Button>
               </div>
             </StepShell>
 
             <StepShell
+              containerRef={(node) => { stepRefs.current[3] = node; }}
               index={3}
               title="Transport"
               question="How should it be transported?"
@@ -414,13 +477,14 @@ export default function BookDelivery() {
               />
 
               <div style={{ marginTop: '22px' }}>
-                <Button onClick={advance} icon="arrow_forward" disabled={!complete.transport}>
+                <Button onClick={advance} icon="arrow_forward" disabled={!complete.transport} data-continue="">
                   Continue
                 </Button>
               </div>
             </StepShell>
 
             <StepShell
+              containerRef={(node) => { stepRefs.current[4] = node; }}
               index={4}
               title="Details"
               question="Who's sending and receiving?"
@@ -432,9 +496,11 @@ export default function BookDelivery() {
               <div style={{ display: 'grid', gap: '16px' }}>
                 <div style={{ ...eyebrow, marginBottom: '-4px' }}>Pickup details</div>
                 <Field
+                  data-autofocus=""
                   label="Your name"
                   value={sender.name}
                   autoComplete="name"
+                  onKeyDown={onFieldEnter}
                   onChange={(value) => dispatch(setSenderField({ field: 'name', value }))}
                 />
                 <Field
@@ -444,6 +510,7 @@ export default function BookDelivery() {
                   inputMode="tel"
                   autoComplete="tel"
                   placeholder="+254 700 000 000"
+                  onKeyDown={onFieldEnter}
                   onChange={(value) => dispatch(setSenderField({ field: 'phone', value }))}
                 />
 
@@ -451,6 +518,7 @@ export default function BookDelivery() {
                 <Field
                   label="Recipient name"
                   value={recipient.name}
+                  onKeyDown={onFieldEnter}
                   onChange={(value) => dispatch(setRecipientField({ field: 'name', value }))}
                 />
                 <Field
@@ -459,18 +527,20 @@ export default function BookDelivery() {
                   type="tel"
                   inputMode="tel"
                   placeholder="+254 700 000 000"
+                  onKeyDown={onFieldEnter}
                   onChange={(value) => dispatch(setRecipientField({ field: 'phone', value }))}
                 />
               </div>
 
               <div style={{ marginTop: '22px' }}>
-                <Button onClick={advance} icon="arrow_forward" disabled={!complete.details}>
+                <Button onClick={advance} icon="arrow_forward" disabled={!complete.details} data-continue="">
                   Review delivery
                 </Button>
               </div>
             </StepShell>
 
             <StepShell
+              containerRef={(node) => { stepRefs.current[5] = node; }}
               index={5}
               title="Confirm"
               question="Ready to send?"
