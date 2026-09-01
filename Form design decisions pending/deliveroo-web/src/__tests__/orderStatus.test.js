@@ -106,15 +106,21 @@ describe('journey stages', () => {
     expect(stageState(atTheDoor, 'AT_PICKUP')).toBe('current');
   });
 
-  it('calls the agent a rider on a motorbike delivery, and a pickup agent otherwise', () => {
+  it('names the agent after the vehicle turning up, not the mode the parcel travels on', () => {
     const labelOf = (order, key) => journeyStages(order, NOW).find((stage) => stage.key === key).label;
 
     const bike = { status: STATUS.ASSIGNED, transport: { mode: 'MOTORBIKE' } };
     expect(labelOf(bike, 'ASSIGNED')).toBe('Rider assigned');
     expect(labelOf(bike, 'AT_PICKUP')).toBe('Rider arrived');
 
-    // An order with no transport is a road order, and its wording must not move.
-    expect(labelOf({ status: STATUS.ASSIGNED }, 'ASSIGNED')).toBe('Pickup agent assigned');
+    // An order with no transport is a road order, and a van sends a driver.
+    expect(labelOf({ status: STATUS.ASSIGNED }, 'ASSIGNED')).toBe('Driver assigned');
+
+    // Air freight is collected by a road courier before it ever sees a plane, so the
+    // wording follows the agent's own vehicle rather than the freight leg.
+    const flight = { status: STATUS.ASSIGNED, transport: { mode: 'AIR' }, courier: { vehicleMode: 'MOTORBIKE' } };
+    expect(labelOf(flight, 'ASSIGNED')).toBe('Rider assigned');
+    expect(labelOf({ status: STATUS.ASSIGNED, transport: { mode: 'AIR' } }, 'ASSIGNED')).toBe('Pickup agent assigned');
   });
 
   it('marks the steps behind the current one done, and the rest to come', () => {
