@@ -1,7 +1,7 @@
 // §18 status vocabulary plus the §16/§17 permission guards. Kept free of React and
 // of the store so both the customer screens and the admin console read one source.
 
-import { agentNounTitle, transportOf } from './transport';
+import { agentNounTitle, collectingMode } from './transport';
 
 export const STATUS = {
   PENDING: 'PENDING',
@@ -130,22 +130,39 @@ const historyTime = (order, status) => {
 };
 
 /**
+ * How much of the pickup → destination leg has actually been run, 0–1: nothing until
+ * the parcel is dispatched, then the elapsed share of the routed duration, then all
+ * of it once it lands.
+ *
+ * This is the one figure the moving map marker, the kilometres left and the last three
+ * timeline rows are all derived from, so the vehicle on the map cannot say one thing
+ * while the timeline beside it says another.
+ */
+export function transitShare(order, now = Date.now()) {
+  if (!order) return 0;
+  if (order.status === STATUS.DELIVERED) return 1;
+  if (order.status !== STATUS.IN_TRANSIT) return 0;
+
+  const startedAt = historyTime(order, STATUS.IN_TRANSIT);
+  const duration = Number(order.route?.durationSeconds) || 0;
+  if (!startedAt || duration <= 0) return 0;
+
+  return Math.max(0, Math.min(1, (now - startedAt) / 1000 / duration));
+}
+
+/**
  * How far along the delivery is, 0–100. Once it is in transit the figure moves with
  * the clock rather than sitting still until the next admin click — that is what makes
  * the ETA count down and the timeline reach "Arriving" on its own.
+ *
+ * Note this is the whole *delivery*, not the drive: requesting, matching and collecting
+ * account for the first 60, so it is deliberately ahead of transitShare above.
  */
 export function progressFor(order, now = Date.now()) {
   if (!order) return 0;
   const base = PROGRESS[order.status] ?? 0;
   if (order.status !== STATUS.IN_TRANSIT) return base;
-
-  const startedAt = historyTime(order, STATUS.IN_TRANSIT);
-  const duration = Number(order.route?.durationSeconds) || 0;
-  if (!startedAt || duration <= 0) return base;
-
-  const elapsed = (now - startedAt) / 1000;
-  const share = Math.max(0, Math.min(1, elapsed / duration));
-  return TRANSIT_BAND[0] + (TRANSIT_BAND[1] - TRANSIT_BAND[0]) * share;
+  return TRANSIT_BAND[0] + (TRANSIT_BAND[1] - TRANSIT_BAND[0]) * transitShare(order, now);
 }
 
 /** Seconds left before the parcel lands, from the progress above. */
@@ -155,11 +172,20 @@ export function remainingSeconds(order, now = Date.now()) {
   return Math.max(0, duration * (1 - progressFor(order, now) / 100));
 }
 
-/** Kilometres still to run — the tracking screen prints this beside the ETA. */
+/**
+ * Kilometres still to run — the tracking screen prints this beside the ETA, and now
+ * beside a marker moving along the same line.
+ *
+ * Measured on transitShare rather than on progressFor, because this is pure geometry:
+ * none of the route has been covered until the parcel is dispatched, however far the
+ * *delivery* has progressed. The seconds left below stay on progressFor, which is the
+ * honest split — time-to-arrive includes the matching and handling that distance-to-go
+ * plainly does not.
+ */
 export function remainingKm(order, now = Date.now()) {
-  if (!order || order.status === STATUS.DELIVERED) return 0;
+  if (!order) return 0;
   const distance = Number(order.route?.distanceKm) || 0;
-  return Math.max(0, distance * (1 - progressFor(order, now) / 100));
+  return Math.max(0, distance * (1 - transitShare(order, now)));
 }
 
 export const isArriving = (order, now = Date.now()) =>
@@ -168,9 +194,9 @@ export const isArriving = (order, now = Date.now()) =>
 /**
  * The eight rows of the tracking timeline, in order.
  *
- * `label` is a function of the transport mode, because the person coming to collect
- * the parcel is a *rider* on a motorbike delivery and a *pickup agent* on everything
- * else — the noun is settled once in transport.js and read here (§25).
+ * `label` is a function of the collecting vehicle, because the person coming for the
+ * parcel is a *rider* when a bike pulls up and a *driver* when a van does — the noun is
+ * settled once in transport.js and read here (§25).
  */
 export const JOURNEY_STAGES = [
   { key: 'REQUESTED', label: () => 'Delivery requested', at: STATUS.PENDING },
@@ -204,7 +230,7 @@ export function agentHasArrived(order, now = Date.now()) {
  */
 export function journeyStages(order, now = Date.now()) {
   const status = order?.status;
-  const mode = transportOf(order);
+  const mode = collectingMode(order);
   const current = stepIndex(status);
   const progress = progressFor(order, now);
   const arriving = progress >= ARRIVING_AT;
@@ -233,12 +259,13 @@ export function journeyStages(order, now = Date.now()) {
 
 /**
  * The status line a *customer* reads, which names the vehicle where the API only has
- * a state: "Rider heading to pickup" rather than "Courier Assigned" (§25). The six
- * STATUS values stay exactly as they are — this is wording, not vocabulary.
+ * a state: "Rider heading to pickup" for a bike, "Driver heading to pickup" for a van,
+ * rather than "Courier Assigned" (§25). The six STATUS values stay exactly as they
+ * are — this is wording, not vocabulary.
  */
 export function statusLabelFor(order, now = Date.now()) {
   if (!order) return '';
-  const noun = agentNounTitle(transportOf(order));
+  const noun = agentNounTitle(collectingMode(order));
   if (order.status === STATUS.ASSIGNED) {
     return agentHasArrived(order, now) ? `${noun} arrived at pickup` : `${noun} heading to pickup`;
   }
