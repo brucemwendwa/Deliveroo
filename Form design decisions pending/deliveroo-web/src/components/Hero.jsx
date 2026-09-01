@@ -29,7 +29,7 @@ export const HERO_PHOTO = {
  * headline is the first thing read over the photograph.
  */
 export const HERO_COPY = {
-  headline: ['From your door to', 'anywhere on earth'],
+  headline: ['From anywhere to', 'your door'],
   body: 'One network. Every mode.'
 };
 
