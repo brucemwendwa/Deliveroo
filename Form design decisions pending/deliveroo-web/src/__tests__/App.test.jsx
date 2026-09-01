@@ -18,7 +18,7 @@ const renderNav = (store = makeStore()) => withStore(<MemoryRouter><Nav /></Memo
 describe('landing page', () => {
   it('opens on the hero, one photograph deep', () => {
     const { container } = withStore(<App />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('From your door toanywhere on earth');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('From anywhere toyour door');
     // One photo, no carousel: the hero holds still.
     expect(container.querySelector('#top').querySelectorAll('img')).toHaveLength(1);
     // The nav's strapline sits above the fold alongside the hero.
