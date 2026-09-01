@@ -43,11 +43,34 @@ import OrderSummary from './OrderSummary';
 import TransportOptions from './TransportOptions';
 import StepShell from './StepShell';
 
-/** The fixed nav sits over the top of the page, so an auto-scrolled step has to clear it. */
+/** The fixed nav sits over the top of the page, so an auto-scrolled block has to clear it. */
 const SCROLL_OFFSET = 108;
+/** Breathing room under a revealed block, and clearance for the phone's fixed price bar. */
+const BOTTOM_GAP = 28;
 
 /** Every control Enter should be able to walk through, in document order. */
 const FOCUSABLE = 'input:not([type="hidden"]):not([disabled]), textarea, select';
+
+const stillPage = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+
+/** Walk the page down so `node` sits just below the nav. */
+const scrollToBlock = (node) => {
+  const top = node.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
+  window.scrollTo({ top: Math.max(top, 0), behavior: stillPage() ? 'auto' : 'smooth' });
+};
+
+/**
+ * Answering one question should put the next one in front of the customer — but only
+ * when it isn't already. Chip rows sit close together, and yanking the page around a
+ * block that was fully on screen anyway reads as a glitch rather than as help.
+ */
+const revealBlock = (node, bottomInset = 0) => {
+  if (!node) return;
+  const { top, bottom } = node.getBoundingClientRect();
+  const alreadyVisible = top >= SCROLL_OFFSET && bottom <= window.innerHeight - bottomInset - BOTTOM_GAP;
+  if (alreadyVisible) return;
+  scrollToBlock(node);
+};
 
 const WEIGHTS = [0.5, 1, 2, 5, 10];
 const DIMENSIONS = [
@@ -85,6 +108,18 @@ export default function BookDelivery() {
   /** One entry per StepShell, so the wizard can bring the open step to the customer. */
   const stepRefs = useRef([]);
   const lastStep = useRef(step);
+  /**
+   * The package and transport steps ask several things in a row, so their blocks are
+   * addressable too: choosing a weight should bring up the package types, and choosing
+   * a type should bring up the description, without anyone reaching for the scrollbar.
+   */
+  const packageTypeRef = useRef(null);
+  const packageDetailsRef = useRef(null);
+  const transportActionRef = useRef(null);
+
+  /** The phone's fixed quote bar covers the bottom of the viewport (§23). */
+  const bottomInset = narrow && route ? 84 : 0;
+  const reveal = (node) => revealBlock(node, bottomInset);
 
   // The wizard is taller than the viewport, so answering one question used to leave
   // the next one somewhere below the fold. Opening a step now walks the page down to
@@ -98,9 +133,9 @@ export default function BookDelivery() {
     const node = stepRefs.current[step];
     if (!node) return;
 
-    const top = node.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
-    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: Math.max(top, 0), behavior: still ? 'auto' : 'smooth' });
+    // Unconditional here, unlike reveal(): a new step's heading belongs at the top of
+    // the page whether or not it happened to be on screen already.
+    scrollToBlock(node);
 
     // The step's controls mount with it, so wait a frame before reaching for one, and
     // only take a field that asked for the cursor — steps that open on a row of chips
@@ -328,6 +363,7 @@ export default function BookDelivery() {
                       onClick={() => {
                         setCustomWeight('');
                         dispatch(setWeight(weight));
+                        reveal(packageTypeRef.current);
                       }}
                     >
                       {weight} kg
@@ -365,7 +401,7 @@ export default function BookDelivery() {
                 </div>
               </fieldset>
 
-              <fieldset style={{ border: 'none', padding: 0, margin: '0 0 24px' }}>
+              <fieldset ref={packageTypeRef} style={{ border: 'none', padding: 0, margin: '0 0 24px' }}>
                 <legend style={{ ...eyebrow, marginBottom: '12px', padding: 0 }}>What kind of package?</legend>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                   {PACKAGE_TYPES.map((type) => (
@@ -379,6 +415,7 @@ export default function BookDelivery() {
                         if (!parcel.description || PACKAGE_TYPES.some((t) => t.label === parcel.description)) {
                           dispatch(setDescription(next ? type.label : ''));
                         }
+                        reveal(packageDetailsRef.current);
                       }}
                       style={{ gap: '8px' }}
                     >
@@ -389,67 +426,77 @@ export default function BookDelivery() {
                 </div>
               </fieldset>
 
-              <Field
-                label="Description · optional"
-                value={parcel.description}
-                placeholder="Two laptops, handle with care"
-                onKeyDown={onFieldEnter}
-                onChange={(value) => dispatch(setDescription(value))}
-              />
+              {/* Description, dimensions and Continue travel together: once a package type
+                  is chosen there is nothing left to answer, so the whole tail of the step
+                  should come into view at once rather than a line at a time. */}
+              <div ref={packageDetailsRef}>
+                <Field
+                  label="Description · optional"
+                  value={parcel.description}
+                  placeholder="Two laptops, handle with care"
+                  onKeyDown={onFieldEnter}
+                  onChange={(value) => dispatch(setDescription(value))}
+                />
 
-              <div style={{ marginTop: '18px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowDimensions((open_) => !open_)}
-                  aria-expanded={showDimensions || dimensionsGiven}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    height: '44px',
-                    padding: 0,
-                    border: 'none',
-                    background: 'transparent',
-                    fontFamily: font.body,
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    color: color.ink,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Icon name={showDimensions || dimensionsGiven ? 'expand_less' : 'straighten'} size={18} color={color.orange} />
-                  Add dimensions · optional
-                </button>
+                <div style={{ marginTop: '18px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDimensions((open_) => !open_);
+                      // Opening the boxes grows the step downwards, past the fold on a
+                      // short window. Reveal after the browser has laid the new rows out.
+                      requestAnimationFrame(() => reveal(packageDetailsRef.current));
+                    }}
+                    aria-expanded={showDimensions || dimensionsGiven}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      height: '44px',
+                      padding: 0,
+                      border: 'none',
+                      background: 'transparent',
+                      fontFamily: font.body,
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: color.ink,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Icon name={showDimensions || dimensionsGiven ? 'expand_less' : 'straighten'} size={18} color={color.orange} />
+                    Add dimensions · optional
+                  </button>
 
-                {(showDimensions || dimensionsGiven) && (
-                  <>
-                    <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: 'repeat(auto-fit,minmax(96px,1fr))', marginTop: '8px' }}>
-                      {DIMENSIONS.map(({ field, label }) => (
-                        <Field
-                          key={field}
-                          label={`${label} (cm)`}
-                          type="number"
-                          inputMode="decimal"
-                          value={parcel[field]}
-                          placeholder="0"
-                          onKeyDown={onFieldEnter}
-                          onChange={(value) => dispatch(setDimension({ field, value }))}
-                        />
-                      ))}
-                    </div>
-                    <p style={{ margin: '10px 0 0', fontSize: '12.5px', lineHeight: 1.5, color: color.muted }}>
-                      {volumetric > 0
-                        ? `A parcel this size prices as ${volumetric} kg volumetric. We charge the higher of that and its real weight, the way every carrier does.`
-                        : 'Large, light parcels take up space that heavier ones would. Dimensions let us price that honestly, and tell us whether a drone can take it.'}
-                    </p>
-                  </>
-                )}
-              </div>
+                  {(showDimensions || dimensionsGiven) && (
+                    <>
+                      <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: 'repeat(auto-fit,minmax(96px,1fr))', marginTop: '8px' }}>
+                        {DIMENSIONS.map(({ field, label }) => (
+                          <Field
+                            key={field}
+                            label={`${label} (cm)`}
+                            type="number"
+                            inputMode="decimal"
+                            value={parcel[field]}
+                            placeholder="0"
+                            onKeyDown={onFieldEnter}
+                            onChange={(value) => dispatch(setDimension({ field, value }))}
+                          />
+                        ))}
+                      </div>
+                      <p style={{ margin: '10px 0 0', fontSize: '12.5px', lineHeight: 1.5, color: color.muted }}>
+                        {volumetric > 0
+                          ? `A parcel this size prices as ${volumetric} kg volumetric. We charge the higher of that and its real weight, the way every carrier does.`
+                          : 'Large, light parcels take up space that heavier ones would. Dimensions let us price that honestly, and tell us whether a drone can take it.'}
+                      </p>
+                    </>
+                  )}
+                </div>
 
-              <div style={{ marginTop: '22px' }}>
-                <Button onClick={advance} icon="arrow_forward" disabled={!complete.parcel} data-continue="">
-                  Continue
-                </Button>
+                <div style={{ marginTop: '22px' }}>
+                  <Button onClick={advance} icon="arrow_forward" disabled={!complete.parcel} data-continue="">
+                    Continue
+                  </Button>
+                </div>
               </div>
             </StepShell>
 
@@ -470,13 +517,16 @@ export default function BookDelivery() {
               <TransportOptions
                 options={options}
                 selected={transport.mode}
-                onSelect={(mode) => dispatch(setTransportMode(mode))}
+                onSelect={(mode) => {
+                  dispatch(setTransportMode(mode));
+                  reveal(transportActionRef.current);
+                }}
                 priority={transport.priority}
                 onPriority={(value) => dispatch(setPriority(value))}
                 loading={routeStatus === 'loading' || !route}
               />
 
-              <div style={{ marginTop: '22px' }}>
+              <div ref={transportActionRef} style={{ marginTop: '22px' }}>
                 <Button onClick={advance} icon="arrow_forward" disabled={!complete.transport} data-continue="">
                   Continue
                 </Button>
