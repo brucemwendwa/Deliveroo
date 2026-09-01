@@ -52,15 +52,18 @@ describe('requesting a pickup', () => {
     const pending = seeded().find((order) => order.status === STATUS.PENDING);
     renderAt(`/orders/${pending.id}/confirmation`);
 
-    expect(await screen.findByText(/finding a pickup agent near you/i)).toBeInTheDocument();
+    // A road booking is out looking for a driver — the noun follows the vehicle.
+    expect(await screen.findByText(/finding a driver near you/i)).toBeInTheDocument();
 
     // Dispatch answers on its own — no button, no reload. The wait is the search
-    // delay plus the backend's own latency, in fake-timer milliseconds.
-    expect(await screen.findByText('Pickup agent assigned.', {}, { timeout: 8000 })).toBeInTheDocument();
+    // delay plus the backend's own latency, in fake-timer milliseconds. Dispatch may
+    // send a van or a bike to collect a road parcel, so the headline names whichever
+    // of the two actually turned up.
+    expect(await screen.findByText(/^(driver|rider) assigned\.$/i, {}, { timeout: 8000 })).toBeInTheDocument();
     // Who is coming, how far out, and the way to watch them arrive.
     expect(screen.getByText(/away/)).toBeInTheDocument();
     expect(screen.getByText(/arriving in/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /track pickup/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /track (driver|rider)/i })).toBeInTheDocument();
   });
 
 });
