@@ -23,7 +23,7 @@ import {
   statusLabelFor
 } from '../lib/orderStatus';
 import { etaClock, formatDuration, formatKes, formatKm } from '../lib/pricing';
-import { agentNoun, modeMeta, priorityOf, transportOf } from '../lib/transport';
+import { agentNounFor, modeMeta, priorityOf, transportOf } from '../lib/transport';
 import { color, eyebrow, font, layout, radius, statusTone } from '../theme';
 
 /** One live figure: label above, value below. Four of them sit under the map. */
@@ -90,7 +90,8 @@ export default function TrackOrder() {
   const arriving = isArriving(order, now);
   const live = !isTerminal(order.status);
   const tone = statusTone[order.status];
-  const noun = agentNoun(mode);
+  // The vehicle actually coming for the parcel, which is what the card says too.
+  const noun = agentNounFor(order);
   const arrived = agentHasArrived(order, now);
 
   const headline =
@@ -222,7 +223,7 @@ export default function TrackOrder() {
             courier={order.courier}
             presentLocation={order.presentLocation}
             mode={mode}
-            moving={live}
+            journey={order}
             height="clamp(340px,52vh,560px)"
           />
 
