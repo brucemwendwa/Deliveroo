@@ -13,7 +13,7 @@ import PageShell from './PageShell';
 import { TrackingSkeleton } from '../components/ui/Skeleton';
 import { STATUS, agentHasArrived, statusLabelFor } from '../lib/orderStatus';
 import { formatDuration, formatKes, formatKm, isWeightVerified } from '../lib/pricing';
-import { agentNoun, agentNounTitle, modeMeta, priorityOf, transportOf } from '../lib/transport';
+import { agentNounFor, agentNounTitle, collectingMode, modeMeta, priorityOf, transportOf } from '../lib/transport';
 import { color, eyebrow, font, layout, radius } from '../theme';
 
 /** How long the search runs before an agent is matched. Long enough to read. */
@@ -51,13 +51,16 @@ export default function Confirmation() {
   const meta = modeMeta(mode);
   const weighed = isWeightVerified(order.parcel);
   const justAssigned = order.status === STATUS.ASSIGNED;
-  const noun = agentNoun(mode);
+  // Named after whoever is actually coming: once an agent is assigned that is their
+  // vehicle, not the mode the parcel travels on afterwards, so the headline, the card
+  // and the timeline all say the same word.
+  const noun = agentNounFor(order);
   const arrived = agentHasArrived(order);
 
   const headline = awaitingAgent
     ? `Finding your ${noun}.`
     : justAssigned
-      ? `${agentNounTitle(mode)} assigned.`
+      ? `${agentNounTitle(collectingMode(order))} assigned.`
       : order.status === STATUS.CANCELLED
         ? 'Delivery cancelled.'
         : 'Delivery confirmed';
@@ -153,7 +156,7 @@ export default function Confirmation() {
             route={order.route}
             courier={order.courier}
             mode={mode}
-            moving={order.status === STATUS.IN_TRANSIT}
+            journey={order}
             height="clamp(260px,34vw,380px)"
           />
 
