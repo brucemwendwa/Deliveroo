@@ -6,11 +6,13 @@ import Icon from '../Icon';
  * controls; completed steps collapse to a single line that stays clickable, and steps
  * ahead of the customer are dimmed rather than hidden so the path is legible.
  */
-export default function StepShell({ index, title, question, active, complete, summary, onOpen, children }) {
+export default function StepShell({ index, title, question, active, complete, summary, onOpen, containerRef, children }) {
   const reachable = active || complete;
 
   return (
     <section
+      ref={containerRef}
+      data-step={index}
       aria-current={active ? 'step' : undefined}
       style={{
         borderTop: `1px solid ${color.border}`,
