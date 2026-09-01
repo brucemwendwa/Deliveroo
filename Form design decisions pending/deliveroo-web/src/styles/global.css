@@ -92,6 +92,15 @@ button { font-family: inherit; }
 }
 .route-fade { animation: fadeIn .7s ease both; }
 
+/* §25 — the vehicle marker. useJourneyClock repositions it a handful of times a
+   second; this carries it between those positions so the journey reads as a glide
+   rather than as a series of hops. Leaflet writes the transform, so the transition
+   goes on the marker element it writes to, and the reduced-motion block above
+   flattens it to nothing along with everything else. */
+.leaflet-marker-icon.vehicle-marker {
+  transition: transform .16s linear;
+}
+
 /* §4 — the services catalogue. Five cards, so the column count is stated rather than
    left to auto-fit: auto-fit would put four across and leave the fifth alone in a row
    of holes. One up on a phone, two on a tablet, then a 3 + 2 layout on the desktop
