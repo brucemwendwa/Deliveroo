@@ -10,7 +10,7 @@ import {
   statusLabelFor
 } from '../../lib/orderStatus';
 import { etaClock, formatKm } from '../../lib/pricing';
-import { agentNoun, agentNounTitle, modeMeta, priorityOf, transportOf } from '../../lib/transport';
+import { agentNounFor, agentNounTitle, collectingMode, modeMeta, priorityOf, transportOf } from '../../lib/transport';
 import { color, ease, eyebrow, font } from '../../theme';
 import Button from '../ui/Button';
 import TransportBadge from '../transport/TransportBadge';
@@ -32,12 +32,13 @@ export default function ActiveDelivery({ order }) {
   const secondsLeft = remainingSeconds(order, now);
   const minutesLeft = Math.max(1, Math.round(secondsLeft / 60));
   const searching = order.status === STATUS.PENDING && !order.courier;
-  const noun = agentNoun(mode);
+  // Named for the vehicle that is coming, the same word the tracking screen uses.
+  const noun = agentNounFor(order);
 
   const facts = [
-    // Who has it comes first once someone does: on a motorbike delivery that is the
+    // Who has it comes first once someone does: when a bike is coming that is the
     // single fact the customer opens the dashboard for.
-    order.courier && [agentNounTitle(mode), order.courier.name],
+    order.courier && [agentNounTitle(collectingMode(order)), order.courier.name],
     ['Current location', currentLocationLabel(order)],
     ['Destination', order.destination.name || order.destination.label],
     ['Distance remaining', formatKm(remainingKm(order, now))],
