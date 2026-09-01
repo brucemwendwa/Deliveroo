@@ -248,7 +248,7 @@ export default function OrderDetails() {
             courier={order.courier}
             presentLocation={order.presentLocation}
             mode={mode}
-            moving={!isTerminal(order.status)}
+            journey={order}
             height="clamp(280px,38vw,420px)"
           />
 
