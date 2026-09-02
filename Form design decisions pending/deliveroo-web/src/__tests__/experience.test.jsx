@@ -102,6 +102,45 @@ describe('requesting a motorbike pickup', () => {
   });
 });
 
+// §25 — the screen a customer who asked for a plane actually sees. A road courier
+// collects the parcel, so the agent on the card is a rider or a driver; the screen has
+// to say why, or an order badged "Air" simply contradicts itself.
+describe('requesting an air freight pickup', () => {
+  let order;
+
+  beforeEach(async () => {
+    order = await createOrder({
+      pickup: { label: 'CBD \u00b7 Nairobi', name: 'CBD', lat: -1.2864, lng: 36.8172 },
+      destination: { label: 'Mombasa', name: 'Mombasa', lat: -4.0435, lng: 39.6682 },
+      route: { distanceKm: 485, durationSeconds: 26_000, coordinates: [], estimated: false },
+      parcel: { weightKg: 3, description: 'Documents' },
+      transport: { mode: TRANSPORT.AIR },
+      sender: { name: 'Sender', phone: '+254700000001' },
+      recipient: { name: 'Recipient', phone: '+254700000002' }
+    });
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('explains the road leg rather than showing a rider for a flight with no reason', async () => {
+    renderAt(`/orders/${order.id}/confirmation`);
+
+    // The hand-over is said while the search is still running, not sprung afterwards.
+    expect(await screen.findByText(/finding a pickup agent near you/i)).toBeInTheDocument();
+    expect(screen.getByText(/runs the road leg/i)).toBeInTheDocument();
+
+    // Whoever turns up, the card names them and the note says where they are taking it.
+    expect(await screen.findByText(/^(rider|driver) assigned\.$/i, {}, { timeout: 8000 })).toBeInTheDocument();
+    expect(screen.getByText(/take it to the air cargo terminal, where air freight takes over/i)).toBeInTheDocument();
+
+    // And the journey itself is the flight, not a generic dispatch.
+    expect(screen.getByText('Loaded onto the flight')).toBeInTheDocument();
+    expect(screen.getByText('In the air')).toBeInTheDocument();
+  });
+});
+
 // §25 — a motorbike delivery is tracked by the same screen as every other mode.
 describe('tracking a motorbike delivery', () => {
   it('names the vehicle, the rider and the stage the rider is at', async () => {
