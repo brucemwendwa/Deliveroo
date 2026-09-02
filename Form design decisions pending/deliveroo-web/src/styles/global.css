@@ -119,3 +119,28 @@ button { font-family: inherit; }
   .services-grid > *:nth-child(4),
   .services-grid > *:nth-child(5) { grid-column: span 3; }
 }
+
+/* §12 — the sign-in dialog. Mobile-first: the form alone, full width, nothing
+   decorative competing with it. The branding column only appears once there is room
+   for it beside the form rather than above it, so the phone layout never scrolls
+   past a hero to reach the input. */
+.auth-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.auth-grid > aside { display: none; }
+.auth-form {
+  padding: clamp(26px, 4vw, 40px);
+  /* The dialog's close button is absolutely positioned over this corner, so the
+     first row of the form starts below it rather than under it. */
+  padding-top: 66px;
+  background: #F3F3F1;
+}
+@media (min-width: 820px) {
+  .auth-grid { grid-template-columns: 1.02fr 1fr; }
+  .auth-grid > aside { display: flex; }
+}
+
+/* The button spinner. Its own name so the reduced-motion block above can flatten it
+   without the button losing the word beside it. */
+@keyframes authSpin { to { transform: rotate(360deg); } }
