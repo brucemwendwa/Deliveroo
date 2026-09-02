@@ -1,7 +1,7 @@
 // §18 status vocabulary plus the §16/§17 permission guards. Kept free of React and
 // of the store so both the customer screens and the admin console read one source.
 
-import { agentNounTitle, collectingMode } from './transport';
+import { agentNounTitle, collectingMode, handoffMeta, transportOf } from './transport';
 
 export const STATUS = {
   PENDING: 'PENDING',
@@ -194,17 +194,28 @@ export const isArriving = (order, now = Date.now()) =>
 /**
  * The eight rows of the tracking timeline, in order.
  *
- * `label` is a function of the collecting vehicle, because the person coming for the
- * parcel is a *rider* when a bike pulls up and a *driver* when a van does — the noun is
- * settled once in transport.js and read here (§25).
+ * Each `label` is a function of two modes, because the two halves of the journey are
+ * not always the same vehicle. The first rows follow whoever is *collecting*: a rider
+ * when a bike pulls up, a driver when a van does. The transit rows follow what the
+ * parcel is actually travelling on, so a flight is loaded and in the air rather than
+ * generically "dispatched" — which is what stops an order badged Air from reading like
+ * a motorbike delivery all the way down. Both nouns are settled in transport.js (§25).
  */
 export const JOURNEY_STAGES = [
   { key: 'REQUESTED', label: () => 'Delivery requested', at: STATUS.PENDING },
-  { key: 'ASSIGNED', label: (mode) => `${agentNounTitle(mode)} assigned`, at: STATUS.ASSIGNED },
-  { key: 'AT_PICKUP', label: (mode) => `${agentNounTitle(mode)} arrived`, at: STATUS.ASSIGNED },
+  { key: 'ASSIGNED', label: ({ collecting }) => `${agentNounTitle(collecting)} assigned`, at: STATUS.ASSIGNED },
+  { key: 'AT_PICKUP', label: ({ collecting }) => `${agentNounTitle(collecting)} arrived`, at: STATUS.ASSIGNED },
   { key: 'PICKED_UP', label: () => 'Parcel picked up', at: STATUS.PICKED_UP },
-  { key: 'DISPATCHED', label: () => 'Parcel dispatched', at: STATUS.IN_TRANSIT },
-  { key: 'IN_TRANSIT', label: () => 'In transit', at: STATUS.IN_TRANSIT },
+  {
+    key: 'DISPATCHED',
+    label: ({ transport }) => handoffMeta(transport)?.loadedLabel || 'Parcel dispatched',
+    at: STATUS.IN_TRANSIT
+  },
+  {
+    key: 'IN_TRANSIT',
+    label: ({ transport }) => handoffMeta(transport)?.transitLabel || 'In transit',
+    at: STATUS.IN_TRANSIT
+  },
   { key: 'ARRIVING', label: () => 'Arriving', at: STATUS.IN_TRANSIT },
   { key: 'DELIVERED', label: () => 'Delivered', at: STATUS.DELIVERED }
 ];
@@ -230,7 +241,8 @@ export function agentHasArrived(order, now = Date.now()) {
  */
 export function journeyStages(order, now = Date.now()) {
   const status = order?.status;
-  const mode = collectingMode(order);
+  // Two modes, not one: who is at the door, and what the parcel travels on afterwards.
+  const modes = { collecting: collectingMode(order), transport: transportOf(order) };
   const current = stepIndex(status);
   const progress = progressFor(order, now);
   const arriving = progress >= ARRIVING_AT;
@@ -253,7 +265,7 @@ export function journeyStages(order, now = Date.now()) {
       else state = arriving ? 'current' : 'todo';
     }
 
-    return { ...stage, label: stage.label(mode), state };
+    return { ...stage, label: stage.label(modes), state };
   });
 }
 
