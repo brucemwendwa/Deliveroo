@@ -2,7 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- viewport-fit=cover is what makes env(safe-area-inset-*) resolve to anything
+         other than zero. The bottom navigation, the booking quote bar and the mobile
+         sheets all pad themselves with it, and without this they sit under the home
+         indicator on a notched phone. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Send it — Door to door, any mode, tracked live</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
