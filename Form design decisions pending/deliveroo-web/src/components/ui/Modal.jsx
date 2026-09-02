@@ -15,7 +15,13 @@ export default function Modal({
   children,
   maxWidth = '460px',
   /** 'sheet' docks the panel to the bottom edge — the phone-native shape (§23). */
-  placement = 'center'
+  placement = 'center',
+  /**
+   * Drops the panel's own padding and clips its corners, so a dialog can lay out
+   * full-bleed columns of its own (§12 auth). Everything else — the trap, Escape,
+   * focus restore — is unchanged.
+   */
+  bleed = false
 }) {
   const sheet = placement === 'sheet';
   const panelRef = useRef(null);
@@ -111,9 +117,12 @@ export default function Modal({
           overflowY: 'auto',
           background: color.paper,
           borderRadius: sheet ? '26px 26px 0 0' : radius.card,
-          padding: sheet
-            ? `26px ${layout.gutter} calc(26px + env(safe-area-inset-bottom,0px))`
-            : 'clamp(24px,3.5vw,38px)',
+          overflowX: bleed ? 'hidden' : undefined,
+          padding: bleed
+            ? 0
+            : sheet
+              ? `26px ${layout.gutter} calc(26px + env(safe-area-inset-bottom,0px))`
+              : 'clamp(24px,3.5vw,38px)',
           boxShadow: '0 50px 90px -40px rgba(15,26,23,.75)',
           animation: sheet ? `sheetUp .32s ${ease.out} both` : `riseIn .3s ${ease.out} both`
         }}
@@ -130,7 +139,9 @@ export default function Modal({
             height: '44px',
             borderRadius: radius.pill,
             border: 'none',
-            background: 'transparent',
+            background: bleed ? 'rgba(250,250,248,.9)' : 'transparent',
+            boxShadow: bleed ? '0 6px 18px -10px rgba(15,26,23,.5)' : 'none',
+            zIndex: 2,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
