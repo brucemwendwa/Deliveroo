@@ -1,5 +1,5 @@
 /**
- * §20 — the four social marks, drawn here for the same reason TransportGlyph draws
+ * §20 — the five social marks, drawn here for the same reason TransportGlyph draws
  * the quadcopter: Material Symbols carries no brand logos, so an <Icon name="instagram">
  * would render the literal word. Paths are the official marks on their own viewBox,
  * normalised to one square and filled with currentColor so the button's hover state
@@ -34,6 +34,13 @@ const MARKS = {
     viewBox: '0 0 448 512',
     render: (
       <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z" />
+    )
+  },
+  tiktok: {
+    label: 'TikTok',
+    viewBox: '0 0 448 512',
+    render: (
+      <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z" />
     )
   },
   x: {
