@@ -1,3 +1,12 @@
+/* The page gutter, as a custom property so the stylesheet and theme.js state it once
+   each rather than three times each. Keep this in step with `layout.gutter` in
+   src/theme.js — the inline styles read it from there, these rules read it from here.
+   The safe-area terms hold content clear of a notch on a handset held sideways, and
+   resolve to 0 on everything else. */
+:root {
+  --gutter: max(clamp(20px, 4vw, 56px), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+}
+
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
@@ -144,3 +153,86 @@ button { font-family: inherit; }
 /* The button spinner. Its own name so the reduced-motion block above can flatten it
    without the button losing the word beside it. */
 @keyframes authSpin { to { transform: rotate(360deg); } }
+
+/* §2 — the hero, mobile first.
+   The photograph is one composite frame, 1503×1046, with five vehicles spread right
+   across it. Stretched over a portrait fold with object-fit:cover it was scaled to
+   the height of the screen and then cropped to its width — about a third of the
+   picture on a phone, which threw away most of what the picture is of.
+   So below the breakpoint it gets a band of its own at exactly the file's aspect
+   ratio: cover on a box of the same shape crops nothing, and the whole frame is
+   visible. The words move underneath it, onto the dark ground the section already
+   carries, rather than sitting over a picture that no longer has room for them. */
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #1A1C1F;
+}
+.hero-photo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1503 / 1046;
+}
+/* The wash under the fixed nav, so the wordmark and strapline keep a dark ground
+   whatever the sky does behind them. Shorter here than on the desktop fold, where
+   190px would be most of the picture. */
+.hero-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 118px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(15,26,23,.62) 0%, rgba(15,26,23,.34) 45%, rgba(15,26,23,0) 100%);
+}
+.hero-copy {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(26px,5vw,40px) var(--gutter) clamp(34px,6vw,56px);
+}
+.hero-words {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The full-bleed fold: the photograph behind everything, filling the viewport, the
+   copy centred over it and the CTA on the bottom edge.
+
+   The condition is width OR shape, because it is the shape that actually breaks. A
+   landscape frame cropped to a portrait screen loses its width — the axis the five
+   vehicles are spread along — and that is the case the stacked band above exists for.
+   A viewport at least as wide as it is tall loses a little sky and tarmac instead,
+   which the picture can spare, so a handset held sideways gets the fold rather than a
+   band it would have to scroll past. Portrait under 980px is the only combination
+   left, and it is exactly the one that was cropping two thirds of the picture away.
+
+   dvh rather than vh so a phone in this range measures the visible viewport instead
+   of running under the browser chrome; the floor keeps the copy from crushing on a
+   short landscape screen. */
+@media (min-width: 980px), (min-aspect-ratio: 1 / 1) {
+  .hero { min-height: max(100dvh, 560px); }
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+  .hero-scrim { height: 190px; }
+  .hero-copy {
+    flex: 1;
+    padding: calc(80px + clamp(18px,4vh,40px)) var(--gutter) clamp(28px,5vh,56px);
+  }
+  .hero-words { flex: 1; justify-content: center; }
+}
