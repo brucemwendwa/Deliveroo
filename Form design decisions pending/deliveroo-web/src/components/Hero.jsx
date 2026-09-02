@@ -15,12 +15,17 @@ const KNOB = 'clamp(50px,5.4vw,62px)';
  * `focus` is the object-position for the wide desktop crop, `focusNarrow` the one used
  * under the 980px breakpoint — a phone crops the frame horizontally instead of
  * vertically, and leans toward the road so the rider and truck survive it.
+ *
+ * Both anchors sit above centre so the crop keeps the top of the frame: that drops
+ * the whole picture — the aircraft above all — clear of the wordmark and strapline
+ * the fixed nav puts in the top-left corner, where the white fuselage was swallowing
+ * them. The road, rider and truck still clear the bottom edge at this crop.
  */
 export const HERO_PHOTO = {
   src: '/photos/hero-global-network.jpeg',
   alt: 'Cargo aircraft, delivery drone, container ship, motorbike courier and freight truck under one sunset, over a world map',
-  focus: '50% 50%',
-  focusNarrow: '58% 50%'
+  focus: '50% 22%',
+  focusNarrow: '58% 26%'
 };
 
 /**
@@ -152,9 +157,10 @@ export default function Hero() {
       }}
     >
       {/*
-        Full bleed stage. One photograph, drawn untouched behind everything: no scrim,
-        no filter, no scale, so it renders exactly as supplied. The copy carries its
-        own shadow.
+        Full bleed stage. One photograph, drawn behind everything at its own colours:
+        no filter, no scale, so it renders as supplied. The copy carries its own
+        shadow, and the only wash over the picture is the short one at the very top,
+        below — the nav band, not the hero copy.
       */}
       <img
         src={HERO_PHOTO.src}
@@ -171,6 +177,26 @@ export default function Hero() {
           height: '100%',
           objectFit: 'cover',
           objectPosition: narrow ? HERO_PHOTO.focusNarrow : HERO_PHOTO.focus
+        }}
+      />
+
+      {/*
+        The nav band only. The crop above moves the aircraft down the frame, and this
+        carries the last of it: a short wash under the fixed nav's 80px so the wordmark
+        and the strapline keep a dark ground whatever the sky does behind them. It ends
+        well above the headline, which is still read straight off the photograph.
+      */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 2,
+          height: '190px',
+          pointerEvents: 'none',
+          background: 'linear-gradient(180deg, rgba(15,26,23,.62) 0%, rgba(15,26,23,.34) 45%, rgba(15,26,23,0) 100%)'
         }}
       />
 
