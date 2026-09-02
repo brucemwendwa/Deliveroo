@@ -28,11 +28,21 @@ const initialState = {
   user: null,
   /** 'identify' → collect email/phone, 'verify' → collect the code */
   stage: 'identify',
+  /**
+   * 'signin' or 'signup'. The exchange is identical either way — this is a
+   * passwordless system, so an account is created by the first successful verify —
+   * but the two intents want different copy and 'signup' also collects a name, which
+   * verifyOtp accepts and stores on the account.
+   */
+  mode: 'signin',
   identifier: '',
+  name: '',
   channel: 'email',
   status: 'idle',
   error: null,
-  hint: null
+  hint: null,
+  /** When the last code went out, so the UI can hold the resend for a moment. */
+  codeSentAt: null
 };
 
 const authSlice = createSlice({
@@ -41,6 +51,16 @@ const authSlice = createSlice({
   reducers: {
     setChannel(state, action) {
       state.channel = action.payload;
+      state.error = null;
+    },
+    setMode(state, action) {
+      state.mode = action.payload;
+      state.stage = 'identify';
+      state.error = null;
+      state.hint = null;
+    },
+    setName(state, action) {
+      state.name = action.payload;
       state.error = null;
     },
     setIdentifier(state, action) {
@@ -56,6 +76,7 @@ const authSlice = createSlice({
       state.status = 'idle';
       state.error = null;
       state.hint = null;
+      state.codeSentAt = null;
     }
   },
   extraReducers: (builder) => {
@@ -71,6 +92,7 @@ const authSlice = createSlice({
         state.status = 'idle';
         state.stage = 'verify';
         state.hint = action.payload?.hint || null;
+        state.codeSentAt = Date.now();
       })
       .addCase(requestOtp.rejected, (state, action) => {
         state.status = 'idle';
@@ -85,6 +107,8 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.stage = 'identify';
         state.hint = null;
+        state.name = '';
+        state.codeSentAt = null;
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.status = 'idle';
@@ -96,7 +120,7 @@ const authSlice = createSlice({
   }
 });
 
-export const { setChannel, setIdentifier, backToIdentify, resetAuthFlow } = authSlice.actions;
+export const { setChannel, setMode, setName, setIdentifier, backToIdentify, resetAuthFlow } = authSlice.actions;
 
 export const selectUser = (state) => state.auth.user;
 export const selectIsSignedIn = (state) => Boolean(state.auth.user);
