@@ -1,7 +1,8 @@
 import { STATUS, STATUS_LABEL } from '../../lib/orderStatus';
-import { DEFAULT_MODE, TRANSPORT, agentNounTitle } from '../../lib/transport';
+import { DEFAULT_MODE, TRANSPORT, agentNoun, agentNounTitle } from '../../lib/transport';
 import { color, font, radius, statusTone } from '../../theme';
 import Icon from '../Icon';
+import HandoffNote from './HandoffNote';
 import TransportGlyph from '../transport/TransportGlyph';
 
 /**
@@ -13,8 +14,10 @@ import TransportGlyph from '../transport/TransportGlyph';
  * The card names them by the vehicle turning up: the bike's mark on the avatar and
  * "Rider heading to pickup" when a bike is coming, "Driver heading to pickup" when a
  * van is — including on an air or sea booking, where a road courier does the collecting
- * whatever the parcel travels on afterwards. `arrived` splits ASSIGNED into on-the-way
- * and waiting-at-the-door — see agentHasArrived in orderStatus.
+ * whatever the parcel travels on afterwards. On those bookings the card also carries the
+ * hand-over note, so a rider turning up for a flight is explained where it is read rather
+ * than left to look like the wrong vehicle. `arrived` splits ASSIGNED into on-the-way and
+ * waiting-at-the-door — see agentHasArrived in orderStatus.
  */
 export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arrived = false, tone = 'dark' }) {
   if (!courier) return null;
@@ -30,6 +33,9 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
     status === STATUS.ASSIGNED
       ? `${agentNounTitle(vehicleMode || mode)} ${arrived ? 'arrived at pickup' : 'heading to pickup'}`
       : STATUS_LABEL[status] || status;
+  // The hand-over is only worth explaining while it is still ahead of the parcel: once
+  // it has been collected the road leg is history and the freight leg speaks for itself.
+  const beforeCollection = status === STATUS.PENDING || status === STATUS.ASSIGNED;
 
   const surface = onDark
     ? { background: 'rgba(243,243,241,.06)', border: '1px solid rgba(243,243,241,.1)' }
@@ -184,6 +190,8 @@ export default function CourierCard({ courier, status, mode = DEFAULT_MODE, arri
           </span>
         )}
       </div>
+
+      {beforeCollection && <HandoffNote mode={mode} noun={agentNoun(vehicleMode || mode)} tone={tone} />}
     </div>
   );
 }
