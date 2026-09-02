@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCtaHover } from '../store/uiSlice';
 import useStartBooking, { BOOKING_PATH } from '../hooks/useStartBooking';
-import { color, ease, font, layout } from '../theme';
+import { color, ease, font } from '../theme';
 import Icon from './Icon';
 
 const KNOB = 'clamp(50px,5.4vw,62px)';
@@ -12,18 +12,23 @@ const KNOB = 'clamp(50px,5.4vw,62px)';
  * sea, road and the rider — under the same sunset. It is the whole stage. There is no
  * carousel: the picture does not change and neither does the copy over it.
  *
- * `focus` is the object-position for the wide desktop crop, `focusNarrow` the one used
- * under the 980px breakpoint — a phone crops the frame horizontally instead of
- * vertically, and leans toward the road so the rider and truck survive it.
+ * `width`/`height` are the file's real pixel dimensions. They are here rather than
+ * hard-coded in the markup because the stylesheet needs the same ratio: below the
+ * breakpoint the picture is given a box of exactly this shape, which is what stops it
+ * being cropped (see `.hero-photo` in global.css). They also reserve the space before
+ * the file arrives, so the copy underneath does not jump when it does.
  *
- * Both anchors sit above centre so the crop keeps the top of the frame: that drops
- * the whole picture — the aircraft above all — clear of the wordmark and strapline
- * the fixed nav puts in the top-left corner, where the white fuselage was swallowing
- * them. The road, rider and truck still clear the bottom edge at this crop.
+ * `focus` is the object-position for the wide desktop crop, `focusNarrow` the one used
+ * under the 980px breakpoint. Both anchors sit above centre so the crop keeps the top
+ * of the frame: that drops the whole picture — the aircraft above all — clear of the
+ * wordmark and strapline the fixed nav puts in the top-left corner, where the white
+ * fuselage was swallowing them.
  */
 export const HERO_PHOTO = {
   src: '/photos/hero-global-network.jpeg',
   alt: 'Cargo aircraft, delivery drone, container ship, motorbike courier and freight truck under one sunset, over a world map',
+  width: 1503,
+  height: 1046,
   focus: '50% 22%',
   focusNarrow: '58% 26%'
 };
@@ -61,6 +66,11 @@ function RequestCta() {
         alignItems: 'center',
         gap: '14px',
         height: KNOB,
+        // A phone is narrower than the pill's natural width once the label, the knob
+        // and the gaps are added up, so it is allowed to shrink to the column and the
+        // label wraps its padding in rather than pushing the row into a sideways
+        // scroll. On anything wider this never binds.
+        maxWidth: '100%',
         color: color.ink
       }}
     >
@@ -80,6 +90,7 @@ function RequestCta() {
           style={{
             position: 'relative',
             width: KNOB,
+            flex: 'none',
             alignSelf: 'stretch',
             borderRadius: '999px',
             background: color.orange,
@@ -109,8 +120,9 @@ function RequestCta() {
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
+          minWidth: 0,
           height: '100%',
-          padding: '0 clamp(24px,3vw,44px)',
+          padding: '0 clamp(18px,3vw,44px)',
           fontSize: 'clamp(14px,1.15vw,16.5px)',
           fontWeight: 600,
           letterSpacing: '-.01em',
@@ -126,6 +138,7 @@ function RequestCta() {
           alignItems: 'center',
           justifyContent: 'center',
           width: KNOB,
+          flex: 'none',
           height: '100%',
           transform: ctaHover ? 'translateX(11px) rotate(45deg)' : 'none',
           transition: `transform .5s ${ease.spring}`
@@ -137,96 +150,64 @@ function RequestCta() {
   );
 }
 
+/**
+ * The two arrangements this section has, chosen by the stylesheet rather than by
+ * JavaScript so the right one is painted on the first frame:
+ *
+ * - A portrait screen under 980px: the photograph takes a band of its own at its
+ *   true aspect ratio, so the whole frame is visible, and the words sit underneath
+ *   it on the dark ground. The picture is a composite — five vehicles spread right
+ *   across a landscape frame — and a portrait fold was cropping it to about a third
+ *   of its width, which threw away most of what it is a picture of.
+ * - Everything else, a handset held sideways included: unchanged. The frame is wide
+ *   enough to carry the words, so the photograph goes full bleed behind them and
+ *   fills the fold, giving up a little sky and tarmac instead of its width.
+ *
+ * `narrow` still picks the crop anchor. It is the JS mirror of the same breakpoint,
+ * and it matters on the wide side of it — the stacked band crops nothing, so there is
+ * no position for it to anchor.
+ */
 export default function Hero() {
   const narrow = useSelector((state) => state.ui.narrow);
 
   return (
-    <div
-      id="top"
-      style={{
-        position: 'relative',
-        // Full viewport height: the photograph is the fold, so the band underneath it
-        // never shows as a strip of green below the picture. dvh rather than vh so a
-        // phone measures the visible viewport instead of running under the browser
-        // chrome; the floor keeps the copy from crushing on a short landscape screen.
-        minHeight: 'max(100dvh,560px)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        background: color.greenDeep
-      }}
-    >
+    <div id="top" className="hero">
       {/*
-        Full bleed stage. One photograph, drawn behind everything at its own colours:
-        no filter, no scale, so it renders as supplied. The copy carries its own
-        shadow, and the only wash over the picture is the short one at the very top,
-        below — the nav band, not the hero copy.
+        Full bleed stage. One photograph, drawn at its own colours: no filter, no
+        scale, so it renders as supplied. The copy carries its own shadow, and the
+        only wash over the picture is the short one at the very top, below — the nav
+        band, not the hero copy.
       */}
       <img
+        className="hero-photo"
         src={HERO_PHOTO.src}
         alt={HERO_PHOTO.alt}
+        width={HERO_PHOTO.width}
+        height={HERO_PHOTO.height}
         // Above the fold, and the only thing behind the headline: never lazy.
         loading="eager"
         decoding="async"
         fetchpriority="high"
         style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1,
-          width: '100%',
-          height: '100%',
           objectFit: 'cover',
           objectPosition: narrow ? HERO_PHOTO.focusNarrow : HERO_PHOTO.focus
         }}
       />
 
       {/*
-        The nav band only. The crop above moves the aircraft down the frame, and this
-        carries the last of it: a short wash under the fixed nav's 80px so the wordmark
-        and the strapline keep a dark ground whatever the sky does behind them. It ends
-        well above the headline, which is still read straight off the photograph.
+        The nav band only: a short wash under the fixed nav's 80px so the wordmark and
+        the strapline keep a dark ground whatever the sky does behind them. It ends
+        well above the headline, which is still read straight off the photograph on a
+        desktop and off the dark ground beneath it on a phone.
       */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 2,
-          height: '190px',
-          pointerEvents: 'none',
-          background: 'linear-gradient(180deg, rgba(15,26,23,.62) 0%, rgba(15,26,23,.34) 45%, rgba(15,26,23,0) 100%)'
-        }}
-      />
+      <div aria-hidden="true" className="hero-scrim" />
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 5,
-          flex: 1,
-          width: '100%',
-          maxWidth: layout.maxWidth,
-          margin: '0 auto',
-          padding: `calc(80px + clamp(18px,4vh,40px)) ${layout.gutter} clamp(28px,5vh,56px)`,
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-      >
+      <div className="hero-copy">
         {/*
           The copy takes every row the CTA leaves, which parks the CTA on the bottom
-          padding edge without the words having to move with it. On a phone the
-          subjects sit across the middle of the crop, so the copy drops to the foot of
-          that space rather than landing on top of them.
+          padding edge without the words having to move with it.
         */}
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: narrow ? 'flex-end' : 'center'
-          }}
-        >
+        <div className="hero-words">
           <div
             style={{
               width: '100%',
