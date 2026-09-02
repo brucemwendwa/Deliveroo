@@ -39,7 +39,7 @@ export const NAV_MENUS = [
     label: 'Contact',
     items: [
       { label: 'Call +254 700 000 000', href: 'tel:+254700000000' },
-      { label: 'Email hello@deliveroo.co', href: 'mailto:hello@deliveroo.co' },
+      { label: 'Email hello@sendit.co', href: 'mailto:hello@sendit.co' },
       { label: 'Where to find us', to: '/#footer' }
     ]
   }
