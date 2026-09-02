@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import useHover from '../hooks/useHover';
 import useStartBooking, { BOOKING_PATH } from '../hooks/useStartBooking';
 import { TRANSPORT } from '../lib/transport';
-import { color, ease, eyebrow, font, layout, radius, shadow } from '../theme';
+import { color, ease, eyebrow, font, layout, radius } from '../theme';
 import Icon from './Icon';
 import TransportGlyph from './transport/TransportGlyph';
 
@@ -95,7 +95,6 @@ function ServiceCard({ service, delay }) {
         // to stop clear of it rather than under it.
         scrollMarginTop: '104px',
         background: color.card,
-        boxShadow: shadow.card,
         color: color.ink,
         boxShadow: hovered ? liftShadow : restShadow,
         transform: hovered ? 'translateY(-6px)' : 'none',
