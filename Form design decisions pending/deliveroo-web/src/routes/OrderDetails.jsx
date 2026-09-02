@@ -252,7 +252,7 @@ export default function OrderDetails() {
             height="clamp(280px,38vw,420px)"
           />
 
-          {order.courier && <CourierCard courier={order.courier} status={order.status} tone="light" />}
+          {order.courier && <CourierCard courier={order.courier} status={order.status} mode={mode} tone="light" />}
 
           <div>
             <div style={{ ...eyebrow, marginBottom: '18px' }}>Progress</div>
