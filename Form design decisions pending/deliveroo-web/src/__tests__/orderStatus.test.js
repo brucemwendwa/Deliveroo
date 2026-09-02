@@ -123,6 +123,27 @@ describe('journey stages', () => {
     expect(labelOf({ status: STATUS.ASSIGNED, transport: { mode: 'AIR' } }, 'ASSIGNED')).toBe('Pickup agent assigned');
   });
 
+  it('names the freight leg on the transit rows, so an air order stops reading like a bike run', () => {
+    const labelsOf = (order) => journeyStages(order, NOW).map((stage) => stage.label);
+
+    const flight = { status: STATUS.ASSIGNED, transport: { mode: 'AIR' }, courier: { vehicleMode: 'MOTORBIKE' } };
+    expect(labelsOf(flight)).toEqual([
+      'Delivery requested',
+      'Rider assigned',
+      'Rider arrived',
+      'Parcel picked up',
+      'Loaded onto the flight',
+      'In the air',
+      'Arriving',
+      'Delivered'
+    ]);
+
+    expect(labelsOf({ status: STATUS.ASSIGNED, transport: { mode: 'SHIP' } })).toContain('At sea');
+    // Road and motorbike are one vehicle throughout and keep the plain wording.
+    expect(labelsOf({ status: STATUS.ASSIGNED })).toContain('Parcel dispatched');
+    expect(labelsOf({ status: STATUS.ASSIGNED })).toContain('In transit');
+  });
+
   it('marks the steps behind the current one done, and the rest to come', () => {
     const order = { status: STATUS.PICKED_UP };
     expect(stageState(order, 'REQUESTED')).toBe('done');
