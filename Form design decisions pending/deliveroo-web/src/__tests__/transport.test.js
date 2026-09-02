@@ -6,6 +6,8 @@ import {
   chargeableWeightKg,
   defaultModeFor,
   estimateDurationSeconds,
+  handoffNote,
+  handoffNoteFor,
   modeAvailability,
   quoteTransport,
   transportOptions,
@@ -245,5 +247,31 @@ describe('parcel measurements', () => {
   it('treats missing dimensions as no volumetric charge at all', () => {
     expect(volumetricWeightKg({})).toBe(0);
     expect(chargeableWeightKg({ weightKg: 3 })).toBe(3);
+  });
+});
+
+// §25 — a plane cannot come to the door, so a road courier collects the parcel first.
+// The customer booked "Air" and is shown a rider on a bike; the app has to say why.
+describe('the hand-over (§25)', () => {
+  it('explains the road leg on every mode that has one', () => {
+    expect(handoffNote(TRANSPORT.AIR, 'rider')).toBe(
+      'Your rider runs the road leg: they collect the parcel and take it to the air cargo terminal, where air freight takes over.'
+    );
+    expect(handoffNote(TRANSPORT.SHIP, 'driver')).toContain('the port');
+    expect(handoffNote(TRANSPORT.DRONE)).toContain('the drone pad');
+  });
+
+  it('has nothing to explain when one vehicle carries the parcel door to door', () => {
+    expect(handoffNote(TRANSPORT.ROAD)).toBeNull();
+    expect(handoffNote(TRANSPORT.MOTORBIKE)).toBeNull();
+  });
+
+  it('names the agent who is actually collecting, not the freight leg', () => {
+    const flight = { transport: { mode: TRANSPORT.AIR }, courier: { vehicleMode: TRANSPORT.MOTORBIKE } };
+    expect(handoffNoteFor(flight)).toMatch(/^Your rider runs the road leg/);
+
+    // Before anyone is matched there is no vehicle to name, so it stays neutral.
+    expect(handoffNoteFor({ transport: { mode: TRANSPORT.AIR } })).toMatch(/^Your pickup agent/);
+    expect(handoffNoteFor({ transport: { mode: TRANSPORT.MOTORBIKE } })).toBeNull();
   });
 });
