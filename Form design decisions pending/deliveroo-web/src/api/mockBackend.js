@@ -207,7 +207,7 @@ export const DEFAULT_SETTINGS = {
   acceptingOrders: true,
   /** A line every member of staff sees at the top of the portal. */
   noticeToStaff: '',
-  supportEmail: 'support@deliveroo.co',
+  supportEmail: 'support@sendit.co',
   supportPhone: '+254 700 000 000'
 };
 
