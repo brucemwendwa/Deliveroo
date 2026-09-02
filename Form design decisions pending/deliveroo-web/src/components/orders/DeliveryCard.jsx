@@ -3,7 +3,7 @@ import useHover from '../../hooks/useHover';
 import { isTerminal } from '../../lib/orderStatus';
 import { formatKes, formatKm, isWeightVerified } from '../../lib/pricing';
 import { priorityOf, transportOf } from '../../lib/transport';
-import { color, ease, font, radius, shadow } from '../../theme';
+import { color, ease, font, radius } from '../../theme';
 import Icon from '../Icon';
 import TransportBadge from '../transport/TransportBadge';
 import StatusPill from './StatusPill';
@@ -31,7 +31,6 @@ export default function DeliveryCard({ order, actions }) {
         borderRadius: radius.card,
         border: `1px solid ${hovered ? 'rgba(28,32,31,.28)' : 'rgba(28,32,31,.1)'}`,
         background: color.card,
-        boxShadow: shadow.card,
         boxShadow: hovered ? '0 22px 40px -32px rgba(28,32,31,.55)' : 'none',
         transform: hovered ? 'translateY(-2px)' : 'none',
         transition: `transform .22s ${ease.out}, box-shadow .22s, border-color .2s`
