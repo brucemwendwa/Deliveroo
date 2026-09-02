@@ -124,6 +124,9 @@ export const TRANSPORT_MODES = [
     speedKmh: 700,
     handlingSeconds: 95 * 60,
     agentNoun: 'pickup agent',
+    // A plane cannot come to the door, so the parcel is collected by road and handed
+    // over — see handoff() below for what the customer is told about that leg.
+    handoff: { point: 'the air cargo terminal', loadedLabel: 'Loaded onto the flight', transitLabel: 'In the air' },
     capacity: { units: 12, offline: 2 },
     limits: { minDistanceKm: 120, maxWeightKg: 250 }
   },
@@ -139,6 +142,7 @@ export const TRANSPORT_MODES = [
     speedKmh: 32,
     handlingSeconds: 10 * 3600,
     agentNoun: 'pickup agent',
+    handoff: { point: 'the port', loadedLabel: 'Loaded onto the ship', transitLabel: 'At sea' },
     capacity: { units: 8, offline: 1 },
     limits: { minDistanceKm: 200, requiresPort: true }
   },
@@ -154,6 +158,7 @@ export const TRANSPORT_MODES = [
     speedKmh: 48,
     handlingSeconds: 8 * 60,
     agentNoun: 'pickup agent',
+    handoff: { point: 'the drone pad', loadedLabel: 'Handed to the drone', transitLabel: 'In the air' },
     capacity: { units: 14, offline: 3 },
     limits: { maxDistanceKm: 30, maxWeightKg: 5, maxLongestSideCm: 45 }
   }
@@ -201,6 +206,36 @@ export const agentNounFor = (order) => agentNoun(collectingMode(order));
 /** Mode of an order, defaulting to road — orders placed before §25 have no mode. */
 export const transportOf = (order) => order?.transport?.mode || DEFAULT_MODE;
 export const priorityOf = (order) => order?.transport?.priority || DEFAULT_PRIORITY;
+
+/**
+ * The hand-over, for the modes that have one.
+ *
+ * A bike or a van is one vehicle door to door: whoever collects the parcel is still
+ * carrying it when it arrives. A plane, a ship and a drone are not — they cannot come
+ * to the door, so a road courier collects the parcel and hands it over further up the
+ * chain. That is why a customer who booked a flight is shown a rider on a bike, and
+ * the reason has to be *on the screen*: an order badged "Air" whose next line reads
+ * "Rider assigned" is, without this, simply a contradiction.
+ */
+export const handoffMeta = (mode) => modeMeta(mode).handoff || null;
+
+/** The hand-over on this order, or null when the collecting agent carries it all the way. */
+export const handoffFor = (order) => handoffMeta(transportOf(order));
+
+/**
+ * The sentence the tracking screens print under the agent: who is at the door, where
+ * they are taking the parcel and what carries it after that. Written here so the
+ * confirmation, the live tracking and the order page cannot explain it three ways.
+ */
+export function handoffNote(mode, noun) {
+  const meta = modeMeta(mode);
+  if (!meta.handoff) return null;
+  const who = noun || agentNoun(mode);
+  return `Your ${who} runs the road leg: they collect the parcel and take it to ${meta.handoff.point}, where ${meta.freightLabel.toLowerCase()} takes over.`;
+}
+
+/** The same sentence for one order, named after whoever is actually collecting it. */
+export const handoffNoteFor = (order) => handoffNote(transportOf(order), agentNounFor(order));
 
 // ---------------------------------------------------------------------------
 // Fleet availability (§26). The admin console can take a mode offline; booking then
