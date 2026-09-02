@@ -174,6 +174,22 @@ describe('mock backend', () => {
       }
     });
 
+    it('will not send a bike for a parcel a bike cannot carry', async () => {
+      // §25 — a 140 kg shipment waiting for the Mombasa sailing still has to be
+      // collected by road, but not on a TVS. Run it enough times to catch a random
+      // pick that reaches into the rider pool.
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        const order = await createOrder({
+          ...draft,
+          parcel: { weightKg: 140, description: 'Machine parts' },
+          route: { distanceKm: 485, durationSeconds: 26_000, coordinates: [], estimated: false },
+          transport: { mode: TRANSPORT.SHIP }
+        });
+        const { courier } = await assignAgent(order.id);
+        expect(courier.vehicleMode).toBe(TRANSPORT.ROAD);
+      }
+    });
+
     it('prices and stores a motorbike delivery as one', async () => {
       const order = await createOrder({ ...draft, transport: { mode: TRANSPORT.MOTORBIKE } });
 
