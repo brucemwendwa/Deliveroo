@@ -10,7 +10,16 @@
 
 import { MAX_WEIGHT_KG, priceOrder } from '../lib/pricing';
 import { STATUS, allowedTransitions, canVerifyWeight, isTerminal, weightLockedReason } from '../lib/orderStatus';
-import { DEFAULT_FLEET, DEFAULT_MODE, DEFAULT_PRIORITY, FLEET_STATUS, TRANSPORT } from '../lib/transport';
+import {
+  DEFAULT_FLEET,
+  DEFAULT_MODE,
+  DEFAULT_PRIORITY,
+  FLEET_STATUS,
+  TRANSPORT,
+  chargeableWeightKg,
+  longestSideCm,
+  modeMeta
+} from '../lib/transport';
 import { clearOutbox, notify, outbox } from '../lib/notifications';
 import { PERMISSION, ROLE, can, isStaffRole } from '../lib/roles';
 
@@ -51,17 +60,32 @@ const rosteredCouriers = () => {
   return COURIERS.map((courier) => ({ ...courier, onShift: roster[courier.id]?.onShift !== false }));
 };
 
+/** Whether a bike could physically take this parcel — the bike's own limits, not a guess. */
+function fitsOnABike(parcel) {
+  const { limits } = modeMeta(TRANSPORT.MOTORBIKE);
+  const weight = chargeableWeightKg(parcel || {}, parcel?.verifiedWeightKg);
+  return weight <= limits.maxWeightKg && longestSideCm(parcel || {}) <= limits.maxLongestSideCm;
+}
+
 /**
- * Who can be sent for this parcel — riders only when the bike carries it all the way,
- * and only people who are actually on shift. Dispatch taking a courier off the roster
- * has to mean something, or the roster is decoration.
+ * Who can be sent for this parcel — and only people who are actually on shift, because
+ * dispatch taking a courier off the roster has to mean something or the roster is
+ * decoration.
+ *
+ * Two rules beyond that, both about not sending a vehicle that cannot do the job. A
+ * motorbike delivery is carried the whole way by whoever collects it, so it has to be
+ * a rider. And no parcel outside the bike's own weight and size limits goes to a rider
+ * on any mode: a 140 kg shipment waiting for the Mombasa sailing needs a van at the
+ * door, whatever carries it after that.
  */
-const eligibleCouriers = (mode) => {
+const eligibleCouriers = (mode, parcel) => {
   const pool = rosteredCouriers().filter((courier) => courier.onShift);
   const eligible =
     mode === TRANSPORT.MOTORBIKE
       ? pool.filter((courier) => courier.vehicleMode === TRANSPORT.MOTORBIKE)
-      : pool;
+      : fitsOnABike(parcel)
+        ? pool
+        : pool.filter((courier) => courier.vehicleMode !== TRANSPORT.MOTORBIKE);
   // Nobody on shift is a real state, but it must not leave an order un-assignable in
   // a prototype whose whole point is being clickable, so the catalogue is the floor.
   return eligible.length ? eligible : COURIERS;
@@ -73,7 +97,7 @@ const eligibleCouriers = (mode) => {
  * screen prints. A real backend would match on actual courier positions.
  */
 function makeAgent(order) {
-  const pool = eligibleCouriers(order.transport?.mode || DEFAULT_MODE);
+  const pool = eligibleCouriers(order.transport?.mode || DEFAULT_MODE, order.parcel);
   const picked = pool[Math.floor(Math.random() * pool.length)];
   const distanceKm = Math.round((0.6 + Math.random() * 3.4) * 10) / 10;
   const bearing = Math.random() * 2 * Math.PI;
@@ -842,7 +866,7 @@ export function seedIfEmpty() {
       courier: assigned
         ? {
             ...(() => {
-              const pool = eligibleCouriers(row.mode);
+              const pool = eligibleCouriers(row.mode, parcel);
               return pool[index % pool.length];
             })(),
             lat: moving ? (pickup.lat + destination.lat) / 2 : pickup.lat,
