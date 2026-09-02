@@ -85,8 +85,8 @@ export default function SiteFooter({ brand = 'Send it' }) {
               <HoverLink href="tel:+254700000000" style={footLink} hoverStyle={hover.foot}>
                 +254 700 000 000
               </HoverLink>
-              <HoverLink href="mailto:hello@deliveroo.co" style={footLink} hoverStyle={hover.foot}>
-                hello@deliveroo.co
+              <HoverLink href="mailto:hello@sendit.co" style={footLink} hoverStyle={hover.foot}>
+                hello@sendit.co
               </HoverLink>
               <span style={{ fontSize: '14.5px', color: 'rgba(243,243,241,.5)', lineHeight: 1.5 }}>
                 Westlands
