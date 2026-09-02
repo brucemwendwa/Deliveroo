@@ -1,6 +1,7 @@
 import { DEFAULT_MODE, TRANSPORT, agentNoun } from '../../lib/transport';
 import { color, eyebrow, font, radius } from '../../theme';
 import Icon from '../Icon';
+import HandoffNote from './HandoffNote';
 import TransportGlyph from '../transport/TransportGlyph';
 
 /**
@@ -29,67 +30,70 @@ export default function FindingAgent({ pickupLabel, mode = DEFAULT_MODE, tone = 
       role="status"
       aria-live="polite"
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '18px',
         padding: '20px',
         borderRadius: radius.card,
         background: onDark ? 'rgba(243,243,241,.06)' : color.card,
         border: `1px solid ${onDark ? 'rgba(243,243,241,.1)' : 'rgba(28,32,31,.12)'}`
       }}
     >
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'relative',
-          flex: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '54px',
-          height: '54px'
-        }}
-      >
-        {[0, 1, 2].map((ring) => (
-          <span
-            key={ring}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '999px',
-              background: color.orange,
-              animation: `radar 2.4s ${ring * 0.8}s ease-out infinite`
-            }}
-          />
-        ))}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
         <span
+          aria-hidden="true"
           style={{
             position: 'relative',
+            flex: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '38px',
-            height: '38px',
-            borderRadius: '999px',
-            background: color.orange,
-            color: color.ink
+            width: '54px',
+            height: '54px'
           }}
         >
-          {rider ? <TransportGlyph mode={mode} size={22} color={color.ink} /> : <Icon name="person_search" size={21} />}
+          {[0, 1, 2].map((ring) => (
+            <span
+              key={ring}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '999px',
+                background: color.orange,
+                animation: `radar 2.4s ${ring * 0.8}s ease-out infinite`
+              }}
+            />
+          ))}
+          <span
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '38px',
+              height: '38px',
+              borderRadius: '999px',
+              background: color.orange,
+              color: color.ink
+            }}
+          >
+            {rider ? <TransportGlyph mode={mode} size={22} color={color.ink} /> : <Icon name="person_search" size={21} />}
+          </span>
         </span>
-      </span>
 
-      <div style={{ minWidth: 0 }}>
-        <div style={{ ...eyebrow, color: color.orange, marginBottom: '6px' }}>Dispatching</div>
-        <div style={{ fontFamily: font.body, fontSize: '16.5px', fontWeight: 600, letterSpacing: '-.02em', color: strong }}>
-          Finding a {noun} near you…
-        </div>
-        {pickupLabel && (
-          <div style={{ marginTop: '4px', fontSize: '13.5px', lineHeight: 1.5, color: quiet }}>
-            Searching around {pickupLabel}
+        <div style={{ minWidth: 0 }}>
+          <div style={{ ...eyebrow, color: color.orange, marginBottom: '6px' }}>Dispatching</div>
+          <div style={{ fontFamily: font.body, fontSize: '16.5px', fontWeight: 600, letterSpacing: '-.02em', color: strong }}>
+            Finding a {noun} near you…
           </div>
-        )}
+          {pickupLabel && (
+            <div style={{ marginTop: '4px', fontSize: '13.5px', lineHeight: 1.5, color: quiet }}>
+              Searching around {pickupLabel}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Said before the match, not after it: the customer who picked a plane should
+          know a road courier is coming for the parcel before one turns up. */}
+      <HandoffNote mode={mode} tone={tone} />
     </div>
   );
 }
