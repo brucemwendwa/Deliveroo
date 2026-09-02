@@ -60,7 +60,12 @@ export const ease = {
 
 export const layout = {
   maxWidth: '1320px',
-  gutter: 'clamp(20px,4vw,56px)'
+  // The page gutter, held clear of a phone's rounded corners and notch as well. With
+  // viewport-fit=cover set on the viewport meta, a handset held sideways puts the
+  // cutout over one edge of the page; the insets are folded in here rather than at
+  // each of the fifteen call sites, and resolve to 0 everywhere else, so this is the
+  // clamp on every device that does not have one.
+  gutter: 'max(clamp(20px,4vw,56px), env(safe-area-inset-left,0px), env(safe-area-inset-right,0px))'
 };
 
 /**
