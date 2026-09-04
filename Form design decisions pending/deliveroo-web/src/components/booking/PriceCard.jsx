@@ -36,6 +36,15 @@ export default function PriceCard({ quote, route, parcel, mode, priority }) {
     ]
   ].filter(Boolean);
 
+  // Why door to door is not the drive time: every mode pays a handling cost — the
+  // driver reaching you and the handover at the other end, 15 minutes on Road, a
+  // terminal's worth on air and sea. It is scaled by the priority tier exactly as
+  // estimateDurationSeconds scales it, so the figure named here is the one actually
+  // inside the total rather than a rounder-sounding version of it.
+  const handlingSeconds = quote.mode
+    ? modeMeta(quote.mode).handlingSeconds * priorityOption(quote.priority ?? priority).timeFactor
+    : 0;
+
   return (
     <div
       style={{
@@ -66,7 +75,16 @@ export default function PriceCard({ quote, route, parcel, mode, priority }) {
       ))}
 
       <div style={{ ...row, borderTop: `1px solid ${color.border}`, paddingTop: '14px' }}>
-        <span style={{ color: color.muted }}>Estimated delivery time</span>
+        {/* One name for one quantity: the tile above, the tracking screen and the
+            admin console all call this door to door. */}
+        <span style={{ color: color.muted }}>
+          Door to door
+          {hasRoute && handlingSeconds > 0 && (
+            <span style={{ display: 'block', marginTop: '2px', fontSize: '12px' }}>
+              Travel plus {formatDuration(handlingSeconds)} handling
+            </span>
+          )}
+        </span>
         <strong style={{ color: color.ink }}>{hasRoute ? formatDuration(quote.durationSeconds) : '—'}</strong>
       </div>
 
