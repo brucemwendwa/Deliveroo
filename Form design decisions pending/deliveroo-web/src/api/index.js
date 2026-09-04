@@ -101,5 +101,5 @@ export const cancelOrder = (...args) => impl.cancelOrder(...args);
 export const seedIfEmpty = (...args) => impl.seedIfEmpty(...args);
 export const subscribe = (...args) => impl.subscribe(...args);
 
-export { MOCK_OTP, DEFAULT_SETTINGS } from './mockBackend';
+export { MOCK_OTP, DEFAULT_SETTINGS, DEMO_STAFF } from './mockBackend';
 export * from './geo';
