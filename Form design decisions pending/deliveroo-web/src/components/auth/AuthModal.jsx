@@ -14,6 +14,8 @@ import {
   verifyOtp
 } from '../../store/authSlice';
 import { closeAuthModal, selectAuthModal, showToast } from '../../store/uiSlice';
+import { DEMO_STAFF, MOCK_OTP, usingMockBackend } from '../../api';
+import { ROLE_LABEL } from '../../lib/roles';
 import { color, ease, font, radius } from '../../theme';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -328,6 +330,104 @@ export default function AuthModal() {
     </div>
   );
 
+  // §27 — the staff door, and only on the demo backend. The portal, the roles and the
+  // seeded colleagues all exist already; what did not exist was any way to find out
+  // that `admin@deliveroo.co` is how you get in, so signing in with your own address
+  // put you in front of an empty portal with nothing saying why. A real deployment
+  // has a real directory and no business advertising accounts, hence the gate.
+  const staffShortcut =
+    usingMockBackend && !isSignUp ? (
+      <div
+        style={{
+          marginTop: '22px',
+          paddingTop: '20px',
+          borderTop: `1px dashed ${color.border}`
+        }}
+      >
+        <p
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '7px',
+            margin: '0 0 4px',
+            fontSize: '13px',
+            fontWeight: 600,
+            color: color.ink
+          }}
+        >
+          <Icon name="badge" size={16} color={color.orangeDeep} />
+          Staff sign-in
+        </p>
+        <p style={{ margin: '0 0 12px', fontSize: '12.5px', lineHeight: 1.5, color: color.muted }}>
+          The admin portal is staff-only. Pick a demo colleague to fill the form — the code
+          is {MOCK_OTP}.
+        </p>
+        <div style={{ display: 'grid', gap: '8px' }}>
+          {DEMO_STAFF.map((person) => (
+            <button
+              key={person.identifier}
+              type="button"
+              onClick={() => {
+                dispatch(setChannel(person.identifier.includes('@') ? 'email' : 'phone'));
+                dispatch(setIdentifier(person.identifier));
+                setTouched({});
+                identifierRef.current?.focus();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '11px',
+                width: '100%',
+                padding: '11px 14px',
+                borderRadius: radius.card,
+                border: `1px solid ${color.border}`,
+                background: color.card,
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: `border-color .2s ${ease.out}, background .2s ${ease.out}`
+              }}
+            >
+              <span
+                style={{
+                  flex: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: radius.pill,
+                  background: 'rgba(248,135,53,.14)',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  color: color.orangeDeep
+                }}
+              >
+                {person.name.charAt(0)}
+              </span>
+              <span style={{ display: 'block', minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: '13.5px', fontWeight: 600, color: color.ink }}>
+                  {person.name} · {ROLE_LABEL[person.role]}
+                </span>
+                <span
+                  style={{
+                    display: 'block',
+                    marginTop: '1px',
+                    fontSize: '12.5px',
+                    color: color.muted,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {person.identifier}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    ) : null;
+
   const identifyPanel = (
     <form onSubmit={submitIdentify} noValidate>
       {banner}
@@ -423,6 +523,8 @@ export default function AuthModal() {
           {busy ? submitting : `Continue with ${isEmail ? 'email' : 'phone'}`}
         </Button>
       </div>
+
+      {staffShortcut}
 
       <p style={switchLineStyle}>
         {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
