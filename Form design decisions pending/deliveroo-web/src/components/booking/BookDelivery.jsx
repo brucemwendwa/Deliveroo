@@ -661,12 +661,18 @@ export default function BookDelivery() {
               <div style={{ display: 'flex', gap: '12px' }}>
                 {[
                   { label: 'Distance', value: formatKm(route.distanceKm) },
-                  // Before a mode is chosen this is the drive time the router measured;
-                  // after, it is that mode's door-to-door estimate, which is the figure
-                  // the customer is actually promised.
+                  // Two different quantities, so they get two different names. Before a
+                  // mode is chosen this is the router's driving time for the line on the
+                  // map — a property of the route, like the distance beside it. After, it
+                  // is that mode's door-to-door estimate, which is the figure the customer
+                  // is actually promised and the one the quote prints.
+                  //
+                  // Calling the first one "estimated time" put 3 min next to the quote's
+                  // 18 min with nothing to say why they differed: door to door also pays
+                  // for handling — 15 minutes on Road — which the drive time never sees.
                   selectedMeta
                     ? { label: 'Door to door', value: formatDuration(quote.durationSeconds) }
-                    : { label: 'Estimated time', value: formatDuration(route.durationSeconds) }
+                    : { label: 'Drive time', value: formatDuration(route.durationSeconds) }
                 ].map((stat) => (
                   <div
                     key={stat.label}
