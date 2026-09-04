@@ -697,7 +697,7 @@ export async function cancelOrder(id) {
  * be about on a fresh browser. Everyone here signs in the ordinary way (any code is
  * `000000`); seeding only decides what they already are when they arrive.
  */
-const DEMO_PEOPLE = [
+export const DEMO_PEOPLE = [
   { identifier: 'admin@deliveroo.co', name: 'Amina Njoroge', role: ROLE.ADMIN },
   { identifier: 'dispatch@deliveroo.co', name: 'Peter Otieno', role: ROLE.DISPATCHER },
   { identifier: 'ada@one.co', name: 'Ada Kimani', role: ROLE.CUSTOMER },
@@ -705,6 +705,14 @@ const DEMO_PEOPLE = [
   { identifier: 'wanjiru@three.co', name: 'Wanjiru Kariuki', role: ROLE.CUSTOMER },
   { identifier: '+254711222333', name: 'Brian Oduor', role: ROLE.CUSTOMER }
 ];
+
+/**
+ * The staff half of the seed. The sign-in dialog offers these as one-click doors on
+ * the demo backend, because a portal you can only reach by knowing an address off by
+ * heart is a portal nobody reaches. Derived from DEMO_PEOPLE rather than written out
+ * again, so a colleague added to the seed appears in the dialog by doing nothing.
+ */
+export const DEMO_STAFF = DEMO_PEOPLE.filter((person) => isStaffRole(person.role));
 
 function seedPeople() {
   const existing = userDirectory();
