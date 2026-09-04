@@ -199,3 +199,42 @@ describe('an already-signed-in visitor', () => {
     await waitFor(() => expect(store.getState().auth.user).toBeNull());
   });
 });
+
+// §27 — the portal, the roles and the seeded colleagues all existed; what did not was
+// any way to discover that the staff door is a particular address. Signing in with
+// your own gave you a customer account and an empty portal with nothing saying why.
+describe('the staff door', () => {
+  it('offers the seeded colleagues on the demo backend', () => {
+    openModal();
+    expect(screen.getByText('Staff sign-in')).toBeInTheDocument();
+    expect(screen.getByText(/Amina Njoroge · Administrator/)).toBeInTheDocument();
+    expect(screen.getByText(/Peter Otieno · Dispatcher/)).toBeInTheDocument();
+    // The code is no use kept secret from the person who has to type it.
+    expect(screen.getByText(new RegExp(`the code is ${MOCK_OTP}`, 'i'))).toBeInTheDocument();
+  });
+
+  it('fills the form when a colleague is picked', async () => {
+    openModal();
+
+    await userEvent.click(screen.getByText(/Amina Njoroge · Administrator/));
+
+    expect(screen.getByLabelText('Email address')).toHaveValue('admin@deliveroo.co');
+  });
+
+  it('signs that colleague in as an administrator', async () => {
+    const { store } = openModal();
+
+    await userEvent.click(screen.getByText(/Amina Njoroge · Administrator/));
+    await userEvent.click(screen.getByRole('button', { name: /Continue with email/ }));
+    await userEvent.type(await screen.findByLabelText('6-digit code'), MOCK_OTP);
+    await userEvent.click(screen.getByRole('button', { name: /Verify and continue/i }));
+
+    await waitFor(() => expect(store.getState().auth.user?.role).toBe('ADMIN'));
+  });
+
+  it('stays out of the create-account step, which is for customers', async () => {
+    openModal();
+    await userEvent.click(screen.getByRole('tab', { name: 'Create account' }));
+    expect(screen.queryByText('Staff sign-in')).not.toBeInTheDocument();
+  });
+});
