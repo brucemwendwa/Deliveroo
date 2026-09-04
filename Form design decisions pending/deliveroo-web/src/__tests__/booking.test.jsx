@@ -119,4 +119,33 @@ describe('booking flow', () => {
     expect(screen.getAllByText('12.4 km').length).toBeGreaterThan(0);
     expect(screen.getAllByText('35 min').length).toBeGreaterThan(0);
   });
+
+  // Two different quantities used to carry the same name: the tile called the router's
+  // driving time an "estimated time" and the quote called the door-to-door promise an
+  // "estimated delivery time", so 35 min and 50 min sat on one screen contradicting
+  // each other with nothing to say why. Both figures were right; only the labels lied.
+  it('tells the drive time apart from the door-to-door promise', async () => {
+    const { store } = renderBooking();
+    store.dispatch(setPickup(WESTLANDS));
+    store.dispatch(setDestination(KILIMANI));
+    store.dispatch(setWeight(3));
+    store.dispatch({
+      type: 'booking/resolveRoute/fulfilled',
+      payload: { distanceKm: 12.4, durationSeconds: 2100, coordinates: [], estimated: false }
+    });
+
+    // The route's own driving time, named for what it is and sitting beside the distance.
+    expect(await screen.findByText('Drive time')).toBeInTheDocument();
+    expect(screen.getAllByText('35 min').length).toBeGreaterThan(0);
+
+    // The figure the customer is actually promised, under the name the tracking screen
+    // and the admin console already use, and showing where the extra 15 minutes go.
+    expect(screen.getByText('Door to door')).toBeInTheDocument();
+    expect(screen.getByText('50 min')).toBeInTheDocument();
+    expect(screen.getByText('Travel plus 15 min handling')).toBeInTheDocument();
+
+    // And neither one is called simply an "estimated time" any more.
+    expect(screen.queryByText('Estimated time')).not.toBeInTheDocument();
+    expect(screen.queryByText('Estimated delivery time')).not.toBeInTheDocument();
+  });
 });
