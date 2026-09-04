@@ -38,9 +38,36 @@ beforeEach(() => {
 });
 
 describe('who gets in', () => {
-  it('turns a customer away from the portal', async () => {
-    await renderPortal('/admin', 'buyer@one.co');
+  it('asks a signed-out visitor to sign in', async () => {
+    render(
+      <Provider store={makeStore()}>
+        <MemoryRouter initialEntries={['/admin']}>
+          <AppRoutes />
+        </MemoryRouter>
+      </Provider>
+    );
     expect(await screen.findByText('Admin access required.')).toBeInTheDocument();
+  });
+
+  it('turns a customer away, naming the account they are on and the way forward', async () => {
+    await renderPortal('/admin', 'buyer@one.co');
+
+    // Not the signed-out wording: being signed in as the wrong person is a different
+    // problem, and a portal that just looks empty reads as a broken page.
+    expect(await screen.findByText('Not a staff account.')).toBeInTheDocument();
+    expect(screen.getByText(/signed in as/i)).toBeInTheDocument();
+    expect(screen.getByText(/a customer/i)).toBeInTheDocument();
+
+    // And the button has to go somewhere. "Sign in" opened a dialog that said they
+    // were already signed in, which was a dead end.
+    expect(screen.getByRole('button', { name: /Switch account/i })).toBeInTheDocument();
+  });
+
+  it('points at the seeded staff accounts while on demo data', async () => {
+    await renderPortal('/admin', 'buyer@one.co');
+    await screen.findByText('Not a staff account.');
+    expect(screen.getByText('admin@deliveroo.co')).toBeInTheDocument();
+    expect(screen.getByText(DISPATCHER)).toBeInTheDocument();
   });
 
   it('opens on the overview, with the sections beside it', async () => {
