@@ -40,13 +40,17 @@ Node 18+.
    `000000`.
 5. The confirmation screen goes looking for an agent, then shows who is coming, in what, how
    far out and their ETA. **Track pickup** opens the live map.
-6. Open `/admin` in a second tab and sign in as `admin@deliveroo.co` (code `000000`). The
+6. Open `/admin` in a second tab and sign in as `admin@deliveroo.co` (code `000000`) — the
+   sign-in dialog lists the staff accounts under **Staff sign-in**, so you never have to know
+   the address by heart, and that block only appears on the demo backend. The
    overview leads with what needs a person; **Deliveries** is the board. Change the order's
    status, drag the vehicle marker, or set where the parcel currently is — **the tracking tab
    updates without a reload**. Take drone capacity offline under **Capacity** and it
    disappears from the customer's options.
 7. Sign in as `dispatch@deliveroo.co` instead to see the same portal as a dispatcher: the
    board, the roster and capacity, but no accounts and no settings — including by URL.
+8. Signing in as a customer and opening `/admin` refuses you by name — it says which account
+   you are on and what it is, and **Switch account** signs you out and reopens the dialog.
 
 ## Multi-modal transport (`src/lib/transport.js`)
 
