@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectUser } from '../../store/authSlice';
+import { selectUser, signOut } from '../../store/authSlice';
 import { fetchAllOrders } from '../../store/ordersSlice';
 import { fetchFleet } from '../../store/fleetSlice';
 import {
@@ -12,10 +12,10 @@ import {
   fetchUsers,
   selectSettings
 } from '../../store/adminSlice';
-import { openAuthModal } from '../../store/uiSlice';
+import { openAuthModal, showToast } from '../../store/uiSlice';
 import useOrderSync from '../../hooks/useOrderSync';
 import { PERMISSION, ROLE_LABEL, can, isStaff, roleOf } from '../../lib/roles';
-import { usingMockBackend } from '../../api';
+import { DEMO_STAFF, usingMockBackend } from '../../api';
 import { color, eyebrow, font, radius } from '../../theme';
 import AdminNav from '../../components/admin/AdminNav';
 import { sectionForPath } from '../../components/admin/adminSections';
@@ -95,14 +95,60 @@ export default function AdminPortal() {
   useEffect(refresh, [refresh]);
   useOrderSync(refresh);
 
+  // Refusal has to say which refusal it is. Being signed out and being signed in as a
+  // customer are different problems with different fixes, and the old screen gave both
+  // of them a "Sign in" button — which, for someone already signed in, opened a dialog
+  // that said "you are already signed in" and went no further.
   if (!staff) {
+    const signedIn = Boolean(user);
     return (
-      <PageShell eyebrow="Admin" title="Admin access required.">
-        <p style={{ margin: '0 0 24px', maxWidth: '46ch', fontSize: '16px', lineHeight: 1.6, color: color.body }}>
-          The admin portal is for staff accounts. Sign in to continue.
+      <PageShell eyebrow="Admin" title={signedIn ? 'Not a staff account.' : 'Admin access required.'}>
+        <p style={{ margin: '0 0 24px', maxWidth: '52ch', fontSize: '16px', lineHeight: 1.6, color: color.body }}>
+          {signedIn ? (
+            <>
+              You are signed in as <strong style={{ color: color.ink }}>{user.name}</strong>, a{' '}
+              {ROLE_LABEL[roleOf(user)].toLowerCase()}. The portal is for dispatchers and
+              administrators, so there is nothing here for this account.
+            </>
+          ) : (
+            'The admin portal is for staff accounts. Sign in to continue.'
+          )}
         </p>
-        <Button onClick={() => dispatch(openAuthModal(pathname))} icon="arrow_forward">
-          Sign in
+        {usingMockBackend && DEMO_STAFF.length ? (
+          <p
+            style={{
+              margin: '0 0 24px',
+              padding: '14px 18px',
+              maxWidth: '52ch',
+              borderRadius: radius.card,
+              border: `1px dashed ${color.border}`,
+              fontSize: '14px',
+              lineHeight: 1.6,
+              color: color.body
+            }}
+          >
+            <strong style={{ color: color.ink }}>Running on demo data.</strong> Sign in as{' '}
+            {DEMO_STAFF.map((person, index) => (
+              <span key={person.identifier}>
+                {index > 0 ? ' or ' : ''}
+                <code style={{ color: color.ink }}>{person.identifier}</code> (
+                {ROLE_LABEL[person.role].toLowerCase()})
+              </span>
+            ))}{' '}
+            to see the portal. The sign-in dialog lists them.
+          </p>
+        ) : null}
+        <Button
+          onClick={async () => {
+            if (signedIn) {
+              await dispatch(signOut());
+              dispatch(showToast({ message: 'Signed out. Sign in as staff to continue.', tone: 'info' }));
+            }
+            dispatch(openAuthModal(pathname));
+          }}
+          icon="arrow_forward"
+        >
+          {signedIn ? 'Switch account' : 'Sign in'}
         </Button>
       </PageShell>
     );
