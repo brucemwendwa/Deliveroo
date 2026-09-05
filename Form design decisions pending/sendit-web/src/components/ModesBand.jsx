@@ -76,7 +76,7 @@ function ModeCard({ meta }) {
 
 /**
  * §25 — the new promise, stated once on the landing page: you describe the parcel,
- * Deliveroo works out how it travels. The eligibility line is not a disclaimer, it is
+ * Send it works out how it travels. The eligibility line is not a disclaimer, it is
  * the product — knowing that a motorbike cannot cross the country is our job, not yours.
  */
 export default function ModesBand() {
@@ -139,7 +139,7 @@ export default function ModesBand() {
         <p style={{ margin: '22px 0 0', display: 'flex', gap: '9px', fontSize: '13.5px', lineHeight: 1.6, color: 'rgba(243,243,241,.6)' }}>
           <Icon name="info" size={16} color={color.orange} style={{ flex: 'none', marginTop: '2px' }} />
           Not every mode serves every route. Sea freight needs a port, and a motorbike or a
-          drone needs a short hop. Deliveroo only offers what can actually make the journey,
+          drone needs a short hop. Send it only offers what can actually make the journey,
           and says why when it can&apos;t.
         </p>
       </div>
