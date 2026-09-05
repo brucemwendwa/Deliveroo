@@ -23,15 +23,15 @@ import {
 import { clearOutbox, notify, outbox } from '../lib/notifications';
 import { PERMISSION, ROLE, can, isStaffRole } from '../lib/roles';
 
-const ORDERS_KEY = 'deliveroo.orders';
-const SESSION_KEY = 'deliveroo.session';
-const FLEET_KEY = 'deliveroo.fleet';
+const ORDERS_KEY = 'sendit.orders';
+const SESSION_KEY = 'sendit.session';
+const FLEET_KEY = 'sendit.fleet';
 // §27 — the records the admin portal manages beyond the board itself.
-const USERS_KEY = 'deliveroo.users';
-const COURIERS_KEY = 'deliveroo.couriers';
-const AUDIT_KEY = 'deliveroo.audit';
-const SETTINGS_KEY = 'deliveroo.settings';
-const CHANGE_EVENT = 'deliveroo:changed';
+const USERS_KEY = 'sendit.users';
+const COURIERS_KEY = 'sendit.couriers';
+const AUDIT_KEY = 'sendit.audit';
+const SETTINGS_KEY = 'sendit.settings';
+const CHANGE_EVENT = 'sendit:changed';
 
 /** Feels like a network without being slow enough to annoy. */
 const LATENCY = 140;
@@ -257,7 +257,7 @@ const settingsNow = () => ({ ...DEFAULT_SETTINGS, ...read(SETTINGS_KEY, null) })
 export const MOCK_OTP = '000000';
 
 /** The address that bootstraps the first administrator on a fresh install. */
-export const FOUNDING_ADMIN = 'admin@deliveroo.co';
+export const FOUNDING_ADMIN = 'admin@sendit.co';
 
 /**
  * The account id an identifier maps to. Shared, so a seeded colleague and the same
@@ -337,7 +337,7 @@ export async function createOrder(draft) {
   // §27 — bookings can be paused from the portal. Enforced here so the pause holds
   // against a stale tab that still has the request button on screen.
   if (!settingsNow().acceptingOrders) {
-    throw new Error('Deliveroo is not accepting new bookings right now. Please try again shortly.');
+    throw new Error('Send it is not accepting new bookings right now. Please try again shortly.');
   }
   const now = new Date().toISOString();
   const order = {
@@ -516,7 +516,7 @@ export async function updatePresentLocation(id, { label, lat, lng } = {}) {
 // --- transport capacity (§26) -----------------------------------------------
 //
 // Prototype: this records which partner capacity dispatch can book into today, not
-// a fleet Deliveroo owns. Booking reads it, so taking a mode offline here removes it
+// a fleet Send it owns. Booking reads it, so taking a mode offline here removes it
 // from the customer's options.
 
 export async function getFleet() {
@@ -698,8 +698,8 @@ export async function cancelOrder(id) {
  * `000000`); seeding only decides what they already are when they arrive.
  */
 export const DEMO_PEOPLE = [
-  { identifier: 'admin@deliveroo.co', name: 'Amina Njoroge', role: ROLE.ADMIN },
-  { identifier: 'dispatch@deliveroo.co', name: 'Peter Otieno', role: ROLE.DISPATCHER },
+  { identifier: 'admin@sendit.co', name: 'Amina Njoroge', role: ROLE.ADMIN },
+  { identifier: 'dispatch@sendit.co', name: 'Peter Otieno', role: ROLE.DISPATCHER },
   { identifier: 'ada@one.co', name: 'Ada Kimani', role: ROLE.CUSTOMER },
   { identifier: 'joseph@two.co', name: 'Joseph Mwangi', role: ROLE.CUSTOMER },
   { identifier: 'wanjiru@three.co', name: 'Wanjiru Kariuki', role: ROLE.CUSTOMER },
@@ -853,7 +853,7 @@ export function seedIfEmpty() {
       packageType: 'DOCUMENTS',
       verifiedWeightKg: row.measured ?? null,
       weighedAt: row.measured ? at : null,
-      weighedBy: row.measured ? 'admin@deliveroo.co' : null
+      weighedBy: row.measured ? 'admin@sendit.co' : null
     };
     const moving = row.status === STATUS.IN_TRANSIT;
     const assigned = moving || row.status === STATUS.ASSIGNED || row.status === STATUS.PICKED_UP;
