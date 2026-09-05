@@ -11,13 +11,13 @@ import { TRANSPORT, transportOf } from '../lib/transport';
 
 const seeded = () => {
   seedIfEmpty();
-  return JSON.parse(localStorage.getItem('deliveroo.orders'));
+  return JSON.parse(localStorage.getItem('sendit.orders'));
 };
 
 /** Renders a portal section with a real admin session already established (§18). */
 const renderPortal = async (path = '/admin/deliveries') => {
   const store = makeStore();
-  await store.dispatch(verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP }));
+  await store.dispatch(verifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP }));
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={[path]}>
