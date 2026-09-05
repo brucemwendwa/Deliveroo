@@ -16,7 +16,7 @@ const limitText = (limits = {}) =>
     limits.maxDistanceKm ? `to ${limits.maxDistanceKm} km` : null,
     limits.maxWeightKg ? `≤ ${limits.maxWeightKg} kg` : null,
     limits.maxLongestSideCm ? `≤ ${limits.maxLongestSideCm} cm side` : null,
-    limits.requiresPort ? 'port at one end' : null
+    limits.requiresPorts ? 'port at each end' : null
   ]
     .filter(Boolean)
     .join(' · ') || 'No restrictions';
