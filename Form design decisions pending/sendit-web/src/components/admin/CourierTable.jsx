@@ -24,7 +24,7 @@ const quiet = { ...cell, color: color.body };
 /**
  * §27 — the roster.
  *
- * Prototype, and worded like one: these are people Deliveroo dispatches, not
+ * Prototype, and worded like one: these are people Send it dispatches, not
  * employees it rosters shifts for. Taking someone off shift means dispatch stops
  * handing them new parcels — it deliberately does not abandon the one they are
  * already carrying, which is why a courier can be off shift with a live job.
