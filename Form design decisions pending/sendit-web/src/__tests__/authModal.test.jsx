@@ -34,9 +34,9 @@ describe('auth modal', () => {
     openModal();
     const field = screen.getByLabelText('Email address');
 
-    await userEvent.type(field, 'rider@deliveroo.co');
+    await userEvent.type(field, 'rider@sendit.co');
 
-    expect(field).toHaveValue('rider@deliveroo.co');
+    expect(field).toHaveValue('rider@sendit.co');
     expect(field).toHaveFocus();
   });
 
@@ -48,7 +48,7 @@ describe('auth modal', () => {
   it('keeps focus in the code field across a whole typed OTP', async () => {
     openModal();
 
-    await userEvent.type(screen.getByLabelText('Email address'), 'rider@deliveroo.co');
+    await userEvent.type(screen.getByLabelText('Email address'), 'rider@sendit.co');
     await userEvent.click(screen.getByRole('button', { name: /Continue with email/ }));
 
     const code = await screen.findByLabelText('6-digit code');
@@ -61,7 +61,7 @@ describe('auth modal', () => {
   it('still closes on Escape after the identifier has been retyped', async () => {
     const { store } = openModal();
 
-    await userEvent.type(screen.getByLabelText('Email address'), 'rider@deliveroo.co');
+    await userEvent.type(screen.getByLabelText('Email address'), 'rider@sendit.co');
     await userEvent.keyboard('{Escape}');
 
     await waitFor(() => expect(store.getState().ui.authModal.open).toBe(false));
@@ -89,7 +89,7 @@ describe('auth modal', () => {
   it('submits on Enter', async () => {
     openModal();
 
-    await userEvent.type(screen.getByLabelText('Email address'), 'rider@deliveroo.co{Enter}');
+    await userEvent.type(screen.getByLabelText('Email address'), 'rider@sendit.co{Enter}');
 
     expect(await screen.findByLabelText('6-digit code')).toBeInTheDocument();
   });
@@ -116,7 +116,7 @@ describe('creating an account', () => {
     const { store } = await switchToSignUp();
 
     await userEvent.type(screen.getByLabelText('Full name'), 'Ada Lovelace');
-    await userEvent.type(screen.getByLabelText('Email address'), 'ada@deliveroo.co');
+    await userEvent.type(screen.getByLabelText('Email address'), 'ada@sendit.co');
     await userEvent.click(screen.getByRole('button', { name: /Continue with email/ }));
 
     expect(await screen.findByText(/Tick the box to continue/i)).toBeInTheDocument();
@@ -127,7 +127,7 @@ describe('creating an account', () => {
     const { store } = await switchToSignUp();
 
     await userEvent.type(screen.getByLabelText('Full name'), 'Ada Lovelace');
-    await userEvent.type(screen.getByLabelText('Email address'), 'ada@deliveroo.co');
+    await userEvent.type(screen.getByLabelText('Email address'), 'ada@sendit.co');
     await userEvent.click(screen.getByRole('checkbox'));
     await userEvent.click(screen.getByRole('button', { name: /Continue with email/ }));
 
@@ -142,7 +142,7 @@ describe('creating an account', () => {
 describe('verifying a code', () => {
   const reachVerifyStage = async () => {
     const result = openModal();
-    await userEvent.type(screen.getByLabelText('Email address'), 'rider@deliveroo.co');
+    await userEvent.type(screen.getByLabelText('Email address'), 'rider@sendit.co');
     await userEvent.click(screen.getByRole('button', { name: /Continue with email/ }));
     await screen.findByLabelText('6-digit code');
     return result;
@@ -180,7 +180,7 @@ describe('an already-signed-in visitor', () => {
     const store = makeStore();
     store.dispatch({
       type: 'auth/verifyOtp/fulfilled',
-      payload: { id: 'u1', name: 'Ada Lovelace', email: 'ada@deliveroo.co' }
+      payload: { id: 'u1', name: 'Ada Lovelace', email: 'ada@sendit.co' }
     });
     store.dispatch(openAuthModal(null));
 
@@ -218,7 +218,7 @@ describe('the staff door', () => {
 
     await userEvent.click(screen.getByText(/Amina Njoroge · Administrator/));
 
-    expect(screen.getByLabelText('Email address')).toHaveValue('admin@deliveroo.co');
+    expect(screen.getByLabelText('Email address')).toHaveValue('admin@sendit.co');
   });
 
   it('signs that colleague in as an administrator', async () => {
