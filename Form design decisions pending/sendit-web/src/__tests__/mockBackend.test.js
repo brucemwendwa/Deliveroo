@@ -39,13 +39,13 @@ beforeEach(() => {
  * arranges it as staff and hands the session back to whoever the test is about.
  */
 const asStaff = async (run) => {
-  const before = localStorage.getItem('deliveroo.session');
-  await verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+  const before = localStorage.getItem('sendit.session');
+  await verifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP });
   try {
     return await run();
   } finally {
-    if (before) localStorage.setItem('deliveroo.session', before);
-    else localStorage.removeItem('deliveroo.session');
+    if (before) localStorage.setItem('sendit.session', before);
+    else localStorage.removeItem('sendit.session');
   }
 };
 
@@ -220,7 +220,7 @@ describe('mock backend', () => {
 
   // §26 — the console's two staff-only levers.
   describe('dispatch console', () => {
-    const signInAsAdmin = () => verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    const signInAsAdmin = () => verifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP });
 
     it('records where the parcel currently is, staff only', async () => {
       const order = await createOrder(draft);
@@ -261,7 +261,7 @@ describe('mock backend', () => {
     const customer = await verifyOtp({ identifier: 'someone@example.com', code: MOCK_OTP });
     expect(customer.isAdmin).toBe(false);
 
-    const admin = await verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    const admin = await verifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP });
     expect(admin.isAdmin).toBe(true);
   });
 
@@ -270,7 +270,7 @@ describe('mock backend', () => {
   });
   // §9/§18 — the customer's weight is a declaration; the fare is settled on our scale.
   describe('weight verification', () => {
-    const signInAsAdmin = () => verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    const signInAsAdmin = () => verifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP });
     const signInAsCustomer = () => verifyOtp({ identifier: 'someone@example.com', code: MOCK_OTP });
 
     it('prices a new order as an estimate off the declared weight', async () => {
@@ -285,7 +285,7 @@ describe('mock backend', () => {
       await expect(verifyWeight(order.id, { weightKg: 1 })).rejects.toThrow(/only staff/i);
 
       // …and with no session at all.
-      localStorage.removeItem('deliveroo.session');
+      localStorage.removeItem('sendit.session');
       await expect(verifyWeight(order.id, { weightKg: 1 })).rejects.toThrow(/only staff/i);
       expect((await getOrder(order.id)).parcel.verifiedWeightKg).toBeNull();
     });
@@ -298,7 +298,7 @@ describe('mock backend', () => {
 
       expect(weighed.parcel.verifiedWeightKg).toBe(7.2);
       expect(weighed.parcel.weightKg).toBe(3);
-      expect(weighed.parcel.weighedBy).toBe('admin@deliveroo.co');
+      expect(weighed.parcel.weighedBy).toBe('admin@sendit.co');
       // 7.2 kg (360) + 12.4 km (496) = 856 → 860
       expect(weighed.pricing.total).toBe(520);
       expect(weighed.pricing.basis).toBe('verified');
