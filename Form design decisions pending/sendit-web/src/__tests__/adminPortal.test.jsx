@@ -14,10 +14,10 @@ import { ROLE } from '../lib/roles';
 
 const seeded = () => {
   seedIfEmpty();
-  return JSON.parse(localStorage.getItem('deliveroo.orders'));
+  return JSON.parse(localStorage.getItem('sendit.orders'));
 };
 
-const renderPortal = async (path = '/admin', identifier = 'admin@deliveroo.co') => {
+const renderPortal = async (path = '/admin', identifier = 'admin@sendit.co') => {
   const store = makeStore();
   await store.dispatch(verifyOtp({ identifier, code: MOCK_OTP }));
   render(
@@ -31,7 +31,7 @@ const renderPortal = async (path = '/admin', identifier = 'admin@deliveroo.co') 
 };
 
 /** The demo seeds one colleague who is a dispatcher rather than an administrator. */
-const DISPATCHER = 'dispatch@deliveroo.co';
+const DISPATCHER = 'dispatch@sendit.co';
 
 beforeEach(() => {
   localStorage.clear();
@@ -66,7 +66,7 @@ describe('who gets in', () => {
   it('points at the seeded staff accounts while on demo data', async () => {
     await renderPortal('/admin', 'buyer@one.co');
     await screen.findByText('Not a staff account.');
-    expect(screen.getByText('admin@deliveroo.co')).toBeInTheDocument();
+    expect(screen.getByText('admin@sendit.co')).toBeInTheDocument();
     expect(screen.getByText(DISPATCHER)).toBeInTheDocument();
   });
 
@@ -161,7 +161,7 @@ describe('sections', () => {
 
   it('shows the trail of what staff have done', async () => {
     seeded();
-    await apiVerifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    await apiVerifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP });
     await updateSettings({ supportPhone: '+254 700 111 222' });
 
     await renderPortal('/admin/audit');
@@ -170,7 +170,7 @@ describe('sections', () => {
     // found through the table rather than by the text alone.
     const table = await screen.findByRole('table');
     expect(within(table).getByText('Settings updated')).toBeInTheDocument();
-    expect(within(table).getByText('admin@deliveroo.co')).toBeInTheDocument();
+    expect(within(table).getByText('admin@sendit.co')).toBeInTheDocument();
     expect(within(table).getByText('supportPhone')).toBeInTheDocument();
   });
 
@@ -201,7 +201,7 @@ describe('platform settings', () => {
   });
 
   it('reaches the customer: a paused platform says so on the booking screen', async () => {
-    await apiVerifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    await apiVerifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP });
     await updateSettings({ acceptingOrders: false });
 
     await renderPortal('/book', 'buyer@one.co');
@@ -209,7 +209,7 @@ describe('platform settings', () => {
   });
 
   it('shows a posted notice at the top of every portal screen', async () => {
-    await apiVerifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+    await apiVerifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP });
     await updateSettings({ noticeToStaff: 'Drone capacity is grounded until 14:00.' });
 
     await renderPortal('/admin/reports');
