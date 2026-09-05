@@ -102,7 +102,7 @@ export default function AdminSettings() {
             onChange={(next) =>
               save(
                 { acceptingOrders: next },
-                next ? 'Deliveroo is taking bookings again.' : 'New bookings are paused.'
+                next ? 'Send it is taking bookings again.' : 'New bookings are paused.'
               )
             }
           />
