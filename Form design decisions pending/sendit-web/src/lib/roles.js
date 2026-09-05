@@ -3,7 +3,7 @@
 // Until now "staff" was a single boolean on the session, which is fine when the
 // console does one job. A portal that can also re-price accounts, promote colleagues
 // and pause the platform needs the finer answer: dispatch runs deliveries, an
-// administrator runs Deliveroo. Kept free of React and of the store for the same
+// administrator runs Send it. Kept free of React and of the store for the same
 // reason orderStatus.js is — the Flask side has to agree with it exactly, and a
 // permission that lives only in the UI is not a permission at all.
 
