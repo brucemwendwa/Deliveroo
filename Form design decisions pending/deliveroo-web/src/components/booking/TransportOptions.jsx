@@ -145,9 +145,11 @@ function OptionCard({ option, selected, onSelect }) {
             </span>
           </div>
 
-          {(busy || option.via) && (
+          {(busy || option.seaLeg) && (
             <span style={{ fontSize: '12.5px', lineHeight: 1.45, color: color.muted }}>
-              {busy ? 'Heavy demand right now, so allow extra time for collection.' : `Sails via ${option.via}.`}
+              {busy
+                ? 'Heavy demand right now, so allow extra time for collection.'
+                : `Sails ${option.seaLeg.from} → ${option.seaLeg.to}, with a road leg at each end.`}
             </span>
           )}
 
