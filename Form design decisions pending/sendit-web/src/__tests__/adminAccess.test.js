@@ -36,7 +36,7 @@ const draft = {
   recipient: { name: 'Recipient', phone: '+254700000002' }
 };
 
-const asAdmin = () => verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP });
+const asAdmin = () => verifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP });
 const asCustomer = () => verifyOtp({ identifier: 'buyer@one.co', code: MOCK_OTP });
 
 beforeEach(() => {
@@ -152,7 +152,7 @@ describe('audit trail', () => {
 
     const [entry] = await listAuditLog();
     expect(entry).toMatchObject({
-      actor: 'admin@deliveroo.co',
+      actor: 'admin@sendit.co',
       actorRole: ROLE.ADMIN,
       action: 'ORDER_STATUS',
       target: order.id
@@ -175,7 +175,7 @@ describe('demo data', () => {
     const orders = await resetDemoData();
     expect(orders).toHaveLength(7);
     expect((await listUsers()).some((user) => user.id === admin.id)).toBe(true);
-    expect(userIdFor('admin@deliveroo.co')).toBe(admin.id);
+    expect(userIdFor('admin@sendit.co')).toBe(admin.id);
   });
 
   it('is administrator-only', async () => {
