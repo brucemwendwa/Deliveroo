@@ -11,7 +11,7 @@ import { TRANSPORT, transportOf } from '../lib/transport';
 
 const seeded = () => {
   seedIfEmpty();
-  return JSON.parse(localStorage.getItem('deliveroo.orders'));
+  return JSON.parse(localStorage.getItem('sendit.orders'));
 };
 
 const renderAt = (path, store = makeStore()) => ({
@@ -188,7 +188,7 @@ describe('mobile layout', () => {
   it('turns the dispatch table into cards', async () => {
     const orders = seeded();
     const store = makeStore();
-    await store.dispatch(verifyOtp({ identifier: 'admin@deliveroo.co', code: MOCK_OTP }));
+    await store.dispatch(verifyOtp({ identifier: 'admin@sendit.co', code: MOCK_OTP }));
     renderNarrow('/admin/deliveries', store);
 
     // Every delivery is still there, as a card each rather than a row each.
