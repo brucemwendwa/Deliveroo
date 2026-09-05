@@ -18,9 +18,14 @@ import { quote } from '../lib/pricing';
 const NAIROBI = { name: 'Nairobi CBD', lat: -1.2864, lng: 36.8172 };
 const WESTLANDS = { name: 'Westlands', lat: -1.2673, lng: 36.8065 };
 const MOMBASA = { name: 'Mombasa', lat: -4.0435, lng: 39.6682 };
+// The other end of a sailing. Sea freight runs quay to quay, so every ship case
+// below needs a port at both ends — Nairobi has none, and that is the whole point.
+const DAR = { name: 'Dar es Salaam', lat: -6.7924, lng: 39.2083 };
+const KISUMU = { name: 'Kisumu', lat: -0.0917, lng: 34.768 };
 
 const localRoute = { distanceKm: 8.2, durationSeconds: 22 * 60 };
 const coastRoute = { distanceKm: 485, durationSeconds: 7.2 * 3600 };
+const seaRoute = { distanceKm: 490, durationSeconds: 8.4 * 3600 };
 
 const optionsFor = (pickup, destination, route, extra = {}) =>
   Object.fromEntries(
@@ -45,26 +50,60 @@ describe('mode eligibility (§25)', () => {
     expect(options.SHIP.reason).toMatch(/sea freight starts at/i);
   });
 
-  it('offers road, air and sea to the coast, but neither a bike nor a drone', () => {
+  it('offers road and air to the coast, but neither a bike nor a drone', () => {
     const options = optionsFor(NAIROBI, MOMBASA, coastRoute);
 
     expect(options.ROAD.available).toBe(true);
     expect(options.AIR.available).toBe(true);
-    expect(options.SHIP.available).toBe(true);
     expect(options.MOTORBIKE.available).toBe(false);
     expect(options.MOTORBIKE.reason).toMatch(/covers routes up to 45 km/i);
     expect(options.DRONE.available).toBe(false);
     expect(options.DRONE.reason).toMatch(/covers routes up to 30 km/i);
-    // Sea freight names the port it would sail from.
-    expect(options.SHIP.via).toBe('Mombasa');
+  });
+
+  it('sails between two ports, and names both of them', () => {
+    const options = optionsFor(MOMBASA, DAR, seaRoute);
+
+    expect(options.SHIP.available).toBe(true);
+    expect(options.SHIP.seaLeg).toEqual({ from: 'Mombasa', to: 'Dar es Salaam' });
+  });
+
+  it('will not sail to a port from a town that has none', () => {
+    // The bug this rule exists for: Mombasa is a port, Nairobi is not, and a ship
+    // cannot cover the 485 km in between on wheels.
+    const options = optionsFor(NAIROBI, MOMBASA, coastRoute);
+
+    expect(options.SHIP.available).toBe(false);
+    expect(options.SHIP.reason).toMatch(/Nairobi CBD does not reach one/i);
+    expect(options.SHIP.reason).toMatch(/cannot finish the journey overland/i);
+  });
+
+  it('will not put a ship on an overland route that happens to end at a port', () => {
+    // Machakos → Kisumu: 414 km of dry land, one quay at the far end of it. The
+    // old one-ended check offered this as a sailing "via Kisumu".
+    const machakos = { name: 'Machakos', lat: -1.5177, lng: 37.2634 };
+    const options = optionsFor(machakos, KISUMU, { distanceKm: 413.7, durationSeconds: 5.45 * 3600 });
+
+    expect(options.SHIP.available).toBe(false);
+    expect(options.SHIP.reason).toMatch(/Machakos does not reach one/i);
+    expect(options.ROAD.available).toBe(true);
+  });
+
+  it('will not sail from a lake to an ocean', () => {
+    // Both ends are genuine ports. Nothing floats between them.
+    const options = optionsFor(KISUMU, MOMBASA, { distanceKm: 890, durationSeconds: 13 * 3600 });
+
+    expect(options.SHIP.available).toBe(false);
+    expect(options.SHIP.reason).toMatch(/Lake Victoria/);
+    expect(options.SHIP.reason).toMatch(/Indian Ocean/);
   });
 
   it('will not sail a route that reaches no port, however long it is', () => {
-    const inland = { name: 'Kampala', lat: 0.3476, lng: 32.5825 };
-    const options = optionsFor(NAIROBI, inland, { distanceKm: 660, durationSeconds: 10 * 3600 });
+    const inland = { name: 'Marsabit', lat: 2.3284, lng: 37.9899 };
+    const options = optionsFor(NAIROBI, inland, { distanceKm: 530, durationSeconds: 10 * 3600 });
 
     expect(options.SHIP.available).toBe(false);
-    expect(options.SHIP.reason).toMatch(/runs between ports/i);
+    expect(options.SHIP.reason).toMatch(/neither end of this route reaches one/i);
     expect(options.AIR.available).toBe(true);
   });
 
@@ -119,7 +158,7 @@ describe('multi-modal pricing (§25)', () => {
   });
 
   it('ranks the modes the way their economics do over a long haul', () => {
-    const options = optionsFor(NAIROBI, MOMBASA, coastRoute);
+    const options = optionsFor(MOMBASA, DAR, seaRoute);
 
     // Sea is the cheapest and the slowest; air the fastest and dearest; road between.
     expect(options.SHIP.quote.total).toBeLessThan(options.ROAD.quote.total);
@@ -129,18 +168,18 @@ describe('multi-modal pricing (§25)', () => {
   });
 
   it('puts a light long-haul parcel on a ship', () => {
-    const light = optionsFor(NAIROBI, MOMBASA, coastRoute);
+    const light = optionsFor(MOMBASA, DAR, seaRoute);
     expect(defaultModeFor(Object.values(light))).toBe(TRANSPORT.SHIP);
   });
 
   // Second half of the same tariff inconsistency: road's KES 2.5 a kilo means the
-  // weight component of a road fare barely exists, so 200 kg to Mombasa now goes by
-  // van rather than by sea. Sea's 28/kg is what used to win the heavy freight.
+  // weight component of a road fare barely exists, so 200 kg down the coast now goes
+  // by van rather than by sea. Sea's 28/kg is what used to win the heavy freight.
   it('sends heavy long-haul freight by road, because weight costs road almost nothing', () => {
     const heavy = transportOptions({
-      pickup: NAIROBI,
-      destination: MOMBASA,
-      route: coastRoute,
+      pickup: MOMBASA,
+      destination: DAR,
+      route: seaRoute,
       parcel: { weightKg: 200 }
     });
     expect(defaultModeFor(heavy)).toBe(TRANSPORT.ROAD);
