@@ -28,7 +28,7 @@ export const NOTIFICATION_TEMPLATES = {
     `${order.quotedPricing && order.quotedPricing.total !== order.pricing.total ? ` (estimated ${formatKes(order.quotedPricing.total)})` : ''}.`
 };
 
-const OUTBOX_KEY = 'deliveroo.outbox';
+const OUTBOX_KEY = 'sendit.outbox';
 
 const readOutbox = () => {
   try {
