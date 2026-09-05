@@ -17,7 +17,7 @@ const TONE = {
  *
  * `assigned` is real: it counts the live orders on that mode. `units` and the
  * baseline `offline` are prototype figures from the catalogue, standing in for what
- * a carrier partner's API would report — Deliveroo books into this capacity, it does
+ * a carrier partner's API would report — Send it books into this capacity, it does
  * not own it. Taking a mode offline puts every unit that isn't already out on a job
  * into the offline column, which is exactly what withdrawing it from quotes means.
  */
@@ -39,7 +39,7 @@ const FIGURES = [
  * §26 — transport availability.
  *
  * Prototype controls over *partner capacity dispatch can book into today* — not a
- * fleet Deliveroo owns. Taking a mode offline here removes it from the customer's
+ * fleet Send it owns. Taking a mode offline here removes it from the customer's
  * options immediately, which is the point: this is the one screen that can stop the
  * booking flow offering something that cannot actually be flown.
  */
@@ -67,7 +67,7 @@ export default function FleetPanel() {
     >
       <div style={{ ...eyebrow, marginBottom: '6px' }}>Transport availability</div>
       <p style={{ margin: '0 0 18px', fontSize: '13px', lineHeight: 1.55, color: color.muted, maxWidth: '58ch' }}>
-        Capacity Deliveroo can book into right now, across its carrier partners: riders,
+        Capacity Send it can book into right now, across its carrier partners: riders,
         drivers, freight and airline space. Taking a mode offline withdraws it from customer
         quotes immediately.
       </p>
