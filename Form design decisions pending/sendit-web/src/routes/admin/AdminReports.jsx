@@ -78,7 +78,7 @@ export default function AdminReports() {
 
   const exportCsv = () => {
     const stamp = new Date(now).toISOString().slice(0, 10);
-    const ok = download(`deliveroo-deliveries-${stamp}.csv`, ordersCsv(scoped), () =>
+    const ok = download(`sendit-deliveries-${stamp}.csv`, ordersCsv(scoped), () =>
       dispatch(showToast({ message: 'This browser would not accept the download.', tone: 'error' }))
     );
     if (ok) dispatch(showToast({ message: `${scoped.length} deliveries exported.`, tone: 'success' }));
