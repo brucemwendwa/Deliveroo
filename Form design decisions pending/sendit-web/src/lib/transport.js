@@ -240,7 +240,7 @@ export const handoffNoteFor = (order) => handoffNote(transportOf(order), agentNo
 // ---------------------------------------------------------------------------
 // Fleet availability (§26). The admin console can take a mode offline; booking then
 // stops offering it. Prototype-level: this is partner capacity we book into, not a
-// fleet Deliveroo owns.
+// fleet Send it owns.
 // ---------------------------------------------------------------------------
 
 export const FLEET_STATUS = {
