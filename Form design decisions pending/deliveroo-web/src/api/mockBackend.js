@@ -809,15 +809,17 @@ export function seedIfEmpty() {
       drop: { lat: -1.2189, lng: 36.8172 }
     },
     {
-      from: 'Industrial Area · Nairobi',
-      to: 'Mombasa',
+      // Port to port, because that is the only shape a sailing comes in: the road
+      // legs at either end are the courier's, not the ship's.
+      from: 'Kilindini · Mombasa',
+      to: 'Dar es Salaam',
       status: STATUS.ASSIGNED,
       mode: TRANSPORT.SHIP,
       weight: 140,
-      km: 485,
-      mins: 1509,
-      pickup: { lat: -1.3082, lng: 36.8506 },
-      drop: { lat: -4.0435, lng: 39.6682 }
+      km: 490,
+      mins: 1520,
+      pickup: { lat: -4.0619, lng: 39.6486 },
+      drop: { lat: -6.7924, lng: 39.2083 }
     },
     {
       from: 'Lavington · Nairobi',
