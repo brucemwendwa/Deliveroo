@@ -10,7 +10,7 @@ import TransportGlyph from '../transport/TransportGlyph';
  * route and this parcel.
  *
  * A mode that can't run the route stays on screen, greyed, carrying the reason it
- * can't. Hiding it would leave the customer wondering whether Deliveroo flies at all;
+ * can't. Hiding it would leave the customer wondering whether Send it flies at all;
  * saying "sea freight starts at 200 km" answers the question and closes it.
  */
 function OptionCard({ option, selected, onSelect }) {
