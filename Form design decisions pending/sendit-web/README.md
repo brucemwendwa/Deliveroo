@@ -1,9 +1,9 @@
-# Deliveroo — on-demand multi-modal delivery (React + Redux Toolkit)
+# Send it — on-demand multi-modal delivery (React + Redux Toolkit)
 
 Vite + React (JavaScript), Redux Toolkit for state, inline style objects kept 1:1 with the
 approved design.
 
-Tell Deliveroo where to collect a parcel and where it's going; it works out how it travels —
+Say where to collect a parcel and where it's going; Send it works out how it travels —
 **motorbike, road, air, sea or drone** — what each option costs, and how long each takes, then
 sends a rider or an agent to come and get it.
 
@@ -40,14 +40,14 @@ Node 18+.
    `000000`.
 5. The confirmation screen goes looking for an agent, then shows who is coming, in what, how
    far out and their ETA. **Track pickup** opens the live map.
-6. Open `/admin` in a second tab and sign in as `admin@deliveroo.co` (code `000000`) — the
+6. Open `/admin` in a second tab and sign in as `admin@sendit.co` (code `000000`) — the
    sign-in dialog lists the staff accounts under **Staff sign-in**, so you never have to know
    the address by heart, and that block only appears on the demo backend. The
    overview leads with what needs a person; **Deliveries** is the board. Change the order's
    status, drag the vehicle marker, or set where the parcel currently is — **the tracking tab
    updates without a reload**. Take drone capacity offline under **Capacity** and it
    disappears from the customer's options.
-7. Sign in as `dispatch@deliveroo.co` instead to see the same portal as a dispatcher: the
+7. Sign in as `dispatch@sendit.co` instead to see the same portal as a dispatcher: the
    board, the roster and capacity, but no accounts and no settings — including by URL.
 8. Signing in as a customer and opening `/admin` refuses you by name — it says which account
    you are on and what it is, and **Switch account** signs you out and reopens the dialog.
@@ -143,7 +143,7 @@ a link is a convenience, not a control. `isAdmin` is still written into the sess
 CUSTOMER`), so everything that asked the old question keeps working, and a session stored
 before roles existed reads as an administrator rather than being locked out.
 
-The founding address `admin@deliveroo.co` is the bootstrap: a fresh install has no directory,
+The founding address `admin@sendit.co` is the bootstrap: a fresh install has no directory,
 so it needs one address that is an administrator by definition. Everyone else's role comes
 from the directory, which is why a promotion survives the next sign-in. An administrator
 cannot demote or suspend themselves — an install whose last administrator clicks the wrong row
@@ -404,7 +404,7 @@ deployment keeps it server-side and keeps it for good. **Reset demo data** exist
 the local backend — there is nothing to re-seed on a real database, and a button that wiped one
 would be the worst button in the product.
 
-The transport availability console is a **prototype interface over partner capacity Deliveroo
+The transport availability console is a **prototype interface over partner capacity Send it
 would book into** — it does not imply owned aircraft, ships or drones, and the wording on that
 panel is deliberate. Air and sea routes are drawn as schematic arcs rather than real flight or
 shipping lanes, because the road polyline OSRM returns would be a lie on the one screen that
