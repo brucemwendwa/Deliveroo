@@ -332,7 +332,7 @@ export default function AuthModal() {
 
   // §27 — the staff door, and only on the demo backend. The portal, the roles and the
   // seeded colleagues all exist already; what did not exist was any way to find out
-  // that `admin@deliveroo.co` is how you get in, so signing in with your own address
+  // that `admin@sendit.co` is how you get in, so signing in with your own address
   // put you in front of an empty portal with nothing saying why. A real deployment
   // has a real directory and no business advertising accounts, hence the gate.
   const staffShortcut =
