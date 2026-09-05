@@ -144,7 +144,7 @@ export const TRANSPORT_MODES = [
     agentNoun: 'pickup agent',
     handoff: { point: 'the port', loadedLabel: 'Loaded onto the ship', transitLabel: 'At sea' },
     capacity: { units: 8, offline: 1 },
-    limits: { minDistanceKm: 200, requiresPort: true }
+    limits: { minDistanceKm: 200, requiresPorts: true }
   },
   {
     id: TRANSPORT.DRONE,
@@ -263,18 +263,35 @@ export const DEFAULT_FLEET = Object.fromEntries(
 const BUSY_DELAY_SECONDS = 25 * 60;
 
 // ---------------------------------------------------------------------------
-// Geography. Sea freight needs a port at one end, which is why Nairobi → Mombasa
-// can go by ship and Nairobi → Westlands cannot.
+// Geography. A ship needs water at *both* ends of the sea leg, and the same water
+// at that. The sailing runs quay to quay and a road courier covers whatever is left
+// over at either end — so Mombasa → Dar es Salaam sails, and Machakos → Kisumu does
+// not, however far apart they are: only one of those two has a quay, and no hull
+// crosses the 400 km of dry land in between.
+//
+// Which is why every port carries the body of water it sits on. Kisumu is a genuine
+// port, but it is a *lake* port: nothing floats from Lake Victoria to the Indian
+// Ocean, so pairing it with Mombasa has to be refused as firmly as pairing it with
+// an inland town.
 // ---------------------------------------------------------------------------
 
+export const WATERS = {
+  OCEAN: 'the Indian Ocean',
+  VICTORIA: 'Lake Victoria'
+};
+
 export const PORTS = [
-  { name: 'Mombasa', lat: -4.0435, lng: 39.6682 },
-  { name: 'Malindi', lat: -3.2192, lng: 40.1169 },
-  { name: 'Lamu', lat: -2.2717, lng: 40.902 },
-  { name: 'Kisumu', lat: -0.0917, lng: 34.768 },
-  { name: 'Dar es Salaam', lat: -6.7924, lng: 39.2083 }
+  { name: 'Mombasa', water: WATERS.OCEAN, lat: -4.0435, lng: 39.6682 },
+  { name: 'Malindi', water: WATERS.OCEAN, lat: -3.2192, lng: 40.1169 },
+  { name: 'Lamu', water: WATERS.OCEAN, lat: -2.2717, lng: 40.902 },
+  { name: 'Dar es Salaam', water: WATERS.OCEAN, lat: -6.7924, lng: 39.2083 },
+  { name: 'Kisumu', water: WATERS.VICTORIA, lat: -0.0917, lng: 34.768 },
+  { name: 'Homa Bay', water: WATERS.VICTORIA, lat: -0.5273, lng: 34.457 },
+  { name: 'Mwanza', water: WATERS.VICTORIA, lat: -2.5164, lng: 32.9175 },
+  { name: 'Port Bell', water: WATERS.VICTORIA, lat: 0.2833, lng: 32.65 }
 ];
 
+/** How far a road leg will reasonably run to put the parcel on the quay. */
 const PORT_RADIUS_KM = 90;
 
 function haversineKm(a, b) {
@@ -296,6 +313,55 @@ export function nearestPort(place) {
     if (km <= PORT_RADIUS_KM && (!best || km < best.km)) best = { ...port, km };
   }
   return best;
+}
+
+const placeName = (place, fallback) => place?.name || place?.label || fallback;
+
+/**
+ * The sea leg for a route — the two ports the ship actually runs between — or the
+ * reason there isn't one.
+ *
+ * There are three ways a route fails to float, and each is a different sentence to
+ * the customer rather than one catch-all: an end that reaches no quay at all, two
+ * ends on waters nothing crosses between, and two ends served by the same port,
+ * where the ship would unload where it loaded. Naming both ports on the way out is
+ * the point of returning them: "sails via Kisumu" is what a one-ended check produces,
+ * and it is exactly the claim that cannot be true.
+ */
+export function seaLegBetween(pickup, destination) {
+  const from = nearestPort(pickup);
+  const to = nearestPort(destination);
+
+  if (!from || !to) {
+    const stranded = [
+      !from && placeName(pickup, 'the pickup'),
+      !to && placeName(destination, 'the destination')
+    ].filter(Boolean);
+
+    return {
+      ok: false,
+      reason:
+        stranded.length === 2
+          ? 'Sea freight sails port to port, and neither end of this route reaches one.'
+          : `Sea freight sails port to port, and ${stranded[0]} does not reach one — a ship cannot finish the journey overland.`
+    };
+  }
+
+  if (from.water !== to.water) {
+    return {
+      ok: false,
+      reason: `${from.name} is on ${from.water} and ${to.name} on ${to.water}. Nothing sails between the two.`
+    };
+  }
+
+  if (from.name === to.name) {
+    return {
+      ok: false,
+      reason: `Both ends of this route are served by ${from.name}, so there is no crossing to sail.`
+    };
+  }
+
+  return { ok: true, from: from.name, to: to.name, water: from.water };
 }
 
 // ---------------------------------------------------------------------------
@@ -395,15 +461,15 @@ export function modeAvailability({
     };
   }
 
-  if (limits.requiresPort) {
-    const port = nearestPort(pickup) || nearestPort(destination);
-    if (!port) {
-      return {
-        available: false,
-        reason: 'Sea freight runs between ports, and neither end of this route reaches one.'
-      };
-    }
-    return { available: true, reason: null, via: port.name, busy: fleetStatus === FLEET_STATUS.BUSY };
+  if (limits.requiresPorts) {
+    const leg = seaLegBetween(pickup, destination);
+    if (!leg.ok) return { available: false, reason: leg.reason };
+    return {
+      available: true,
+      reason: null,
+      seaLeg: { from: leg.from, to: leg.to },
+      busy: fleetStatus === FLEET_STATUS.BUSY
+    };
   }
 
   return { available: true, reason: null, busy: fleetStatus === FLEET_STATUS.BUSY };
@@ -538,7 +604,7 @@ export function transportOptions({
       available: availability.available,
       reason: availability.reason,
       busy: Boolean(availability.busy),
-      via: availability.via || null,
+      seaLeg: availability.seaLeg || null,
       quote: availability.available
         ? quoteTransport({
             mode: meta.id,
