@@ -11,7 +11,7 @@ import { cancelOrder } from '../store/ordersSlice';
 /** Reads the seeded fixtures straight out of the mock backend's store. */
 const seeded = () => {
   seedIfEmpty();
-  return JSON.parse(localStorage.getItem('deliveroo.orders'));
+  return JSON.parse(localStorage.getItem('sendit.orders'));
 };
 
 const renderAt = (path, store = makeStore()) => ({
@@ -99,9 +99,9 @@ describe('routes', () => {
     const [inTransit] = seeded();
     // An order booked by someone else: §17 says only its owner may cancel it, and the
     // rule is enforced in the backend, so the screen has to surface the refusal.
-    const orders = JSON.parse(localStorage.getItem('deliveroo.orders'));
+    const orders = JSON.parse(localStorage.getItem('sendit.orders'));
     orders[0].userId = 'usr_somebody';
-    localStorage.setItem('deliveroo.orders', JSON.stringify(orders));
+    localStorage.setItem('sendit.orders', JSON.stringify(orders));
 
     const { store } = renderAt(`/orders/${inTransit.id}`);
     await screen.findByText('Delivery details');
@@ -128,7 +128,7 @@ describe('routes', () => {
     // Seed the stored session rather than the store: AppLayout dispatches
     // loadSession() on mount, which would overwrite a directly-set user.
     localStorage.setItem(
-      'deliveroo.session',
+      'sendit.session',
       JSON.stringify({ id: 'u1', name: 'Ada', phone: '+254700000000' })
     );
     renderAt('/book');
